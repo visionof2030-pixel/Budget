@@ -594,6 +594,27 @@
             color: var(--accent-light);
         }
 
+        .btn-danger-outline {
+            background: transparent;
+            border: 2px solid var(--danger);
+            color: var(--danger);
+            padding: 12px 24px;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            font-family: var(--font);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all var(--transition);
+            min-height: 48px;
+            touch-action: manipulation;
+        }
+        .btn-danger-outline:hover {
+            background: var(--danger);
+            color: #fff;
+            border-color: var(--danger);
+            box-shadow: 0 4px 16px rgba(179, 69, 42, 0.3);
+        }
+
         /* ===== MODALS ===== */
         .modal {
             display: none;
@@ -1484,6 +1505,9 @@
                         <button id="addExpenseBtn" class="btn-primary">
                             <i class="fas fa-plus"></i> إضافة مصروف
                         </button>
+                        <button id="clearAllExpensesBtn" class="btn-danger-outline">
+                            <i class="fas fa-trash-alt"></i> مسح الكل
+                        </button>
                         <div class="expenses-filters">
                             <input type="text" id="expenseSearch" placeholder="بحث..." class="search-input" />
                             <select id="expenseCategoryFilter" class="filter-select">
@@ -2080,7 +2104,11 @@
                 let exp = this.getExpenses();
                 exp = exp.filter(e => e.id !== id);
                 this.saveExpenses(exp);
-                // تحديث الواجهات فوراً
+                this.refreshUI();
+            },
+
+            clearAllExpenses() {
+                this.saveExpenses([]);
                 this.refreshUI();
             },
 
@@ -2090,7 +2118,6 @@
                     UI.renderExpenses();
                     UI.renderReports();
                     UI.updateCategoryFilters();
-                    // تحديث ميزانية السفر والمؤقتة إذا كانت الصفحة ظاهرة
                     const travelPage = Utils.id('page-travel');
                     if (travelPage && travelPage.classList.contains('active')) {
                         UI.renderTravel();
@@ -2436,7 +2463,7 @@
         };
 
         /* ============================================================
-           GEMINI.JS - مساعد Gemini مع دوال متقدمة للتفكير
+           GEMINI.JS - مساعد Gemini مع برومتس محسّنة للردود المباشرة
            ============================================================ */
         const Gemini = {
             getApiKey() { return Storage.getGeminiKey(); },
@@ -2451,6 +2478,7 @@
                     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
 
                 const contents = [];
+                // النظام يتم وضعه كأول رسالة من المستخدم (نظراً لأن API لا يدعم system role مباشرة)
                 contents.push({
                     role: 'user',
                     parts: [{ text: systemPrompt }]
@@ -2465,9 +2493,9 @@
                 const payload = {
                     contents: contents,
                     generationConfig: {
-                        temperature: 0.7,
-                        maxOutputTokens: 2048,
-                        topP: 0.95,
+                        temperature: 0.3,
+                        maxOutputTokens: 1024,
+                        topP: 0.9,
                     }
                 };
 
@@ -2499,7 +2527,7 @@
                     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
                 const payload = {
                     contents: [{ role: 'user', parts: [{ text: prompt }] }],
-                    generationConfig: { temperature: 0.5, maxOutputTokens: 1024, topP: 0.95 }
+                    generationConfig: { temperature: 0.3, maxOutputTokens: 1024, topP: 0.9 }
                 };
                 const response = await fetch(url, {
                     method: 'POST',
@@ -2577,171 +2605,296 @@
                 return null;
             },
 
-            async runAnalytics(expenses, settings) {
-                const totalExpenses = Budget.getTotal(expenses);
-                const remaining = (parseFloat(settings.salary) || 0) - totalExpenses;
-                const catMap = Budget.getByCategory(expenses);
-                const catBudgets = settings.categoryBudgets || {};
-                let catSummary = '';
-                for (const [cat, spent] of Object.entries(catMap)) {
-                    const budget = catBudgets[cat] || 0;
-                    const pct = budget > 0 ? ((spent / budget) * 100).toFixed(0) : 0;
-                    catSummary += `- ${cat}: صرف ${spent.toFixed(2)} ريال، الميزانية ${budget.toFixed(2)} ريال (${pct}%)\n`;
-                }
+            // ===== برومتس المحادثة الرئيسية (المضمنة) =====
+            getSystemPrompt(context) {
+                return `أنت مساعد مالي ذكي مدمج داخل تطبيق إدارة الميزانية الشخصية.
 
-                const forecast = Budget.forecastExpenses(30);
-                const patterns = Budget.analyzeSpendingPatterns();
+مهمتك:
+مساعدة المستخدم على فهم دخله، مصروفاته، ميزانيته، أنماط الإنفاق، وفرص تحسين إدارة المال.
 
-                const prompt =
-                    `أنت مستشار مالي خبير. بناءً على البيانات التالية، قدم تحليلاً ذكياً متقدماً:
-                الراتب الشهري: ${settings.salary} ريال
-                إجمالي المصروفات هذا الشهر: ${totalExpenses.toFixed(2)} ريال
-                المتبقي: ${remaining.toFixed(2)} ريال
-                هدف الادخار: ${settings.savingsGoal || 0} ريال
-                تفاصيل المصروفات حسب التصنيف:
-                ${catSummary}
+أنت لا تقوم بتصميم واجهة المستخدم، ولا تشرح طريقة عملك، ولا تعرض خطوات التحليل الداخلية. أنت فقط تقدم نتائج مالية واضحة مبنية على البيانات المتاحة.
 
-                التحليلات المتقدمة:
-                - متوسط الإنفاق اليومي: ${forecast.dailyAvg.toFixed(2)} ريال
-                - التوقع للشهر القادم: ${forecast.forecast.toFixed(2)} ريال
-                - أعلى 3 تصنيفات إنفاق: ${patterns.biggestSpenders.map(s => `${s.category} (${s.percentage.toFixed(0)}%)`).join(', ')}
+========================
+قواعد أساسية للرد
+========================
 
-                المطلوب:
-                1. تحليل عميق للأنماط المالية
-                2. اقتراحات ذكية لتقليل المصروفات بناءً على الأنماط المكتشفة
-                3. تحذيرات فورية للتجاوزات
-                4. خطة ادخار مقترحة للشهر القادم
-                5. توقع مالي شامل
-                كن مختصراً ومفيداً، أجب باللغة العربية.`;
+1. لا تعرض التفكير الداخلي أو خطوات التحليل.
 
-                return await this.generate(prompt);
-            },
+ممنوع استخدام عبارات مثل:
+- تحليل الطلب:
+- الإجراء المطلوب:
+- البيانات المطلوبة:
+- سأقوم بتحليل:
+- سأقوم بفحص:
+- طريقة تفكيري:
+- بناءً على التحليل الداخلي:
 
-            async askQuestion(question, expenses, settings) {
-                const totalExpenses = Budget.getTotal(expenses);
-                const remaining = (parseFloat(settings.salary) || 0) - totalExpenses;
-                const catMap = Budget.getByCategory(expenses);
-                let catStr = '';
-                for (const [cat, spent] of Object.entries(catMap)) {
-                    catStr += `- ${cat}: ${spent.toFixed(2)} ريال\n`;
-                }
+ابدأ بالنتيجة مباشرة.
 
-                const forecast = Budget.forecastExpenses(30);
+2. لا تخترع أي معلومات.
 
-                const prompt =
-                    `أنت مستشار مالي خبير. أجب على السؤال التالي بناءً على البيانات والتحليلات المتقدمة:
-                الراتب: ${settings.salary} ريال
-                المصروفات الكلية: ${totalExpenses.toFixed(2)} ريال
-                المتبقي: ${remaining.toFixed(2)} ريال
-                المصروفات حسب التصنيف:
-                ${catStr}
-                متوسط الإنفاق اليومي: ${forecast.dailyAvg.toFixed(2)} ريال
-                التوقع للشهر القادم: ${forecast.forecast.toFixed(2)} ريال
+- استخدم فقط البيانات المقدمة لك.
+- إذا لم توجد بيانات كافية، اطلب البيانات الناقصة بشكل مختصر.
+- لا تفترض مصروفات أو دخل غير موجود.
 
-                السؤال: ${question}
+3. اجعل الرد مناسبًا للمستخدم النهائي.
 
-                أجب بذكاء، مع مراعاة السياق الكامل للبيانات، وقدم نصائح عملية قابلة للتنفيذ.
-                أجب باللغة العربية.`;
+أسلوب الرد:
+- واضح.
+- مختصر.
+- احترافي.
+- ودود.
+- يشبه مستشارًا ماليًا شخصيًا.
 
-                return await this.generate(prompt);
-            },
+4. لا تستخدم مقدمات طويلة.
 
-            async answerFinancialQuery(query, expenses, settings) {
-                const today = Utils.today();
-                const todayExpenses = Budget.getTodayExpenses();
-                const todayTotal = Budget.getTotal(todayExpenses);
-                const monthExpenses = Budget.getMonthExpenses();
-                const monthTotal = Budget.getTotal(monthExpenses);
-                const remaining = Budget.getRemaining(monthExpenses);
-                const dailyBudget = Budget.getDailyBudget();
+لا تبدأ بعبارات مثل:
+- بالتأكيد
+- يسعدني مساعدتك
+- سأقوم الآن
+- دعني أحلل
 
-                const context = {
-                    today: today,
-                    todayTotal: todayTotal,
-                    todayCount: todayExpenses.length,
-                    todayDetails: todayExpenses.map(e => `${e.description || e.category}: ${Utils.formatCurrency(e.amount)}`)
-                        .join('، '),
-                    monthTotal: monthTotal,
-                    monthCount: monthExpenses.length,
-                    remaining: remaining,
-                    dailyBudget: dailyBudget,
-                    salary: settings.salary || 0,
-                    savingsGoal: settings.savingsGoal || 0
-                };
+ابدأ مباشرة بالمعلومة المهمة.
 
-                let answer = '';
-                const q = query.toLowerCase();
+========================
+تنسيق الرد
+========================
 
-                if (q.includes('كم مصروفي اليوم') || q.includes('مصروفات اليوم') || q.includes('كم أنفقت اليوم')) {
-                    if (todayTotal === 0) {
-                        answer =
-                            `📊 **مصروفات اليوم (${Utils.formatDate(today)})**\n\nلا توجد مصروفات مسجلة لهذا اليوم. مجموع مصروفاتك اليوم = 0 ريال.`;
-                    } else {
-                        answer =
-                            `📊 **مصروفات اليوم (${Utils.formatDate(today)})**\n\n` +
-                            `المجموع الكلي: **${Utils.formatCurrency(todayTotal)}**\n` +
-                            `عدد المصروفات: **${todayExpenses.length}**\n\n` +
-                            `📋 **التفاصيل:**\n${todayExpenses.map(e => `• ${e.description || e.category}: ${Utils.formatCurrency(e.amount)}`).join('\n')}\n\n` +
-                            `💰 المتبقي من ميزانية اليوم: **${Utils.formatCurrency(dailyBudget - todayTotal)}**`;
-                    }
-                    return answer;
-                }
+مهم جدًا:
 
-                if (q.includes('كم مصروفي هذا الشهر') || q.includes('مصروفات الشهر')) {
-                    answer =
-                        `📊 **مصروفات هذا الشهر**\n\n` +
-                        `المجموع الكلي: **${Utils.formatCurrency(monthTotal)}**\n` +
-                        `عدد المصروفات: **${monthExpenses.length}**\n` +
-                        `المتبقي من الراتب: **${Utils.formatCurrency(remaining)}**\n` +
-                        `ميزانية اليوم المتبقية: **${Utils.formatCurrency(dailyBudget)}**\n\n` +
-                        `📋 **التفاصيل حسب التصنيف:**\n${Object.entries(Budget.getByCategory(monthExpenses)).map(([cat, amt]) => `• ${cat}: ${Utils.formatCurrency(amt)}`).join('\n')}`;
-                    return answer;
-                }
+لا تستخدم Markdown.
 
-                if (q.includes('كم المتبقي') || q.includes('المتبقي من الراتب')) {
-                    answer =
-                        `💰 **المتبقي من الراتب هذا الشهر**\n\n` +
-                        `الراتب الشهري: **${Utils.formatCurrency(settings.salary || 0)}**\n` +
-                        `المصروفات: **${Utils.formatCurrency(monthTotal)}**\n` +
-                        `المتبقي: **${Utils.formatCurrency(remaining)}**\n` +
-                        `هدف الادخار: **${Utils.formatCurrency(settings.savingsGoal || 0)}**\n\n` +
-                        `${remaining >= (settings.savingsGoal || 0) ? '✅ أنت على المسار الصحيح لتحقيق هدف الادخار!' : '⚠️ أنت بحاجة لتقليل المصروفات لتحقيق هدف الادخار.'}`;
-                    return answer;
-                }
+ممنوع استخدام:
+**
+##
+*
+`
+>
+---
 
-                return null;
+لا تستخدم أي رموز تنسيق تظهر للمستخدم.
+
+لا تضف رموز زخرفية أو إيموجي.
+
+استخدم نصًا نظيفًا فقط.
+
+مثال صحيح:
+
+ملخص المصروفات الشهرية
+
+إجمالي المصروفات: 1,042 ريال
+
+توزيع المصروفات:
+
+أخرى: 529 ريال (50.77%)
+الكهرباء: 390 ريال (37.43%)
+المطاعم: 63 ريال (6.05%)
+الإنترنت: 60 ريال (5.76%)
+
+الملاحظات:
+
+أعلى فئة إنفاق هي أخرى.
+يفضل مراجعة المصروفات الموجودة ضمن هذه الفئة لمعرفة إمكانية تقليلها.
+
+========================
+أسلوب التحليل المالي
+========================
+
+عند سؤال المستخدم عن المصروفات:
+
+اعرض:
+- إجمالي المصروفات.
+- توزيع المصروفات حسب الفئات.
+- أكبر الفئات إنفاقًا.
+- ملاحظات عملية.
+
+عند سؤال المستخدم عن الدخل:
+
+اعرض:
+- إجمالي الدخل.
+- مقارنة الدخل بالمصروفات.
+- نسبة الادخار إن وجدت.
+- اقتراحات للتحسين.
+
+عند سؤال المستخدم:
+"أين ذهب مالي؟"
+أجب بتلخيص واضح لأكثر أماكن الإنفاق.
+
+عند سؤال المستخدم:
+"كيف أوفر؟"
+
+قدم:
+- 3 إلى 5 نصائح عملية.
+- مبنية على بيانات المستخدم.
+- بدون نصائح عامة غير مرتبطة بالبيانات.
+
+========================
+قواعد الأرقام
+========================
+
+- استخدم العملة الموجودة في البيانات.
+- نسق الأرقام بفواصل الآلاف.
+
+مثال:
+1042 ريال تصبح:
+1,042 ريال
+
+- قرب النسب إلى منزلتين عشريتين.
+
+مثال:
+50.77%
+
+========================
+قواعد المقارنة
+========================
+
+عند مقارنة الأشهر:
+
+اعرض:
+الشهر السابق:
+المبلغ
+
+الشهر الحالي:
+المبلغ
+
+التغير:
+زيادة أو انخفاض مع النسبة.
+
+لا تكتفِ بعرض الأرقام، أضف تفسيرًا مختصرًا.
+
+========================
+قواعد النصائح
+========================
+
+النصائح يجب أن تكون:
+- عملية.
+- قصيرة.
+- مرتبطة بالبيانات.
+
+مثال:
+
+بدل:
+"حاول تقليل مصاريفك"
+
+استخدم:
+"مصروفات المطاعم تمثل 25% من إنفاقك هذا الشهر، تقليل عدد الطلبات الأسبوعية قد يساعد على خفض المصروفات."
+
+========================
+قواعد الطول
+========================
+
+- الردود العادية: أقل من 150 كلمة.
+- التحليلات التفصيلية: أقل من 300 كلمة.
+- لا تكرر نفس المعلومات.
+- لا تشرح ما قمت به، فقط أعط النتيجة.
+
+========================
+فصل البيانات عن العرض
+========================
+
+لا تنشئ تصاميم أو جداول واجهة.
+لا تستخدم Markdown.
+أعد محتوى نظيفًا يمكن للتطبيق عرضه مباشرة.
+
+========================
+الهدف النهائي
+========================
+
+اجعل المستخدم يفهم وضعه المالي بسرعة، ويعرف أين ينفق أمواله، وما الخطوة العملية التالية لتحسين ميزانيته.
+
+البيانات المتاحة:
+${context}`;
             },
 
             async thinkAndDecide(query, context) {
-                const directAnswer = await this.answerFinancialQuery(query, context.expenses || [], context.settings ||
-                {});
-                if (directAnswer) {
-                    return directAnswer;
+                const systemPrompt = this.getSystemPrompt(JSON.stringify(context, null, 2));
+                const messages = [{ role: 'user', content: query }];
+                try {
+                    const response = await this.sendMessage(messages, systemPrompt);
+                    return response;
+                } catch (e) {
+                    // في حال فشل Gemini، نقدم ردوداً محلية مبنية على البيانات
+                    return this.localFallbackResponse(query, context);
+                }
+            },
+
+            // ردود احتياطية محلية عندما يتعذر الوصول إلى Gemini
+            localFallbackResponse(query, context) {
+                const q = query.toLowerCase();
+                const monthExp = context.monthExp || [];
+                const totalMonth = context.totalMonth || 0;
+                const settings = context.settings || {};
+                const remaining = context.remaining || 0;
+                const todayExpenses = context.todayExpenses || [];
+                const todayTotal = context.todayTotal || 0;
+                const dailyBudget = context.dailyBudget || 0;
+
+                if (q.includes('كم مصروفي اليوم') || q.includes('مصروفات اليوم') || q.includes('كم أنفقت اليوم')) {
+                    if (todayTotal === 0) {
+                        return `مصروفات اليوم (${Utils.formatDate(Utils.today())})
+
+لا توجد مصروفات مسجلة لهذا اليوم. مجموع مصروفاتك اليوم = 0 ريال.`;
+                    }
+                    return `مصروفات اليوم (${Utils.formatDate(Utils.today())})
+
+المجموع الكلي: ${Utils.formatCurrency(todayTotal)}
+عدد المصروفات: ${todayExpenses.length}
+
+التفاصيل:
+${todayExpenses.map(e => `• ${e.description || e.category}: ${Utils.formatCurrency(e.amount)}`).join('\n')}
+
+المتبقي من ميزانية اليوم: ${Utils.formatCurrency(dailyBudget - todayTotal)}`;
                 }
 
-                const prompt =
-                    `أنت Budget AI Agent، وكيل ذكاء اصطناعي متخصص في الإدارة المالية.
-                لديك صلاحيات كاملة على التطبيق. بناءً على طلب المستخدم التالي، قرر الإجراءات المناسبة.
+                if (q.includes('كم مصروفي هذا الشهر') || q.includes('مصروفات الشهر')) {
+                    const catMap = Budget.getByCategory(monthExp);
+                    return `مصروفات هذا الشهر
 
-                السياق:
-                ${JSON.stringify(context, null, 2)}
+المجموع الكلي: ${Utils.formatCurrency(totalMonth)}
+عدد المصروفات: ${monthExp.length}
+المتبقي من الراتب: ${Utils.formatCurrency(remaining)}
+ميزانية اليوم المتبقية: ${Utils.formatCurrency(dailyBudget)}
 
-                طلب المستخدم: ${query}
+التفاصيل حسب التصنيف:
+${Object.entries(catMap).map(([cat, amt]) => `• ${cat}: ${Utils.formatCurrency(amt)}`).join('\n')}`;
+                }
 
-                قم بتحليل الطلب وقرر:
-                1. ما هو الإجراء المطلوب (إضافة، حذف، تعديل، تحديث، تحليل، توقع، إعادة توزيع)
-                2. ما هي البيانات المطلوبة
-                3. ما هو الرد المناسب
+                if (q.includes('كم المتبقي') || q.includes('المتبقي من الراتب')) {
+                    return `المتبقي من الراتب هذا الشهر
 
-                أعد رداً مقنعاً يشرح ما ستفعله، مع كتلة json-actions في النهاية إذا كان هناك إجراءات فعلية.
+الراتب الشهري: ${Utils.formatCurrency(settings.salary || 0)}
+المصروفات: ${Utils.formatCurrency(totalMonth)}
+المتبقي: ${Utils.formatCurrency(remaining)}
+هدف الادخار: ${Utils.formatCurrency(settings.savingsGoal || 0)}
 
-                تذكر: يمكنك تنفيذ أي إجراء على التطبيق بما في ذلك تغيير ميزانية اليوم والأسبوع والشهر،
-                إعادة توزيع الميزانية حسب الأولويات، تحليل الأنماط، التوقعات، وغيرها.
-                عند إضافة مصروف، احسب المجموع الإجمالي إذا كان الطلب يحتوي على عدة عناصر.
+${remaining >= (settings.savingsGoal || 0) ? 'أنت على المسار الصحيح لتحقيق هدف الادخار.' : 'أنت بحاجة لتقليل المصروفات لتحقيق هدف الادخار.'}`;
+                }
 
-                إذا كان السؤال عن بيانات (مثل "كم مصروفي اليوم")، قم بحساب البيانات وعرضها مباشرة في الرد.`;
+                if (q.includes('كيف أوفر') || q.includes('كيف وفر')) {
+                    const catMap = Budget.getByCategory(monthExp);
+                    const sorted = Object.entries(catMap).sort((a, b) => b[1] - a[1]);
+                    let tips = 'نصائح لتوفير المال بناءً على بياناتك:\n\n';
+                    if (sorted.length > 0) {
+                        const top = sorted[0];
+                        tips += `أكبر فئة إنفاق هي "${top[0]}" بمبلغ ${Utils.formatCurrency(top[1])}.`;
+                        tips += `\nمراجعة هذه الفئة قد توفر لك مبلغاً كبيراً.`;
+                    }
+                    if (totalMonth > (settings.salary || 0) * 0.7) {
+                        tips += `\nمصروفاتك تشكل ${((totalMonth/(settings.salary||1))*100).toFixed(0)}% من راتبك. حاول تقليل المصروفات غير الأساسية.`;
+                    }
+                    tips += `\n\nتوصيات إضافية:
+- تحديد ميزانية يومية ثابتة.
+- تتبع كل عملية شراء صغيرة.
+- البحث عن بدائل أقل سعراً للخدمات والمنتجات.`;
+                    return tips;
+                }
 
-                return await this.generate(prompt);
+                return `مرحباً! أنا مساعدك المالي. يمكنني مساعدتك في معرفة:
+- مصروفات اليوم أو الشهر
+- المتبقي من الراتب
+- نصائح لتوفير المال
+
+اسألني عن أي من هذه المواضيع وسأقدم لك إجابة واضحة ومباشرة.`;
             }
         };
 
@@ -2922,7 +3075,6 @@
                     }
                 });
 
-                // تحديث كل الواجهات (ضمان إضافي)
                 Budget.refreshUI();
                 return log;
             }
@@ -3063,7 +3215,7 @@
         }
 
         /* ============================================================
-           UI.JS - مُحسَّن مع عرض تفصيلي للمصروفات عند الضغط
+           UI.JS - مع زر مسح الكل والبرومتس المحسنة
            ============================================================ */
         const UI = {
             init() {
@@ -3081,6 +3233,7 @@
                 this.setupTravel();
                 this.setupTemp();
                 this.setupExpenseDetailModal();
+                this.setupClearAllExpenses();
                 this.renderDashboard();
                 this.renderExpenses();
                 this.renderReports();
@@ -3278,6 +3431,25 @@
 
                 modal.classList.add('open');
                 currentExpenseId = expense.id;
+            },
+
+            // ----- Clear All Expenses -----
+            setupClearAllExpenses() {
+                const clearBtn = Utils.id('clearAllExpensesBtn');
+                Utils.on(clearBtn, 'click', () => {
+                    const expenses = Budget.getExpenses();
+                    if (expenses.length === 0) {
+                        alert('لا توجد مصروفات لمسحها.');
+                        return;
+                    }
+                    if (confirm(`هل أنت متأكد من حذف جميع المصروفات (${expenses.length} مصروف)؟ هذا الإجراء لا يمكن التراجع عنه.`)) {
+                        Budget.clearAllExpenses();
+                        alert('تم حذف جميع المصروفات بنجاح.');
+                        this.renderDashboard();
+                        this.renderExpenses();
+                        this.renderReports();
+                    }
+                });
             },
 
             // ----- Expense Modal -----
@@ -3749,7 +3921,7 @@
                 });
             },
 
-            // ----- CHAT (المساعد) مع دوال متقدمة للتفكير -----
+            // ----- CHAT (المساعد) مع البرومتس المحسنة -----
             setupChat() {
                 const messagesContainer = Utils.id('chatMessages');
                 const input = Utils.id('chatInput');
@@ -3834,88 +4006,7 @@
                         const tempSummary =
                             `الميزانية الكلية: ${(tempBudget.totalBudget||0).toFixed(2)} ريال | المصروف: ${tempSpent.toFixed(2)} ريال | المتبقي: ${tempRemaining.toFixed(2)} ريال`;
 
-                        const systemPrompt = `أنت Budget AI Agent، المساعد المالي الذكي الرسمي داخل تطبيق Budget.
-                        أنت لست ChatBot عام، بل وكيل ذكاء اصطناعي (AI Agent) متخصص في الإدارة المالية الشخصية، وتحليل البيانات، واتخاذ القرارات بناءً على البيانات الفعلية.
-                        هويتك: اسمك Budget AI، وظيفتك Financial Intelligence Agent.
-                        أهدافك: مساعدة المستخدم على إدارة الميزانية، تحليل المصروفات، تحليل الدخل، تحسين التدفق النقدي، تقليل الهدر، اقتراح طرق الادخار، التنبؤ بالمصروفات، التنبؤ بالعجز المالي، تحليل العادات المالية، مقارنة الأشهر، تحليل التصنيفات، اكتشاف الأنماط، تقديم تقارير مالية احترافية.
-                        شخصيتك: احترافي، ذكي، واضح، مختصر عندما يكون السؤال بسيطاً، مفصلاً عند الطلب، عملي، لا تستخدم عبارات مبالغ فيها، لا تجامل إذا كانت البيانات تشير إلى مشكلة، اعتمد دائماً على البيانات.
-                        اللغة: استعمل لغة المستخدم (العربية).
-                        أهم قاعدة: لا تخترع أي معلومة. إذا لم تكن البيانات موجودة قل بوضوح "لا أملك بيانات كافية للإجابة." ولا تقدّم أي أرقام افتراضية على أنها حقيقية.
-                        مصدر المعلومات: مصدر الحقيقة الوحيد هو الأدوات (Tools). إذا احتجت بيانات مالية فيجب طلبها من الأدوات. لا تعتمد على المحادثة فقط.
-                        الأدوات: سيتم تزويدك بأدوات مثل getExpenses(), getIncome(), getBudgets(), getTransactions(), getAccounts(), getCategories(), getGoals(), getMonthlySummary(), forecastBudget(), generateInsights(). لا تحاول محاكاة نتائج هذه الأدوات.
-                        عند وجود بيانات: 1. افهم البيانات. 2. حللها. 3. استخرج الأنماط. 4. اكتشف المشكلات. 5. اقترح الحلول. 6. اذكر سبب كل اقتراح.
-                        عند تحليل المصروفات: ابحث عن أكبر المصروفات، أكثر التصنيفات استهلاكاً، المصروفات المتكررة، الاشتراكات، المدفوعات غير الضرورية، الارتفاع غير الطبيعي، الانخفاض، المواسم، الفواتير المتكررة.
-                        عند تحليل الدخل: حدد الاستقرار، التذبذب، نسبة الادخار، معدل الإنفاق، الفائض، العجز.
-                        عند تحليل الميزانية: اذكر هل الميزانية مناسبة؟ هل يوجد تجاوز؟ ما سبب التجاوز؟ كيف يمكن إصلاحه؟
-                        التوقعات: اعتمد على البيانات السابقة فقط ولا تقدّم توقعاً إذا لم تكن البيانات كافية.
-                        النصائح: يجب أن تكون مرتبطة بالبيانات، قابلة للتنفيذ، قصيرة، واضحة.
-                        ممنوعات: لا تخترع معاملات، مصروفات، دخل، أرقام، ميزانيات، ولا تتوقع بدون بيانات، ولا تعد المستخدم بنتائج مضمونة.
-                        أسلوب الإجابة: ابدأ دائماً بملخص، ثم التحليل، ثم الملاحظات، ثم الاقتراحات، ثم الخطوات القادمة.
-                        تنسيق الرد: يفضل استخدام العناوين، القوائم، الجداول، الرموز التعبيرية باعتدال.
-                        الذاكرة: تذكر سياق المحادثة الحالية.
-
-                        التاريخ والوقت (حقيقي عبر API خارجي):
-                        - التاريخ الميلادي الحقيقي الآن: ${realDateStr} (${realDayName})
-                        - تاريخ نزول الراتب القادم: ${nextSalaryDate ? Utils.formatDate(nextSalaryDate.toISOString().split('T')[0]) : 'غير محدد'}
-                        - الأيام المتبقية لنزول الراتب القادم: ${daysUntilSalary !== null ? daysUntilSalary + ' يوم' : 'غير معروف'}
-
-                        البيانات المالية الأساسية:
-                        - الراتب الشهري: ${settings.salary || 0} ريال
-                        - إجمالي المصروفات هذا الشهر: ${totalMonth.toFixed(2)} ريال
-                        - المتبقي: ${remaining.toFixed(2)} ريال
-                        - هدف الادخار: ${settings.savingsGoal || 0} ريال
-                        - تفاصيل المصروفات حسب التصنيف:
-                        ${catSummary || 'لا توجد مصروفات مسجلة هذا الشهر.'}
-                        - عدد المصروفات الكلي: ${expenses.length}
-
-                        التحليلات المتقدمة:
-                        - متوسط الإنفاق اليومي: ${forecast.dailyAvg.toFixed(2)} ريال
-                        - التوقع للشهر القادم: ${forecast.forecast.toFixed(2)} ريال
-                        - أعلى 3 تصنيفات إنفاق: ${patterns.biggestSpenders.map(s => `${s.category} (${s.percentage.toFixed(0)}%)`).join(', ')}
-                        - التوصيات التلقائية: ${patterns.recommendations.join(' | ') || 'لا توجد توصيات حالياً'}
-
-                        ميزانية السفر: ${travelSummary}
-                        الميزانية المؤقتة: ${tempSummary}
-
-                        ============================================================
-                        نظام التحكم الكامل عبر الأوامر (Actions) - صلاحياتك الفعلية:
-                        ============================================================
-                        لديك تحكم كامل بكل قوائم التطبيق مباشرة من داخل هذه المحادثة. عندما يطلب المستخدم منك تنفيذ أي إجراء فعلي (إضافة/حذف/تعديل مصروف، تحديث الراتب أو تاريخه، تحديث هدف الادخار، تحديث ميزانية أي تصنيف أو إضافة تصنيف جديد، تحديث ميزانية اليوم/الأسبوع/الشهر، إعادة توزيع الميزانية حسب الأولويات، تفعيل/تحديث ميزانية السفر أو إضافة/حذف مصروف سفر، تحديث الميزانية المؤقتة أو إضافة/حذف مصروف منها)، يجب عليك تنفيذ ذلك فعلياً عبر إرفاق كتلة كود في نهاية ردك بهذا الشكل بالضبط:
-
-                        \`\`\`json-actions
-                        {"actions":[{"type":"...", "...": "..."}]}
-                        \`\`\`
-
-                        أنواع الإجراءات المتاحة (type) وحقولها:
-                        - add_expense: {amount, description, category, date(YYYY-MM-DD), merchant, notes}
-                        - delete_expense: {id}
-                        - set_salary: {amount}
-                        - set_salary_date: {date}
-                        - set_savings_goal: {amount}
-                        - set_category_budget: {category, amount}
-                        - add_category: {name, budget}
-                        - set_daily_budget: {amount}  ← يغير ميزانية اليوم ويؤثر على الأسبوع والشهر
-                        - set_weekly_budget: {amount} ← يغير ميزانية الأسبوع ويؤثر على اليوم والشهر
-                        - set_monthly_budget: {amount} ← يغير ميزانية الشهر ويؤثر على اليوم والأسبوع
-                        - rebalance_budget: {priorities: {"تصنيف1": وزن, "تصنيف2": وزن, ...}} ← يعيد توزيع الميزانية حسب الأولويات
-                        - add_travel_expense: {amount, description, category, date}
-                        - delete_travel_expense: {id}
-                        - set_travel_budget: {tripName, totalBudget, category, amount}
-                        - add_temp_expense: {amount, description, category, date}
-                        - delete_temp_expense: {id}
-                        - set_temp_budget: {totalBudget, category, amount}
-
-                        قواعد صارمة لاستخدام الأوامر:
-                        1. أرفق كتلة json-actions فقط عندما يطلب المستخدم فعلاً تنفيذ إجراء (وليس عند مجرد سؤال أو استفسار).
-                        2. اكتب دائماً رداً نصياً طبيعياً قبل كتلة الأوامر يوضح للمستخدم ماذا فعلت أو ستفعل.
-                        3. لا تكتب أي نص JSON خارج كتلة \`\`\`json-actions\`\`\` هذه.
-                        4. للحذف تحتاج معرف id للمصروف - إذا لم تعرفه اطلب من المستخدم توضيح المصروف المقصود بدلاً من تخمين id.
-                        5. التاريخ اليوم إذا لم يُحدد المستخدم تاريخاً هو ${realDateStr} (استخدمه كافتراضي).
-                        6. يمكنك تضمين أكثر من إجراء في نفس الكتلة داخل مصفوفة actions إذا طلب المستخدم عدة عمليات دفعة واحدة.
-                        7. عند إضافة مصروف يحتوي على عدة عناصر (مثل: فطور بـ 15 ريال ثم 19 ريال ثم شاهي بـ 6 ريال)، قم بحساب المجموع الإجمالي وإضافته كمصروف واحد مع وصف يوضح المكونات.
-                        8. إذا كان السؤال عن بيانات (مثل "كم مصروفي اليوم")، قم بحساب البيانات وعرضها مباشرة في الرد دون الحاجة إلى إجراءات.`;
-
-                        const rawResponse = await Gemini.thinkAndDecide(text, {
+                        const context = {
                             settings,
                             monthExp,
                             totalMonth,
@@ -3926,21 +4017,37 @@
                             travelSummary,
                             tempSummary,
                             daysUntilSalary,
+                            realDateStr,
+                            realDayName,
+                            nextSalaryDate: nextSalaryDate ? Utils.formatDate(nextSalaryDate.toISOString().split('T')[0]) :
+                                'غير محدد',
                             expenses: expenses,
                             todayExpenses: Budget.getTodayExpenses(),
-                            todayTotal: Budget.getTotal(Budget.getTodayExpenses())
-                        });
+                            todayTotal: Budget.getTotal(Budget.getTodayExpenses()),
+                            dailyBudget: Budget.getDailyBudget(),
+                            salary: settings.salary || 0,
+                            savingsGoal: settings.savingsGoal || 0
+                        };
 
-                        const { cleanText, actions } = Commands.extract(rawResponse);
+                        // استخدام برومتس Gemini الجديدة أو الرد المحلي
+                        let response;
+                        try {
+                            response = await Gemini.thinkAndDecide(text, context);
+                        } catch (e) {
+                            response = Gemini.localFallbackResponse(text, context);
+                        }
+
+                        // استخراج الأوامر إن وجدت (للتوافق مع الإجراءات السابقة)
+                        const { cleanText, actions } = Commands.extract(response);
 
                         hideTyping();
 
                         if (actions.length === 0) {
-                            addMessage(cleanText || rawResponse, 'assistant');
-                            chatHistory.push({ role: 'assistant', content: cleanText || rawResponse });
+                            addMessage(cleanText || response, 'assistant');
+                            chatHistory.push({ role: 'assistant', content: cleanText || response });
                         } else {
-                            addMessage(cleanText || rawResponse, 'assistant');
-                            chatHistory.push({ role: 'assistant', content: cleanText || rawResponse });
+                            addMessage(cleanText || response, 'assistant');
+                            chatHistory.push({ role: 'assistant', content: cleanText || response });
                             const log = Commands.execute(actions);
                             if (log.length > 0) {
                                 addMessage(log.join('<br>'), 'system');
@@ -4031,7 +4138,6 @@
                     </div>`
                 ).join('');
 
-                // عند النقر على إجمالي المصروفات، عرض التفاصيل
                 const totalCard = cardsContainer.querySelector('.dash-card.negative .card-value');
                 if (totalCard) {
                     totalCard.closest('.dash-card').addEventListener('click', () => {
