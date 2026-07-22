@@ -1019,77 +1019,6 @@
             outline: none;
             background: var(--bg-glass);
         }
-        .children-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-        .child-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: var(--bg-glass);
-            padding: 6px 8px;
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--bg-glass-border);
-        }
-        .child-row select.child-type-select {
-            flex: 0 0 90px;
-            padding: 8px 6px;
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--bg-glass-border);
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            font-family: var(--font);
-            font-size: 0.85rem;
-        }
-        .child-row input.child-name-input {
-            flex: 1;
-            padding: 8px 10px;
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--bg-glass-border);
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            font-family: var(--font);
-            font-size: 0.85rem;
-        }
-        .child-remove-btn {
-            flex-shrink: 0;
-            width: 34px;
-            height: 34px;
-            border: none;
-            border-radius: var(--radius-sm);
-            background: rgba(179, 69, 42, 0.12);
-            color: var(--danger);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background var(--transition);
-        }
-        .child-remove-btn:hover {
-            background: rgba(179, 69, 42, 0.22);
-        }
-        .btn-add-child {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 14px;
-            border-radius: var(--radius-sm);
-            border: 1px dashed var(--accent);
-            background: transparent;
-            color: var(--accent);
-            font-family: var(--font);
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            margin-bottom: 16px;
-            transition: all var(--transition);
-        }
-        .btn-add-child:hover {
-            background: rgba(46, 125, 181, 0.1);
-        }
         .api-status {
             margin-top: 12px;
             padding: 12px 16px;
@@ -1145,6 +1074,14 @@
             border: 1px solid var(--bg-glass-border);
             border-bottom-left-radius: 4px;
             color: var(--text-primary);
+        }
+        .chat-message.system {
+            align-self: flex-start;
+            background: rgba(31, 122, 92, 0.1);
+            border: 1px solid rgba(31, 122, 92, 0.3);
+            border-bottom-left-radius: 4px;
+            color: var(--success);
+            font-size: 0.85rem;
         }
         .chat-message .message-time {
             font-size: 0.6rem;
@@ -1456,6 +1393,12 @@
                 <a href="#" class="nav-link" data-page="settings">
                     <i class="fas fa-cog"></i><span>الإعدادات</span>
                 </a>
+                <a href="#" class="nav-link" data-page="travel">
+                    <i class="fas fa-plane"></i><span>ميزانية السفر</span>
+                </a>
+                <a href="#" class="nav-link" data-page="temp">
+                    <i class="fas fa-umbrella-beach"></i><span>ميزانية مؤقتة</span>
+                </a>
                 <!-- صفحة المساعد (الدردشة) -->
                 <a href="#" class="nav-link" data-page="chat">
                     <i class="fas fa-comment-dots"></i><span>المساعد</span>
@@ -1494,6 +1437,7 @@
                 <section id="page-dashboard" class="page active">
                     <div id="dashboardCards" class="dashboard-cards"></div>
                     <div id="dashboardSummary" class="dashboard-summary"></div>
+                    <div id="dashboardExtraCards" class="dashboard-cards" style="margin-top:16px;"></div>
                 </section>
 
                 <!-- ===== EXPENSES ===== -->
@@ -1580,11 +1524,6 @@
                                 <input type="number" id="settingsSalary" class="form-input" min="0" step="0.01" />
                             </div>
                             <div class="form-group">
-                                <label for="settingsIncomeType">نوع الدخل / جهة الصرف</label>
-                                <select id="settingsIncomeType" class="form-input"></select>
-                                <small class="form-hint">اختر جهة الصرف لتعبئة تاريخ النزول تلقائياً حسب موعدها الشهري</small>
-                            </div>
-                            <div class="form-group">
                                 <label for="settingsSalaryDate">تاريخ نزول الراتب</label>
                                 <input type="date" id="settingsSalaryDate" class="form-input" />
                             </div>
@@ -1592,17 +1531,78 @@
                                 <label for="settingsSavingsGoal">هدف الادخار الشهري (ريال)</label>
                                 <input type="number" id="settingsSavingsGoal" class="form-input" min="0" step="0.01" />
                             </div>
-                            <h3>مصروف الأبناء اليومي</h3>
-                            <p class="hint">أضف كل ابن أو ابنة، ويمكنك كتابة الاسم وإضافة المزيد حسب الحاجة</p>
-                            <div id="childrenContainer" class="children-list"></div>
-                            <button type="button" id="addChildBtn" class="btn-add-child">
-                                <i class="fas fa-plus"></i> إضافة ابن / ابنة
-                            </button>
                             <h3>ميزانيات التصنيفات</h3>
                             <div id="categoryBudgetsContainer" class="category-budgets-grid"></div>
                             <button type="submit" class="btn-primary">حفظ الإعدادات</button>
                         </form>
                     </div>
+                </section>
+
+                <!-- ===== TRAVEL BUDGET (ميزانية السفر) ===== -->
+                <section id="page-travel" class="page">
+                    <div class="settings-container glass" style="margin-bottom:16px;">
+                        <h2><i class="fas fa-plane"></i> ميزانية السفر</h2>
+                        <p class="hint">فعّل هذه الميزانية عند السفر — حسابها منفصل تماماً عن ميزانيتك الأساسية.</p>
+                        <form id="travelBudgetForm" class="settings-form">
+                            <div class="form-group">
+                                <label for="travelTripName">اسم الرحلة (اختياري)</label>
+                                <input type="text" id="travelTripName" class="form-input" placeholder="مثال: رحلة إسطنبول" />
+                            </div>
+                            <div class="form-group">
+                                <label for="travelTotalBudget">إجمالي ميزانية السفر (ريال)</label>
+                                <input type="number" id="travelTotalBudget" class="form-input" min="0" step="0.01" />
+                            </div>
+                            <h3>ميزانية كل بند من بنود السفر</h3>
+                            <p class="hint">تذاكر الطيران، الفنادق والسكن، المواصلات الداخلية، الإنترنت والاتصالات، الفعاليات والأنشطة، الطعام والمطاعم، التسوق والهدايا، التأشيرة والتأمين، الطوارئ</p>
+                            <div id="travelCategoryBudgetsContainer" class="category-budgets-grid"></div>
+                            <button type="submit" class="btn-primary">حفظ ميزانية السفر</button>
+                        </form>
+                    </div>
+
+                    <div id="travelDashboardCards" class="dashboard-cards"></div>
+
+                    <div class="expenses-toolbar">
+                        <button id="addTravelExpenseBtn" class="btn-primary">
+                            <i class="fas fa-plus"></i> إضافة مصروف سفر
+                        </button>
+                        <div class="expenses-filters">
+                            <select id="travelCategoryFilter" class="filter-select">
+                                <option value="all">جميع بنود السفر</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="travelExpensesList" class="expenses-list"></div>
+                </section>
+
+                <!-- ===== TEMPORARY BUDGET (ميزانية مؤقتة) ===== -->
+                <section id="page-temp" class="page">
+                    <div class="settings-container glass" style="margin-bottom:16px;">
+                        <h2><i class="fas fa-umbrella-beach"></i> ميزانية مؤقتة</h2>
+                        <p class="hint">لمناسبات مثل: كشتة، قطة، واجب، فزعة، صدقة وغيرها — حسابها منفصل تماماً عن الميزانية الأساسية.</p>
+                        <form id="tempBudgetForm" class="settings-form">
+                            <div class="form-group">
+                                <label for="tempTotalBudget">إجمالي الميزانية المؤقتة (ريال)</label>
+                                <input type="number" id="tempTotalBudget" class="form-input" min="0" step="0.01" />
+                            </div>
+                            <h3>ميزانية كل بند (اختياري)</h3>
+                            <div id="tempCategoryBudgetsContainer" class="category-budgets-grid"></div>
+                            <button type="submit" class="btn-primary">حفظ الميزانية المؤقتة</button>
+                        </form>
+                    </div>
+
+                    <div id="tempDashboardCards" class="dashboard-cards"></div>
+
+                    <div class="expenses-toolbar">
+                        <button id="addTempExpenseBtn" class="btn-primary">
+                            <i class="fas fa-plus"></i> إضافة مصروف
+                        </button>
+                        <div class="expenses-filters">
+                            <select id="tempCategoryFilter" class="filter-select">
+                                <option value="all">جميع البنود</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="tempExpensesList" class="expenses-list"></div>
                 </section>
 
                 <!-- ===== CHAT PAGE (AI Assistant) ===== -->
@@ -1611,7 +1611,6 @@
                         <div class="chat-messages" id="chatMessages">
                             <div class="chat-message assistant">
                                 مرحباً! أنا Budget AI، مساعدك المالي الذكي. كيف يمكنني مساعدتك اليوم؟
-                                يمكنك أيضاً إخباري بأي مبلغ صرفته (مثال: "دفعت 50 ريال بنزين") وسأسجله لك تلقائياً وأحدّث لوحة التحكم.
                                 <div class="message-time">الآن</div>
                             </div>
                         </div>
@@ -1675,8 +1674,7 @@
                             </div>
                             <div class="form-group">
                                 <label>التصنيف الفرعي</label>
-                                <select id="manualSubCategory" class="form-input" style="display:none;"></select>
-                                <input type="text" id="manualSubCategoryText" class="form-input" placeholder="اختياري" />
+                                <input type="text" id="manualSubCategory" class="form-input" placeholder="اختياري" />
                             </div>
                         </div>
                         <div class="form-row">
@@ -1704,6 +1702,42 @@
     </div>
 
     <!-- ============================================================
+    MODAL: QUICK EXPENSE (يُستخدم لميزانية السفر والميزانية المؤقتة)
+    ============================================================ -->
+    <div id="quickExpenseModal" class="modal">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <h2 id="quickExpenseModalTitle">إضافة مصروف</h2>
+                <button class="modal-close" id="closeQuickExpenseModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>المبلغ (ريال)</label>
+                        <input type="number" id="quickAmount" class="form-input" step="0.01" min="0" />
+                    </div>
+                    <div class="form-group">
+                        <label>التاريخ</label>
+                        <input type="date" id="quickDate" class="form-input" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>الوصف</label>
+                    <input type="text" id="quickDescription" class="form-input" placeholder="وصف المصروف" />
+                </div>
+                <div class="form-group">
+                    <label>البند</label>
+                    <select id="quickCategory" class="form-input"></select>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-secondary" id="cancelQuickExpenseBtn">إلغاء</button>
+                    <button class="btn-primary" id="saveQuickExpenseBtn">حفظ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
     MODAL: GEMINI SECRET (مخفي)
     ============================================================ -->
     <div id="geminiModal" class="modal">
@@ -1715,11 +1749,16 @@
             <div class="modal-body">
                 <form id="geminiSettingsForm" class="settings-form">
                     <div class="form-group">
-                        <label for="geminiModel">نوع النموذج</label>
+                        <label for="geminiModel">نوع النموذج (اختر أولاً)</label>
                         <select id="geminiModel" class="form-input">
-                            <option value="gemini-2.5-flash-lite" selected>Gemini 2.5 Flash-Lite</option>
+                            <option value="gemini-3.6-flash" selected>Gemini 3.6 Flash</option>
+                            <option value="gemini-3.5-flash">Gemini 3.5 Flash</option>
+                            <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite</option>
+                            <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite</option>
+                            <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                            <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite</option>
                         </select>
-                        <small class="form-hint">النموذج الوحيد المعتمد في التطبيق حالياً.</small>
+                        <small class="form-hint">حدد نسخة Gemini Flash قبل إدخال المفتاح.</small>
                     </div>
                     <div class="form-group">
                         <label for="geminiApiKey">مفتاح API الخاص بـ Gemini</label>
@@ -1754,11 +1793,6 @@
                         <input type="number" id="setupSalary" class="form-input" placeholder="مثال: 15000" required />
                     </div>
                     <div class="form-group">
-                        <label>نوع الدخل / جهة الصرف</label>
-                        <select id="setupIncomeType" class="form-input"></select>
-                        <small class="form-hint">اختر جهة الصرف لتعبئة تاريخ النزول تلقائياً حسب موعدها الشهري</small>
-                    </div>
-                    <div class="form-group">
                         <label>تاريخ نزول الراتب</label>
                         <input type="date" id="setupSalaryDate" class="form-input" required />
                     </div>
@@ -1766,12 +1800,6 @@
                         <label>هدف الادخار الشهري (ريال)</label>
                         <input type="number" id="setupSavingsGoal" class="form-input" placeholder="مثال: 3000" required />
                     </div>
-                    <h3>مصروف الأبناء اليومي</h3>
-                    <p class="hint">أضف كل ابن أو ابنة، ويمكنك كتابة الاسم وإضافة المزيد حسب الحاجة</p>
-                    <div id="setupChildrenContainer" class="children-list"></div>
-                    <button type="button" id="setupAddChildBtn" class="btn-add-child">
-                        <i class="fas fa-plus"></i> إضافة ابن / ابنة
-                    </button>
                     <h3>ميزانيات التصنيفات</h3>
                     <p class="hint">حدد ميزانية لكل تصنيف (ريال)</p>
                     <div id="setupCategoriesContainer" class="category-budgets-grid"></div>
@@ -1801,7 +1829,7 @@
                 const dt = new Date(d);
                 return dt.toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' });
             },
-            today: () => new Date().toISOString().split('T')[0],
+            today: () => (typeof WorldTime !== 'undefined' ? WorldTime.now() : new Date()).toISOString().split('T')[0],
             getWeekRange: () => {
                 const now = new Date();
                 const day = now.getDay() || 7;
@@ -1823,40 +1851,87 @@
                 'الإيجار', 'الأقساط', 'المطاعم', 'المقاهي', 'الصحة',
                 'الترفيه', 'التسوق', 'التعليم', 'السيارة', 'مصروف شخصي', 'أخرى'
             ],
-            // التصنيفات الفرعية الافتراضية لبعض التصنيفات الرئيسية
-            subCategoriesMap: () => ({
-                'السيارة': ['بنزين', 'زيت', 'غسيل'],
-                'الإنترنت': ['انترنت المنزل', 'اشتراك الباقة الشخصية', 'اشتراك باقة الابن أو الابنة', 'اشتراك باقة الزوجة'],
-                'الأقساط': ['أقساط البنك', 'دفعات تمارا', 'دفعات تابي', 'قسط بطاقة فيزا أو ماستركارد']
-            }),
-            getSubCategories: (cat) => Utils.subCategoriesMap()[cat] || [],
-            // مواعيد صرف الرواتب والدعم والمعاشات في السعودية
-            incomeTypes: () => [
-                { value: 'gov_employee', label: 'رواتب الموظفين الحكوميين (27 من كل شهر)', day: 27 },
-                { value: 'retirement', label: 'معاشات التقاعد والتأمينات الاجتماعية (1 من كل شهر)', day: 1 },
-                { value: 'saned', label: 'ساند - التعطل عن العمل (بداية كل شهر)', day: 1 },
-                { value: 'social_security', label: 'الضمان الاجتماعي المطور (1 من كل شهر)', day: 1 },
-                { value: 'citizen_account', label: 'حساب المواطن (10 من كل شهر)', day: 10 },
-                { value: 'housing_support', label: 'الدعم السكني (24 من كل شهر)', day: 24 },
-                { value: 'comprehensive_rehab', label: 'التأهيل الشامل (26 من كل شهر)', day: 26 },
-                { value: 'custom', label: 'أخرى (تحديد التاريخ يدوياً)', day: null }
+            // بنود ميزانية السفر
+            travelCategories: () => [
+                'تذاكر الطيران', 'الفنادق والسكن', 'المواصلات الداخلية',
+                'الإنترنت والاتصالات', 'الفعاليات والأنشطة', 'الطعام والمطاعم',
+                'التسوق والهدايا', 'التأشيرة والتأمين', 'الطوارئ', 'أخرى'
             ],
-            nextDateForDay: (day) => {
-                const now = new Date();
-                const year = now.getFullYear();
-                const month = now.getMonth();
-                const daysInMonth = new Date(year, month + 1, 0).getDate();
-                const useDay = Math.min(day, daysInMonth);
-                return `${year}-${String(month + 1).padStart(2, '0')}-${String(useDay).padStart(2, '0')}`;
+            // بنود الميزانية المؤقتة
+            tempCategories: () => [
+                'كشتة', 'قطة', 'واجب', 'فزعة', 'صدقة', 'أخرى'
+            ]
+        };
+
+        /* ============================================================
+           WORLDTIME.JS - تاريخ ميلادي حقيقي عبر API خارجي
+           يستخدمه الذكاء الاصطناعي وكل حسابات التواريخ في التطبيق
+           بدلاً من الاعتماد على ساعة الجهاز فقط
+           ============================================================ */
+        const WorldTime = {
+            offsetMs: 0,
+            synced: false,
+            syncedAt: null,
+            source: '',
+
+            async init() {
+                const endpoints = [
+                    { name: 'worldtimeapi.org', url: 'https://worldtimeapi.org/api/timezone/Asia/Riyadh',
+                        parse: (d) => new Date(d.datetime) },
+                    { name: 'timeapi.io', url: 'https://timeapi.io/api/Time/current/zone?timeZone=UTC',
+                        parse: (d) => new Date(d.dateTime + 'Z') },
+                    { name: 'worldclockapi.com', url: 'https://worldclockapi.com/api/json/utc/now',
+                        parse: (d) => new Date(d.currentDateTime) }
+                ];
+
+                const withTimeout = (promise, ms) => Promise.race([
+                    promise,
+                    new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))
+                ]);
+
+                for (const ep of endpoints) {
+                    try {
+                        const res = await withTimeout(fetch(ep.url), 4000);
+                        if (!res.ok) continue;
+                        const data = await res.json();
+                        const serverDate = ep.parse(data);
+                        if (!serverDate || isNaN(serverDate.getTime())) continue;
+                        this.offsetMs = serverDate.getTime() - Date.now();
+                        this.synced = true;
+                        this.syncedAt = Date.now();
+                        this.source = ep.name;
+                        Storage.set('time_offset', this.offsetMs);
+                        Storage.set('time_synced_at', this.syncedAt);
+                        Storage.set('time_source', this.source);
+                        break;
+                    } catch (e) { /* جرّب المصدر التالي */ }
+                }
+
+                if (!this.synced) {
+                    const savedOffset = Storage.get('time_offset', null);
+                    const savedAt = Storage.get('time_synced_at', null);
+                    if (savedOffset !== null) {
+                        this.offsetMs = savedOffset;
+                        this.syncedAt = savedAt;
+                        this.source = Storage.get('time_source', 'محفوظ سابقاً');
+                    }
+                }
+                return this.synced;
             },
-            defaultChildren: () => [
-                { id: 'child_son_1', type: 'son', name: '' },
-                { id: 'child_daughter_1', type: 'daughter', name: '' }
-            ],
-            getChildCategoryLabel: (child) => {
-                const name = (child.name || '').trim();
-                if (name) return `مصروف ${name}`;
-                return child.type === 'daughter' ? 'مصروف الابنة' : 'مصروف الابن';
+
+            // الوقت الحقيقي الحالي (تاريخ ميلادي دقيق)
+            now() {
+                return new Date(Date.now() + this.offsetMs);
+            },
+
+            todayStr() {
+                return this.now().toISOString().split('T')[0];
+            },
+
+            statusText() {
+                if (this.synced) return `متزامن (${this.source})`;
+                if (this.offsetMs) return `آخر مزامنة محفوظة (${this.source || ''})`;
+                return 'يعتمد على ساعة الجهاز';
             }
         };
 
@@ -1879,33 +1954,19 @@
             getExpenses() { return this.get('expenses', []); },
             setExpenses(exp) { this.set('expenses', exp); },
             getSettings() {
-                const def = { salary: 0, salaryDate: Utils.today(), incomeType: 'custom', savingsGoal: 0, categoryBudgets: {}, children: [] };
+                const def = { salary: 0, salaryDate: Utils.today(), savingsGoal: 0, categoryBudgets: {} };
                 return this.get('settings', def);
             },
             setSettings(s) { this.set('settings', s); },
-            getChildren() {
-                const s = this.getSettings();
-                return (s.children && s.children.length > 0) ? s.children : Utils.defaultChildren();
-            },
-            setChildren(children) {
-                const s = this.getSettings();
-                s.children = children;
-                this.setSettings(s);
-            },
             // Gemini specific (المصدر الوحيد للذكاء الاصطناعي)
             getGeminiKey() { return this.get('gemini_key', ''); },
             setGeminiKey(key) { this.set('gemini_key', key); },
-            getGeminiModel() { return this.get('gemini_model', 'gemini-2.5-flash-lite'); },
+            getGeminiModel() { return this.get('gemini_model', 'gemini-3.6-flash'); },
             setGeminiModel(model) { this.set('gemini_model', model); },
             getCategories() {
                 const s = this.getSettings();
-                let cats = s.categoryBudgets ? Object.keys(s.categoryBudgets) : [];
-                if (cats.length === 0) cats = Utils.defaultCategories();
-                const children = this.getChildren();
-                children.forEach(c => {
-                    const label = Utils.getChildCategoryLabel(c);
-                    if (!cats.includes(label)) cats.push(label);
-                });
+                const cats = s.categoryBudgets ? Object.keys(s.categoryBudgets) : [];
+                if (cats.length === 0) return Utils.defaultCategories();
                 return cats;
             },
             getCategoryBudget(cat) {
@@ -1917,7 +1978,25 @@
             },
             markLaunched() {
                 localStorage.setItem('ai_budget_launched', 'true');
-            }
+            },
+
+            // ===== ميزانية السفر (منفصلة تماماً عن الميزانية الأساسية) =====
+            getTravelBudget() {
+                const def = { enabled: false, tripName: '', totalBudget: 0, categoryBudgets: {} };
+                return this.get('travel_budget', def);
+            },
+            setTravelBudget(v) { this.set('travel_budget', v); },
+            getTravelExpenses() { return this.get('travel_expenses', []); },
+            setTravelExpenses(exp) { this.set('travel_expenses', exp); },
+
+            // ===== الميزانية المؤقتة (كشتة، قطة، واجب، فزعة، صدقة...) - منفصلة عن الأساسية =====
+            getTempBudget() {
+                const def = { totalBudget: 0, categoryBudgets: {} };
+                return this.get('temp_budget', def);
+            },
+            setTempBudget(v) { this.set('temp_budget', v); },
+            getTempExpenses() { return this.get('temp_expenses', []); },
+            setTempExpenses(exp) { this.set('temp_expenses', exp); }
         };
 
         /* ============================================================
@@ -2006,6 +2085,85 @@
                 return daysInMonth > 0 ? salary / daysInMonth : 0;
             },
             getWeeklyBudget() { return this.getDailyBudget() * 7; },
+
+            // ----- عد تنازلي حقيقي لنزول الراتب القادم (يعتمد على WorldTime) -----
+            getNextSalaryDate() {
+                const settings = Storage.getSettings();
+                if (!settings.salaryDate) return null;
+                const base = new Date(settings.salaryDate);
+                if (isNaN(base.getTime())) return null;
+                const day = base.getDate();
+                const now = WorldTime.now();
+                const today0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                let candidate = new Date(now.getFullYear(), now.getMonth(), day);
+                if (candidate < today0) {
+                    candidate = new Date(now.getFullYear(), now.getMonth() + 1, day);
+                }
+                return candidate;
+            },
+            getDaysUntilSalary() {
+                const next = this.getNextSalaryDate();
+                if (!next) return null;
+                const now = WorldTime.now();
+                const today0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                return Math.round((next - today0) / 86400000);
+            },
+
+            // ===== ميزانية السفر (حسابها منفصل تماماً عن الأساسية) =====
+            addTravelExpense(data) {
+                const exp = Storage.getTravelExpenses();
+                const entry = {
+                    id: Utils.generateId(),
+                    amount: parseFloat(data.amount) || 0,
+                    description: data.description || '',
+                    category: data.category || 'أخرى',
+                    date: data.date || Utils.today(),
+                    notes: data.notes || '',
+                    createdAt: new Date().toISOString()
+                };
+                exp.push(entry);
+                Storage.setTravelExpenses(exp);
+                return entry;
+            },
+            deleteTravelExpense(id) {
+                let exp = Storage.getTravelExpenses();
+                exp = exp.filter(e => e.id !== id);
+                Storage.setTravelExpenses(exp);
+            },
+            getTravelTotal() { return this.getTotal(Storage.getTravelExpenses()); },
+            getTravelByCategory() { return this.getByCategory(Storage.getTravelExpenses()); },
+            getTravelRemaining() {
+                const b = Storage.getTravelBudget();
+                return (parseFloat(b.totalBudget) || 0) - this.getTravelTotal();
+            },
+
+            // ===== الميزانية المؤقتة (حسابها منفصل تماماً عن الأساسية) =====
+            addTempExpense(data) {
+                const exp = Storage.getTempExpenses();
+                const entry = {
+                    id: Utils.generateId(),
+                    amount: parseFloat(data.amount) || 0,
+                    description: data.description || '',
+                    category: data.category || 'أخرى',
+                    date: data.date || Utils.today(),
+                    notes: data.notes || '',
+                    createdAt: new Date().toISOString()
+                };
+                exp.push(entry);
+                Storage.setTempExpenses(exp);
+                return entry;
+            },
+            deleteTempExpense(id) {
+                let exp = Storage.getTempExpenses();
+                exp = exp.filter(e => e.id !== id);
+                Storage.setTempExpenses(exp);
+            },
+            getTempTotal() { return this.getTotal(Storage.getTempExpenses()); },
+            getTempByCategory() { return this.getByCategory(Storage.getTempExpenses()); },
+            getTempRemaining() {
+                const b = Storage.getTempBudget();
+                return (parseFloat(b.totalBudget) || 0) - this.getTempTotal();
+            },
             getMonthlyBudget() { return parseFloat(Storage.getSettings().salary) || 0; },
             getCategoryRemaining(category) {
                 const monthExp = this.getMonthExpenses();
@@ -2191,6 +2349,159 @@
         };
 
         /* ============================================================
+           COMMANDS.JS - تحكم كامل للذكاء الاصطناعي عبر أوامر المحادثة
+           يقرأ الذكاء الاصطناعي طلب المستخدم في الدردشة، ويرفق في رده كتلة
+           JSON مخفية من نوع "إجراءات" (actions)، فيقوم هذا الوحدة بتنفيذها
+           فعلياً على كل قوائم التطبيق (المصروفات، ميزانية السفر، الميزانية
+           المؤقتة، الإعدادات) ثم يحدّث كل الواجهات المرتبطة تلقائياً.
+           ============================================================ */
+        const Commands = {
+            // يبحث في رد الذكاء الاصطناعي عن كتلة الإجراءات ```json-actions ... ```
+            extract(text) {
+                if (!text) return { cleanText: text, actions: [] };
+                const match = text.match(/```json-actions\s*([\s\S]*?)```/i);
+                if (!match) return { cleanText: text, actions: [] };
+                let actions = [];
+                try {
+                    const parsed = JSON.parse(match[1].trim());
+                    actions = Array.isArray(parsed) ? parsed : (parsed.actions || []);
+                } catch (e) {
+                    actions = [];
+                }
+                const cleanText = text.replace(match[0], '').trim();
+                return { cleanText, actions };
+            },
+
+            // ينفذ قائمة الإجراءات فعلياً على التخزين المحلي، ويعيد ملخصاً نصياً بما تم
+            execute(actions) {
+                const log = [];
+                if (!Array.isArray(actions) || actions.length === 0) return log;
+
+                actions.forEach(a => {
+                    try {
+                        switch (a.type) {
+                            case 'add_expense': {
+                                const e = Budget.addExpense({
+                                    amount: a.amount, description: a.description, category: a.category,
+                                    date: a.date, merchant: a.merchant, notes: a.notes
+                                });
+                                log.push(`✅ أُضيف مصروف: ${e.description || e.category} بمبلغ ${Utils.formatCurrency(e.amount)} (${e.category})`);
+                                break;
+                            }
+                            case 'delete_expense': {
+                                Budget.deleteExpense(a.id);
+                                log.push('🗑️ تم حذف المصروف من الميزانية الأساسية');
+                                break;
+                            }
+                            case 'set_salary': {
+                                const s = Storage.getSettings();
+                                s.salary = parseFloat(a.amount) || 0;
+                                Storage.setSettings(s);
+                                log.push(`💵 تم تحديث الراتب الشهري إلى ${Utils.formatCurrency(s.salary)}`);
+                                break;
+                            }
+                            case 'set_salary_date': {
+                                const s = Storage.getSettings();
+                                s.salaryDate = a.date;
+                                Storage.setSettings(s);
+                                log.push(`📅 تم تحديث تاريخ نزول الراتب إلى ${Utils.formatDate(a.date)}`);
+                                break;
+                            }
+                            case 'set_savings_goal': {
+                                const s = Storage.getSettings();
+                                s.savingsGoal = parseFloat(a.amount) || 0;
+                                Storage.setSettings(s);
+                                log.push(`🎯 تم تحديث هدف الادخار إلى ${Utils.formatCurrency(s.savingsGoal)}`);
+                                break;
+                            }
+                            case 'set_category_budget': {
+                                const s = Storage.getSettings();
+                                s.categoryBudgets = s.categoryBudgets || {};
+                                s.categoryBudgets[a.category] = parseFloat(a.amount) || 0;
+                                Storage.setSettings(s);
+                                log.push(`📊 تم تحديث ميزانية "${a.category}" إلى ${Utils.formatCurrency(a.amount)}`);
+                                break;
+                            }
+                            case 'add_category': {
+                                const s = Storage.getSettings();
+                                s.categoryBudgets = s.categoryBudgets || {};
+                                if (!(a.name in s.categoryBudgets)) s.categoryBudgets[a.name] = parseFloat(a.budget) || 0;
+                                Storage.setSettings(s);
+                                log.push(`🏷️ تمت إضافة تصنيف جديد: ${a.name}`);
+                                break;
+                            }
+                            case 'add_travel_expense': {
+                                const e = Budget.addTravelExpense({
+                                    amount: a.amount, description: a.description, category: a.category,
+                                    date: a.date, notes: a.notes
+                                });
+                                log.push(`✈️ أُضيف مصروف سفر: ${e.description || e.category} بمبلغ ${Utils.formatCurrency(e.amount)} (${e.category})`);
+                                break;
+                            }
+                            case 'delete_travel_expense': {
+                                Budget.deleteTravelExpense(a.id);
+                                log.push('🗑️ تم حذف مصروف من ميزانية السفر');
+                                break;
+                            }
+                            case 'set_travel_budget': {
+                                const b = Storage.getTravelBudget();
+                                b.enabled = true;
+                                if (a.tripName !== undefined) b.tripName = a.tripName;
+                                if (a.totalBudget !== undefined) b.totalBudget = parseFloat(a.totalBudget) || 0;
+                                if (a.category && a.amount !== undefined) {
+                                    b.categoryBudgets = b.categoryBudgets || {};
+                                    b.categoryBudgets[a.category] = parseFloat(a.amount) || 0;
+                                }
+                                Storage.setTravelBudget(b);
+                                log.push('✈️ تم تحديث ميزانية السفر');
+                                break;
+                            }
+                            case 'add_temp_expense': {
+                                const e = Budget.addTempExpense({
+                                    amount: a.amount, description: a.description, category: a.category,
+                                    date: a.date, notes: a.notes
+                                });
+                                log.push(`💰 أُضيف مصروف مؤقت: ${e.description || e.category} بمبلغ ${Utils.formatCurrency(e.amount)} (${e.category})`);
+                                break;
+                            }
+                            case 'delete_temp_expense': {
+                                Budget.deleteTempExpense(a.id);
+                                log.push('🗑️ تم حذف مصروف من الميزانية المؤقتة');
+                                break;
+                            }
+                            case 'set_temp_budget': {
+                                const b = Storage.getTempBudget();
+                                if (a.totalBudget !== undefined) b.totalBudget = parseFloat(a.totalBudget) || 0;
+                                if (a.category && a.amount !== undefined) {
+                                    b.categoryBudgets = b.categoryBudgets || {};
+                                    b.categoryBudgets[a.category] = parseFloat(a.amount) || 0;
+                                }
+                                Storage.setTempBudget(b);
+                                log.push('💰 تم تحديث الميزانية المؤقتة');
+                                break;
+                            }
+                            default:
+                                log.push(`⚠️ إجراء غير معروف: ${a.type}`);
+                        }
+                    } catch (e) {
+                        log.push(`⚠️ تعذر تنفيذ إجراء (${a.type || '?'}): ${e.message}`);
+                    }
+                });
+
+                // تحديث كل الواجهات المتأثرة فور تنفيذ أي إجراء
+                if (typeof UI !== 'undefined') {
+                    UI.renderDashboard();
+                    UI.renderExpenses();
+                    UI.renderReports();
+                    UI.updateCategoryFilters();
+                    if (Utils.id('page-travel')) UI.renderTravel();
+                    if (Utils.id('page-temp')) UI.renderTemp();
+                }
+                return log;
+            }
+        };
+
+        /* ============================================================
            CHARTS.JS (نفس السابق)
            ============================================================ */
         const Charts = {
@@ -2339,10 +2650,21 @@
                 this.setupSetupWizard();
                 this.setupGeminiModal();
                 this.setupChat();
+                this.setupQuickExpenseModal();
+                this.setupTravel();
+                this.setupTemp();
                 this.renderDashboard();
                 this.renderExpenses();
                 this.renderReports();
+                this.renderTravel();
+                this.renderTemp();
                 this.updateCategoryFilters();
+
+                // مزامنة التاريخ الميلادي الحقيقي عبر API خارجي، ثم تحديث كل ما يعتمد عليه
+                WorldTime.init().then(() => {
+                    this.setupDate();
+                    this.renderDashboard();
+                });
             },
 
             setupTheme() {
@@ -2374,6 +2696,8 @@
                     reports: Utils.id('page-reports'),
                     analytics: Utils.id('page-analytics'),
                     settings: Utils.id('page-settings'),
+                    travel: Utils.id('page-travel'),
+                    temp: Utils.id('page-temp'),
                     chat: Utils.id('page-chat')
                 };
                 const titles = {
@@ -2382,6 +2706,8 @@
                     reports: 'التقارير',
                     analytics: 'التحليلات',
                     settings: 'الإعدادات',
+                    travel: 'ميزانية السفر',
+                    temp: 'ميزانية مؤقتة',
                     chat: 'المساعد'
                 };
 
@@ -2401,6 +2727,8 @@
                         if (page === 'dashboard') this.renderDashboard();
                         if (page === 'expenses') { this.renderExpenses();
                             this.updateCategoryFilters(); }
+                        if (page === 'travel') this.renderTravel();
+                        if (page === 'temp') this.renderTemp();
                         if (page === 'chat') {
                             // عند فتح الدردشة، نحرك التركيز إلى حقل الإدخال
                             setTimeout(() => Utils.id('chatInput').focus(), 200);
@@ -2433,7 +2761,7 @@
             },
 
             setupDate() {
-                const now = new Date();
+                const now = WorldTime.now();
                 Utils.id('currentDate').textContent = now.toLocaleDateString('ar-SA', {
                     weekday: 'long',
                     year: 'numeric',
@@ -2470,21 +2798,9 @@
                     modal.classList.add('open');
                     Utils.id('manualDate').value = Utils.today();
                     this.populateCategorySelect(Utils.id('manualCategory'));
-                    this.updateSubCategoryOptions();
                     aiInput.value = '';
                     parseResult.innerHTML = '';
                     saveBtn.style.display = 'none';
-                });
-
-                Utils.on(Utils.id('manualCategory'), 'change', () => {
-                    this.updateSubCategoryOptions();
-                });
-                Utils.on(Utils.id('manualSubCategory'), 'change', () => {
-                    const subSelect = Utils.id('manualSubCategory');
-                    const subText = Utils.id('manualSubCategoryText');
-                    const isCustom = subSelect.value === '__custom__';
-                    subText.style.display = isCustom ? 'block' : 'none';
-                    if (isCustom) subText.value = '';
                 });
 
                 const closeModal = () => {
@@ -2527,7 +2843,6 @@
                             Utils.id('manualAmount').value = result.amount;
                             Utils.id('manualDescription').value = text;
                             Utils.id('manualCategory').value = result.category;
-                            this.updateSubCategoryOptions();
                             Utils.id('manualDate').value = result.date;
                             Utils.id('manualMerchant').value = result.merchant || '';
                             saveBtn.style.display = 'inline-flex';
@@ -2562,16 +2877,11 @@
                         alert('الرجاء إدخال مبلغ صحيح');
                         return;
                     }
-                    const subSelect = Utils.id('manualSubCategory');
-                    const subText = Utils.id('manualSubCategoryText');
-                    const subCategory = (subSelect.style.display !== 'none' && subSelect.value !== '__custom__')
-                        ? subSelect.value
-                        : (subText.value || '');
                     const data = {
                         amount: amount,
                         description: Utils.id('manualDescription').value || 'مصروف يدوي',
                         category: Utils.id('manualCategory').value || 'أخرى',
-                        subCategory: subCategory,
+                        subCategory: Utils.id('manualSubCategory').value || '',
                         date: Utils.id('manualDate').value || Utils.today(),
                         paymentMethod: Utils.id('manualPaymentMethod').value || '',
                         merchant: Utils.id('manualMerchant').value || '',
@@ -2592,105 +2902,139 @@
                 ).join('');
             },
 
-            updateSubCategoryOptions(selectedSub) {
-                const catSelect = Utils.id('manualCategory');
-                const subSelect = Utils.id('manualSubCategory');
-                const subText = Utils.id('manualSubCategoryText');
-                if (!catSelect || !subSelect || !subText) return;
-                const subs = Utils.getSubCategories(catSelect.value);
-                if (subs.length > 0) {
-                    const isKnown = selectedSub && subs.includes(selectedSub);
-                    subSelect.innerHTML = subs.map(s =>
-                        `<option value="${s}" ${s === selectedSub ? 'selected' : ''}>${s}</option>`
-                    ).join('') + `<option value="__custom__" ${selectedSub && !isKnown ? 'selected' : ''}>أخرى (تحديد يدوي)</option>`;
-                    subSelect.style.display = 'block';
-                    const isCustom = subSelect.value === '__custom__';
-                    subText.style.display = isCustom ? 'block' : 'none';
-                    subText.placeholder = 'اكتب التصنيف الفرعي';
-                    if (!isCustom) subText.value = '';
-                    else if (selectedSub) subText.value = selectedSub;
-                } else {
-                    subSelect.style.display = 'none';
-                    subSelect.innerHTML = '';
-                    subText.style.display = 'block';
-                    subText.placeholder = 'اختياري';
-                    subText.value = selectedSub || '';
-                }
-            },
-
             saveExpenseFromData(data) {
                 Budget.addExpense(data);
             },
 
-            // ----- مصروف الأبناء اليومي (إدارة الابن/الابنة القابلة للتخصيص) -----
-            renderChildRowHTML(child) {
-                return `<div class="child-row" data-id="${child.id}">
-                    <select class="child-type-select">
-                        <option value="son" ${child.type === 'son' ? 'selected' : ''}>ابن</option>
-                        <option value="daughter" ${child.type === 'daughter' ? 'selected' : ''}>ابنة</option>
-                    </select>
-                    <input type="text" class="child-name-input" placeholder="الاسم (اختياري)" value="${child.name || ''}" />
-                    <button type="button" class="child-remove-btn"><i class="fas fa-trash"></i></button>
-                </div>`;
+            // ----- Quick Expense Modal (تُستخدم لميزانية السفر والميزانية المؤقتة) -----
+            quickExpenseTarget: null,
+
+            openQuickExpenseModal(type) {
+                this.quickExpenseTarget = type;
+                const modal = Utils.id('quickExpenseModal');
+                const title = Utils.id('quickExpenseModalTitle');
+                const catSelect = Utils.id('quickCategory');
+                const cats = type === 'travel' ? Utils.travelCategories() : Utils.tempCategories();
+                title.textContent = type === 'travel' ? 'إضافة مصروف سفر' : 'إضافة مصروف مؤقت';
+                catSelect.innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('');
+                Utils.id('quickAmount').value = '';
+                Utils.id('quickDescription').value = '';
+                Utils.id('quickDate').value = Utils.today();
+                modal.classList.add('open');
             },
 
-            renderChildrenList(containerId, children) {
-                const container = Utils.id(containerId);
-                container.innerHTML = children.map(c => this.renderChildRowHTML(c)).join('');
-            },
+            setupQuickExpenseModal() {
+                const modal = Utils.id('quickExpenseModal');
+                const closeBtn = Utils.id('closeQuickExpenseModal');
+                const cancelBtn = Utils.id('cancelQuickExpenseBtn');
+                const saveBtn = Utils.id('saveQuickExpenseBtn');
 
-            bindChildRowEvents(row, onChange) {
-                const removeBtn = Utils.qs('.child-remove-btn', row);
-                Utils.on(removeBtn, 'click', () => {
-                    row.remove();
-                    if (onChange) onChange();
+                const closeModal = () => modal.classList.remove('open');
+                Utils.on(closeBtn, 'click', closeModal);
+                Utils.on(cancelBtn, 'click', closeModal);
+                modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+                Utils.on(saveBtn, 'click', () => {
+                    const amount = parseFloat(Utils.id('quickAmount').value);
+                    if (!amount || amount <= 0) {
+                        alert('الرجاء إدخال مبلغ صحيح');
+                        return;
+                    }
+                    const data = {
+                        amount,
+                        description: Utils.id('quickDescription').value || '',
+                        category: Utils.id('quickCategory').value,
+                        date: Utils.id('quickDate').value || Utils.today()
+                    };
+                    if (this.quickExpenseTarget === 'travel') {
+                        Budget.addTravelExpense(data);
+                        this.renderTravel();
+                    } else if (this.quickExpenseTarget === 'temp') {
+                        Budget.addTempExpense(data);
+                        this.renderTemp();
+                    }
+                    closeModal();
                 });
-                const typeSelect = Utils.qs('.child-type-select', row);
-                const nameInput = Utils.qs('.child-name-input', row);
-                Utils.on(typeSelect, 'change', () => { if (onChange) onChange(); });
-                Utils.on(nameInput, 'input', () => { if (onChange) onChange(); });
             },
 
-            wireChildrenContainer(containerId, addBtnId, onChange) {
-                const container = Utils.id(containerId);
-                const addBtn = Utils.id(addBtnId);
-                Utils.qsa('.child-row', container).forEach(row => this.bindChildRowEvents(row, onChange));
-                Utils.on(addBtn, 'click', () => {
-                    const row = document.createElement('div');
-                    row.className = 'child-row';
-                    row.dataset.id = Utils.generateId();
-                    row.innerHTML = `
-                        <select class="child-type-select">
-                            <option value="son" selected>ابن</option>
-                            <option value="daughter">ابنة</option>
-                        </select>
-                        <input type="text" class="child-name-input" placeholder="الاسم (اختياري)" value="" />
-                        <button type="button" class="child-remove-btn"><i class="fas fa-trash"></i></button>
-                    `;
-                    container.appendChild(row);
-                    this.bindChildRowEvents(row, onChange);
-                    if (onChange) onChange();
+            // ----- ميزانية السفر -----
+            setupTravel() {
+                const form = Utils.id('travelBudgetForm');
+                const nameInput = Utils.id('travelTripName');
+                const totalInput = Utils.id('travelTotalBudget');
+                const container = Utils.id('travelCategoryBudgetsContainer');
+                const cats = Utils.travelCategories();
+
+                const loadBudget = () => {
+                    const b = Storage.getTravelBudget();
+                    nameInput.value = b.tripName || '';
+                    totalInput.value = b.totalBudget || 0;
+                    container.innerHTML = cats.map(cat =>
+                        `<div class="category-budget-item">
+                            <label>${cat}</label>
+                            <input type="number" class="travel-cat-budget" data-cat="${cat}"
+                                   value="${(b.categoryBudgets && b.categoryBudgets[cat]) || 0}" step="0.01" min="0" />
+                        </div>`
+                    ).join('');
+                };
+                loadBudget();
+
+                Utils.on(form, 'submit', (e) => {
+                    e.preventDefault();
+                    const categoryBudgets = {};
+                    Utils.qsa('.travel-cat-budget').forEach(inp => {
+                        categoryBudgets[inp.dataset.cat] = parseFloat(inp.value) || 0;
+                    });
+                    Storage.setTravelBudget({
+                        enabled: true,
+                        tripName: nameInput.value || '',
+                        totalBudget: parseFloat(totalInput.value) || 0,
+                        categoryBudgets
+                    });
+                    this.renderTravel();
+                    alert('تم حفظ ميزانية السفر بنجاح!');
                 });
+
+                Utils.on(Utils.id('addTravelExpenseBtn'), 'click', () => this.openQuickExpenseModal('travel'));
+                Utils.on(Utils.id('travelCategoryFilter'), 'change', () => this.renderTravel());
             },
 
-            getChildrenFromContainer(containerId) {
-                const rows = Utils.qsa(`#${containerId} .child-row`);
-                return rows.map(row => ({
-                    id: row.dataset.id || Utils.generateId(),
-                    type: Utils.qs('.child-type-select', row).value,
-                    name: Utils.qs('.child-name-input', row).value.trim()
-                }));
-            },
+            // ----- الميزانية المؤقتة -----
+            setupTemp() {
+                const form = Utils.id('tempBudgetForm');
+                const totalInput = Utils.id('tempTotalBudget');
+                const container = Utils.id('tempCategoryBudgetsContainer');
+                const cats = Utils.tempCategories();
 
-            buildCategoryBudgetsHTML(cats, existingBudgets) {
-                return cats.map(cat =>
-                    `<div class="category-budget-item">
-                        <label>${cat}</label>
-                        <input type="number" class="cat-budget-input" data-cat="${cat}" 
-                               value="${(existingBudgets && existingBudgets[cat]) || 0}" 
-                               step="0.01" min="0" />
-                    </div>`
-                ).join('');
+                const loadBudget = () => {
+                    const b = Storage.getTempBudget();
+                    totalInput.value = b.totalBudget || 0;
+                    container.innerHTML = cats.map(cat =>
+                        `<div class="category-budget-item">
+                            <label>${cat}</label>
+                            <input type="number" class="temp-cat-budget" data-cat="${cat}"
+                                   value="${(b.categoryBudgets && b.categoryBudgets[cat]) || 0}" step="0.01" min="0" />
+                        </div>`
+                    ).join('');
+                };
+                loadBudget();
+
+                Utils.on(form, 'submit', (e) => {
+                    e.preventDefault();
+                    const categoryBudgets = {};
+                    Utils.qsa('.temp-cat-budget').forEach(inp => {
+                        categoryBudgets[inp.dataset.cat] = parseFloat(inp.value) || 0;
+                    });
+                    Storage.setTempBudget({
+                        totalBudget: parseFloat(totalInput.value) || 0,
+                        categoryBudgets
+                    });
+                    this.renderTemp();
+                    alert('تم حفظ الميزانية المؤقتة بنجاح!');
+                });
+
+                Utils.on(Utils.id('addTempExpenseBtn'), 'click', () => this.openQuickExpenseModal('temp'));
+                Utils.on(Utils.id('tempCategoryFilter'), 'change', () => this.renderTemp());
             },
 
             // ----- Settings (نفس السابق) -----
@@ -2698,63 +3042,44 @@
                 const form = Utils.id('settingsForm');
                 const salaryInput = Utils.id('settingsSalary');
                 const dateInput = Utils.id('settingsSalaryDate');
-                const incomeTypeSelect = Utils.id('settingsIncomeType');
                 const goalInput = Utils.id('settingsSavingsGoal');
                 const container = Utils.id('categoryBudgetsContainer');
-
-                incomeTypeSelect.innerHTML = Utils.incomeTypes().map(t =>
-                    `<option value="${t.value}">${t.label}</option>`
-                ).join('');
 
                 const loadSettings = () => {
                     const s = Storage.getSettings();
                     salaryInput.value = s.salary || '';
                     dateInput.value = s.salaryDate || Utils.today();
-                    incomeTypeSelect.value = s.incomeType || 'custom';
                     goalInput.value = s.savingsGoal || '';
-
-                    const children = Storage.getChildren();
-                    this.renderChildrenList('childrenContainer', children);
-                    this.wireChildrenContainer('childrenContainer', 'addChildBtn', null);
-
                     const cats = Storage.getCategories();
-                    container.innerHTML = this.buildCategoryBudgetsHTML(cats, s.categoryBudgets);
+                    container.innerHTML = cats.map(cat =>
+                        `<div class="category-budget-item">
+                            <label>${cat}</label>
+                            <input type="number" class="cat-budget-input" data-cat="${cat}" 
+                                   value="${(s.categoryBudgets && s.categoryBudgets[cat]) || 0}" 
+                                   step="0.01" min="0" />
+                        </div>`
+                    ).join('');
                 };
                 loadSettings();
 
-                Utils.on(incomeTypeSelect, 'change', () => {
-                    const type = Utils.incomeTypes().find(t => t.value === incomeTypeSelect.value);
-                    if (type && type.day) {
-                        dateInput.value = Utils.nextDateForDay(type.day);
-                    }
-                });
-
                 Utils.on(form, 'submit', (e) => {
                     e.preventDefault();
-                    const children = this.getChildrenFromContainer('childrenContainer');
                     const settings = {
                         salary: parseFloat(salaryInput.value) || 0,
                         salaryDate: dateInput.value || Utils.today(),
-                        incomeType: incomeTypeSelect.value,
                         savingsGoal: parseFloat(goalInput.value) || 0,
-                        categoryBudgets: {},
-                        children
+                        categoryBudgets: {}
                     };
                     const inputs = Utils.qsa('.cat-budget-input');
                     inputs.forEach(inp => {
                         const cat = inp.dataset.cat;
                         settings.categoryBudgets[cat] = parseFloat(inp.value) || 0;
                     });
-                    children.forEach(c => {
-                        const label = Utils.getChildCategoryLabel(c);
-                        if (!(label in settings.categoryBudgets)) settings.categoryBudgets[label] = 0;
-                    });
                     Storage.setSettings(settings);
                     alert('تم حفظ الإعدادات بنجاح!');
                     this.renderDashboard();
                     this.renderReports();
                     this.updateCategoryFilters();
-                    loadSettings();
                 });
             },
 
@@ -2803,8 +3128,6 @@
                 const modal = Utils.id('setupModal');
                 const form = Utils.id('setupForm');
                 const container = Utils.id('setupCategoriesContainer');
-                const incomeTypeSelect = Utils.id('setupIncomeType');
-                const dateInput = Utils.id('setupSalaryDate');
 
                 if (!Storage.isFirstLaunch()) {
                     modal.classList.remove('open');
@@ -2813,34 +3136,14 @@
 
                 modal.classList.add('open');
 
-                incomeTypeSelect.innerHTML = Utils.incomeTypes().map(t =>
-                    `<option value="${t.value}">${t.label}</option>`
+                const cats = Utils.defaultCategories();
+                container.innerHTML = cats.map(cat =>
+                    `<div class="category-budget-item">
+                        <label>${cat}</label>
+                        <input type="number" class="setup-cat-budget" data-cat="${cat}" 
+                               value="0" step="0.01" min="0" />
+                    </div>`
                 ).join('');
-                Utils.on(incomeTypeSelect, 'change', () => {
-                    const type = Utils.incomeTypes().find(t => t.value === incomeTypeSelect.value);
-                    if (type && type.day) {
-                        dateInput.value = Utils.nextDateForDay(type.day);
-                    }
-                });
-
-                const renderSetupCategories = () => {
-                    const domValues = {};
-                    Utils.qsa('.setup-cat-budget').forEach(inp => { domValues[inp.dataset.cat] = inp.value; });
-                    const children = this.getChildrenFromContainer('setupChildrenContainer');
-                    const childLabels = children.map(c => Utils.getChildCategoryLabel(c));
-                    const cats = [...Utils.defaultCategories(), ...childLabels];
-                    container.innerHTML = cats.map(cat =>
-                        `<div class="category-budget-item">
-                            <label>${cat}</label>
-                            <input type="number" class="setup-cat-budget" data-cat="${cat}" 
-                                   value="${domValues[cat] !== undefined ? domValues[cat] : 0}" step="0.01" min="0" />
-                        </div>`
-                    ).join('');
-                };
-
-                this.renderChildrenList('setupChildrenContainer', Utils.defaultChildren());
-                this.wireChildrenContainer('setupChildrenContainer', 'setupAddChildBtn', renderSetupCategories);
-                renderSetupCategories();
 
                 Utils.on(form, 'submit', (e) => {
                     e.preventDefault();
@@ -2864,15 +3167,11 @@
                         categoryBudgets[cat] = parseFloat(inp.value) || 0;
                     });
 
-                    const children = this.getChildrenFromContainer('setupChildrenContainer');
-
                     const settings = {
                         salary,
                         salaryDate: date,
-                        incomeType: incomeTypeSelect.value,
                         savingsGoal: goal || 0,
-                        categoryBudgets,
-                        children
+                        categoryBudgets
                     };
                     Storage.setSettings(settings);
                     Storage.markLaunched();
@@ -2910,7 +3209,7 @@
                         status.textContent = '⚠️ لم يتم إضافة مفتاح Gemini بعد';
                     }
                     const savedModel = Storage.getGeminiModel();
-                    modelSelect.value = savedModel || 'gemini-2.5-flash-lite';
+                    modelSelect.value = savedModel || 'gemini-3.6-flash';
                 });
 
                 Utils.on(closeBtn, 'click', () => {
@@ -3013,13 +3312,29 @@
                             catSummary += `- ${cat}: صرف ${spent.toFixed(2)} ريال، الميزانية ${budget.toFixed(2)} ريال (${pct}%)\n`;
                         }
 
-                        // قائمة التصنيفات والتصنيفات الفرعية المتاحة فعلياً في التطبيق
-                        const availableCats = Storage.getCategories();
-                        let subCatsInfo = '';
-                        availableCats.forEach(cat => {
-                            const subs = Utils.getSubCategories(cat);
-                            if (subs.length) subCatsInfo += `- ${cat} ← (${subs.join('، ')})\n`;
-                        });
+                        // التاريخ الميلادي الحقيقي (عبر API خارجي وليس ساعة الجهاز) + العد التنازلي للراتب
+                        const realNow = WorldTime.now();
+                        const realDateStr = realNow.toISOString().split('T')[0];
+                        const realDayName = realNow.toLocaleDateString('ar-SA', { weekday: 'long' });
+                        const daysUntilSalary = Budget.getDaysUntilSalary();
+                        const nextSalaryDate = Budget.getNextSalaryDate();
+
+                        // ميزانية السفر
+                        const travelBudget = Storage.getTravelBudget();
+                        const travelExpenses = Storage.getTravelExpenses();
+                        const travelSpent = Budget.getTravelTotal();
+                        const travelRemaining = Budget.getTravelRemaining();
+                        let travelSummary = 'ميزانية السفر غير مفعّلة حالياً.';
+                        if (travelBudget.enabled || travelExpenses.length > 0) {
+                            travelSummary = `الرحلة: ${travelBudget.tripName || '(بدون اسم)'} | الميزانية الكلية: ${(travelBudget.totalBudget||0).toFixed(2)} ريال | المصروف: ${travelSpent.toFixed(2)} ريال | المتبقي: ${travelRemaining.toFixed(2)} ريال`;
+                        }
+
+                        // الميزانية المؤقتة
+                        const tempBudget = Storage.getTempBudget();
+                        const tempExpenses = Storage.getTempExpenses();
+                        const tempSpent = Budget.getTempTotal();
+                        const tempRemaining = Budget.getTempRemaining();
+                        const tempSummary = `الميزانية الكلية: ${(tempBudget.totalBudget||0).toFixed(2)} ريال | المصروف: ${tempSpent.toFixed(2)} ريال | المتبقي: ${tempRemaining.toFixed(2)} ريال`;
 
                         // بناء System Prompt الرسمي
                         const systemPrompt = `أنت Budget AI Agent، المساعد المالي الذكي الرسمي داخل تطبيق Budget.
@@ -3045,63 +3360,80 @@
                         المستقبل: قد يتم تزويدك مستقبلاً بإمكانية الاتصال بـ Supabase، Tool Calling، Function Calling، RAG، Embeddings، OCR، تحليل الفواتير، رفع ملفات، استيراد كشوف البنوك.
                         الهدف النهائي: كن أفضل مستشار مالي شخصي داخل التطبيق، واجعل كل إجابة مبنية على البيانات الفعلية، وتساعد المستخدم على اتخاذ قرارات مالية أفضل، مع الحفاظ على الدقة والشفافية في كل رد.
 
-                        تسجيل المصروفات من المحادثة: إذا ذكر المستخدم أنه صرف أو دفع أو اشترى شيئاً بمبلغ فعلي محدد (مثال: "دفعت 50 ريال بنزين"، "صرفت 20 على قهوة"، "اشتريت غرض ابني بـ100 ريال")، فهذا يعني أنه يريد تسجيل هذا المبلغ كمصروف فعلي في التطبيق.
-                        في هذه الحالة فقط: بعد ردك الطبيعي المختصر، أضف في سطر منفصل وأخير النص التالي بالضبط: [EXPENSE_JSON] يليه كائن JSON صالح دون أي تنسيق Markdown حوله، بالشكل:
-                        {"amount": رقم فقط, "category": "أحد التصنيفات المتاحة أدناه بالضبط", "subCategory": "أحد التصنيفات الفرعية المتاحة إن وجدت وإلا اتركها فارغة", "description": "وصف مختصر", "merchant": "اسم المتجر إن ذُكر وإلا فارغ", "date": "YYYY-MM-DD (استخدم تاريخ اليوم إذا لم يُحدد المستخدم تاريخاً آخر)"}
-                        التصنيفات المتاحة (اختر الأقرب دلالياً، ولا تخترع تصنيفاً جديداً): ${availableCats.join('، ')}
-                        التصنيفات الفرعية المتاحة لبعض التصنيفات:
-                        ${subCatsInfo || 'لا توجد تصنيفات فرعية معرّفة حالياً.'}
-                        إذا لم يذكر المستخدم مصروفاً فعلياً بمبلغ محدد، لا تضف سطر [EXPENSE_JSON] إطلاقاً. لا تضف أكثر من مصروف واحد في نفس الرد؛ إذا ذكر المستخدم عدة مبالغ في رسالة واحدة اطلب منه إرسالها واحداً تلو الآخر بدلاً من محاولة تجميعها.
+                        التاريخ والوقت (حقيقي عبر API خارجي - وليس تخميناً من ذاكرتك):
+                        - التاريخ الميلادي الحقيقي الآن: ${realDateStr} (${realDayName})
+                        - تاريخ نزول الراتب القادم: ${nextSalaryDate ? Utils.formatDate(nextSalaryDate.toISOString().split('T')[0]) : 'غير محدد'}
+                        - الأيام المتبقية لنزول الراتب القادم: ${daysUntilSalary !== null ? daysUntilSalary + ' يوم' : 'غير معروف (لم يُحدد تاريخ الراتب في الإعدادات)'}
+                        - حالة مزامنة الوقت: ${WorldTime.statusText()}
+                        استخدم هذا التاريخ الحقيقي دائماً عند حساب أي مدة أو عدد أيام متبقية، ولا تعتمد على تاريخ من ذاكرتك.
 
-                        البيانات الحالية:
+                        البيانات المالية الأساسية:
                         - الراتب الشهري: ${settings.salary || 0} ريال
                         - إجمالي المصروفات هذا الشهر: ${totalMonth.toFixed(2)} ريال
                         - المتبقي: ${remaining.toFixed(2)} ريال
                         - هدف الادخار: ${settings.savingsGoal || 0} ريال
                         - تفاصيل المصروفات حسب التصنيف:
                         ${catSummary || 'لا توجد مصروفات مسجلة هذا الشهر.'}
-                        - عدد المصروفات الكلي: ${expenses.length}`;
+                        - عدد المصروفات الكلي: ${expenses.length}
+
+                        ميزانية السفر (منفصلة تماماً عن الميزانية الأساسية - بنودها: تذاكر الطيران، الفنادق والسكن، المواصلات الداخلية، الإنترنت والاتصالات، الفعاليات والأنشطة، الطعام والمطاعم، التسوق والهدايا، التأشيرة والتأمين، الطوارئ، أخرى):
+                        ${travelSummary}
+
+                        الميزانية المؤقتة (منفصلة تماماً عن الميزانية الأساسية - بنودها: كشتة، قطة، واجب، فزعة، صدقة، أخرى):
+                        ${tempSummary}
+
+                        ============================================================
+                        نظام التحكم الكامل عبر الأوامر (Actions) - صلاحياتك الفعلية:
+                        ============================================================
+                        لديك تحكم كامل بكل قوائم التطبيق مباشرة من داخل هذه المحادثة. عندما يطلب المستخدم منك تنفيذ أي إجراء فعلي (إضافة/حذف/تعديل مصروف، تحديث الراتب أو تاريخه، تحديث هدف الادخار، تحديث ميزانية أي تصنيف أو إضافة تصنيف جديد، تفعيل/تحديث ميزانية السفر أو إضافة/حذف مصروف سفر، تحديث الميزانية المؤقتة أو إضافة/حذف مصروف منها)، يجب عليك تنفيذ ذلك فعلياً عبر إرفاق كتلة كود في نهاية ردك بهذا الشكل بالضبط:
+
+                        \`\`\`json-actions
+                        {"actions":[{"type":"...", "...": "..."}]}
+                        \`\`\`
+
+                        أنواع الإجراءات المتاحة (type) وحقولها:
+                        - add_expense: {amount, description, category, date(YYYY-MM-DD), merchant, notes} — إضافة مصروف للميزانية الأساسية
+                        - delete_expense: {id}
+                        - set_salary: {amount}
+                        - set_salary_date: {date}
+                        - set_savings_goal: {amount}
+                        - set_category_budget: {category, amount}
+                        - add_category: {name, budget}
+                        - add_travel_expense: {amount, description, category(من بنود السفر أعلاه), date}
+                        - delete_travel_expense: {id}
+                        - set_travel_budget: {tripName, totalBudget, category, amount} — لتفعيل/تحديث ميزانية السفر أو ميزانية بند معين فيها
+                        - add_temp_expense: {amount, description, category(من: كشتة، قطة، واجب، فزعة، صدقة، أخرى), date}
+                        - delete_temp_expense: {id}
+                        - set_temp_budget: {totalBudget, category, amount}
+
+                        قواعد صارمة لاستخدام الأوامر:
+                        1. أرفق كتلة json-actions فقط عندما يطلب المستخدم فعلاً تنفيذ إجراء (وليس عند مجرد سؤال أو استفسار).
+                        2. اكتب دائماً رداً نصياً طبيعياً قبل كتلة الأوامر يوضح للمستخدم ماذا فعلت أو ستفعل.
+                        3. لا تكتب أي نص JSON خارج كتلة \`\`\`json-actions\`\`\` هذه.
+                        4. للحذف تحتاج معرف id للمصروف - إذا لم تعرفه اطلب من المستخدم توضيح المصروف المقصود بدلاً من تخمين id.
+                        5. التاريخ اليوم إذا لم يُحدد المستخدم تاريخاً هو ${realDateStr} (استخدمه كافتراضي).
+                        6. يمكنك تضمين أكثر من إجراء في نفس الكتلة داخل مصفوفة actions إذا طلب المستخدم عدة عمليات دفعة واحدة.`;
 
                         // إرسال الطلب إلى Gemini
-                        const response = await Gemini.sendMessage(chatHistory, systemPrompt);
+                        const rawResponse = await Gemini.sendMessage(chatHistory, systemPrompt);
+
+                        // استخراج أي أوامر (actions) مرفقة في رد الذكاء الاصطناعي وتنفيذها فعلياً على كل القوائم
+                        const { cleanText, actions } = Commands.extract(rawResponse);
 
                         // إزالة مؤشر الكتابة
                         hideTyping();
 
-                        // فحص إن كان الرد يحتوي على أمر تسجيل مصروف [EXPENSE_JSON]
-                        let displayResponse = response;
-                        const expenseMatch = response.match(/\[EXPENSE_JSON\]\s*(\{[\s\S]*?\})\s*$/);
-                        if (expenseMatch) {
-                            displayResponse = response.slice(0, expenseMatch.index).trim();
-                            try {
-                                const data = JSON.parse(expenseMatch[1]);
-                                const amount = parseFloat(data.amount);
-                                if (amount && amount > 0) {
-                                    const entry = Budget.addExpense({
-                                        amount: amount,
-                                        description: data.description || text,
-                                        category: data.category || 'أخرى',
-                                        subCategory: data.subCategory || '',
-                                        date: data.date || Utils.today(),
-                                        merchant: data.merchant || '',
-                                        paymentMethod: '',
-                                        notes: ''
-                                    });
-                                    // تحديث الصفحة الرئيسية وكل الشاشات المرتبطة فوراً
-                                    this.renderDashboard();
-                                    this.renderExpenses();
-                                    this.renderReports();
-                                    this.updateCategoryFilters();
-                                    displayResponse += `${displayResponse ? '\n\n' : ''}✅ تم تسجيل مصروف بقيمة ${Utils.formatCurrency(entry.amount)} ضمن تصنيف "${entry.category}"${entry.subCategory ? ' (' + entry.subCategory + ')' : ''} وتحديث لوحة التحكم تلقائياً.`;
-                                }
-                            } catch (parseErr) {
-                                // تجاهل بصمت إن فشل تحليل JSON، ويُعرض الرد النصي فقط
+                        // إضافة رد المساعد (بدون كتلة الأوامر الخام)
+                        addMessage(cleanText || rawResponse, 'assistant');
+                        chatHistory.push({ role: 'assistant', content: cleanText || rawResponse });
+
+                        // تنفيذ الأوامر إن وجدت، وعرض ملخص بما تم تحديثه فعلياً
+                        if (actions.length > 0) {
+                            const log = Commands.execute(actions);
+                            if (log.length > 0) {
+                                addMessage(log.join('<br>'), 'system');
                             }
                         }
-
-                        // إضافة رد المساعد
-                        addMessage(displayResponse, 'assistant');
-                        chatHistory.push({ role: 'assistant', content: displayResponse });
 
                     } catch (err) {
                         hideTyping();
@@ -3158,6 +3490,16 @@
                             0), cls: 'accent' }
                 ];
 
+                const daysLeft = Budget.getDaysUntilSalary();
+                if (daysLeft !== null) {
+                    cards.push({
+                        icon: 'fa-hourglass-half',
+                        label: 'الأيام المتبقية لنزول الراتب القادم',
+                        value: daysLeft === 0 ? 'اليوم!' : `${daysLeft} يوم`,
+                        cls: daysLeft <= 3 ? 'positive' : 'accent'
+                    });
+                }
+
                 cardsContainer.innerHTML = cards.map(c =>
                     `<div class="dash-card ${c.cls}">
                         <div class="card-icon"><i class="fas ${c.icon}"></i></div>
@@ -3165,6 +3507,35 @@
                         <div class="card-value">${c.value}</div>
                     </div>`
                 ).join('');
+
+                // بطاقات إضافية: ميزانية السفر والميزانية المؤقتة (منفصلة عن الحساب الأساسي)
+                const extraContainer = Utils.id('dashboardExtraCards');
+                if (extraContainer) {
+                    const extraCards = [];
+                    const travelBudget = Storage.getTravelBudget();
+                    if (travelBudget.enabled && (travelBudget.totalBudget > 0 || Storage.getTravelExpenses().length > 0)) {
+                        const travelRemaining = Budget.getTravelRemaining();
+                        extraCards.push({
+                            icon: 'fa-plane', label: `متبقي ميزانية السفر${travelBudget.tripName ? ' - ' + travelBudget.tripName : ''}`,
+                            value: Utils.formatCurrency(travelRemaining), cls: travelRemaining >= 0 ? 'positive' : 'negative'
+                        });
+                    }
+                    const tempBudget = Storage.getTempBudget();
+                    if (tempBudget.totalBudget > 0 || Storage.getTempExpenses().length > 0) {
+                        const tempRemaining = Budget.getTempRemaining();
+                        extraCards.push({
+                            icon: 'fa-umbrella-beach', label: 'متبقي الميزانية المؤقتة',
+                            value: Utils.formatCurrency(tempRemaining), cls: tempRemaining >= 0 ? 'positive' : 'negative'
+                        });
+                    }
+                    extraContainer.innerHTML = extraCards.map(c =>
+                        `<div class="dash-card ${c.cls}">
+                            <div class="card-icon"><i class="fas ${c.icon}"></i></div>
+                            <div class="card-label">${c.label}</div>
+                            <div class="card-value">${c.value}</div>
+                        </div>`
+                    ).join('');
+                }
 
                 const catMap = Budget.getByCategory(monthExp);
                 const catEntries = Object.entries(catMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
@@ -3182,6 +3553,125 @@
                         <div class="value">${monthExp.length > 0 ? Utils.formatCurrency(totalMonth / monthExp.length) : Utils.formatCurrency(0)}</div>
                     </div>
                 `;
+            },
+
+            renderTravel() {
+                const b = Storage.getTravelBudget();
+                const total = parseFloat(b.totalBudget) || 0;
+                const spent = Budget.getTravelTotal();
+                const remaining = total - spent;
+
+                const cardsContainer = Utils.id('travelDashboardCards');
+                const cards = [
+                    { icon: 'fa-wallet', label: 'إجمالي ميزانية السفر', value: Utils.formatCurrency(total), cls: 'accent' },
+                    { icon: 'fa-arrow-down', label: 'المصروف حتى الآن', value: Utils.formatCurrency(spent), cls: 'negative' },
+                    { icon: 'fa-arrow-up', label: 'المتبقي', value: Utils.formatCurrency(remaining), cls: remaining >= 0 ? 'positive' : 'negative' }
+                ];
+                cardsContainer.innerHTML = cards.map(c =>
+                    `<div class="dash-card ${c.cls}">
+                        <div class="card-icon"><i class="fas ${c.icon}"></i></div>
+                        <div class="card-label">${c.label}</div>
+                        <div class="card-value">${c.value}</div>
+                    </div>`
+                ).join('');
+
+                // فلتر البنود
+                const filter = Utils.id('travelCategoryFilter');
+                const currentFilter = filter.value || 'all';
+                filter.innerHTML = '<option value="all">جميع بنود السفر</option>' +
+                    Utils.travelCategories().map(c => `<option value="${c}" ${c === currentFilter ? 'selected' : ''}>${c}</option>`).join('');
+
+                let expenses = Storage.getTravelExpenses().sort((a, b2) => b2.date.localeCompare(a.date));
+                if (currentFilter !== 'all') expenses = expenses.filter(e => e.category === currentFilter);
+
+                const list = Utils.id('travelExpensesList');
+                if (expenses.length === 0) {
+                    list.innerHTML = `<div class="empty-state glass"><i class="fas fa-plane"></i><p>لا توجد مصروفات سفر بعد</p></div>`;
+                    return;
+                }
+                list.innerHTML = expenses.map(e =>
+                    `<div class="expense-item glass">
+                        <div class="expense-info">
+                            <div class="desc">${e.description || e.category}</div>
+                            <div class="meta">
+                                <span><i class="fas fa-tag"></i> ${e.category}</span>
+                                <span><i class="fas fa-calendar"></i> ${Utils.formatDate(e.date)}</span>
+                            </div>
+                        </div>
+                        <div class="expense-amount">${Utils.formatCurrency(e.amount)}</div>
+                        <div class="expense-actions">
+                            <button class="delete-btn" data-id="${e.id}"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>`
+                ).join('');
+                Utils.qsa('#travelExpensesList .delete-btn').forEach(btn => {
+                    Utils.on(btn, 'click', () => {
+                        if (confirm('هل تريد حذف هذا المصروف؟')) {
+                            Budget.deleteTravelExpense(btn.dataset.id);
+                            this.renderTravel();
+                            this.renderDashboard();
+                        }
+                    });
+                });
+            },
+
+            renderTemp() {
+                const b = Storage.getTempBudget();
+                const total = parseFloat(b.totalBudget) || 0;
+                const spent = Budget.getTempTotal();
+                const remaining = total - spent;
+
+                const cardsContainer = Utils.id('tempDashboardCards');
+                const cards = [
+                    { icon: 'fa-wallet', label: 'إجمالي الميزانية المؤقتة', value: Utils.formatCurrency(total), cls: 'accent' },
+                    { icon: 'fa-arrow-down', label: 'المصروف حتى الآن', value: Utils.formatCurrency(spent), cls: 'negative' },
+                    { icon: 'fa-arrow-up', label: 'المتبقي', value: Utils.formatCurrency(remaining), cls: remaining >= 0 ? 'positive' : 'negative' }
+                ];
+                cardsContainer.innerHTML = cards.map(c =>
+                    `<div class="dash-card ${c.cls}">
+                        <div class="card-icon"><i class="fas ${c.icon}"></i></div>
+                        <div class="card-label">${c.label}</div>
+                        <div class="card-value">${c.value}</div>
+                    </div>`
+                ).join('');
+
+                const filter = Utils.id('tempCategoryFilter');
+                const currentFilter = filter.value || 'all';
+                filter.innerHTML = '<option value="all">جميع البنود</option>' +
+                    Utils.tempCategories().map(c => `<option value="${c}" ${c === currentFilter ? 'selected' : ''}>${c}</option>`).join('');
+
+                let expenses = Storage.getTempExpenses().sort((a, b2) => b2.date.localeCompare(a.date));
+                if (currentFilter !== 'all') expenses = expenses.filter(e => e.category === currentFilter);
+
+                const list = Utils.id('tempExpensesList');
+                if (expenses.length === 0) {
+                    list.innerHTML = `<div class="empty-state glass"><i class="fas fa-umbrella-beach"></i><p>لا توجد مصروفات مؤقتة بعد</p></div>`;
+                    return;
+                }
+                list.innerHTML = expenses.map(e =>
+                    `<div class="expense-item glass">
+                        <div class="expense-info">
+                            <div class="desc">${e.description || e.category}</div>
+                            <div class="meta">
+                                <span><i class="fas fa-tag"></i> ${e.category}</span>
+                                <span><i class="fas fa-calendar"></i> ${Utils.formatDate(e.date)}</span>
+                            </div>
+                        </div>
+                        <div class="expense-amount">${Utils.formatCurrency(e.amount)}</div>
+                        <div class="expense-actions">
+                            <button class="delete-btn" data-id="${e.id}"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>`
+                ).join('');
+                Utils.qsa('#tempExpensesList .delete-btn').forEach(btn => {
+                    Utils.on(btn, 'click', () => {
+                        if (confirm('هل تريد حذف هذا المصروف؟')) {
+                            Budget.deleteTempExpense(btn.dataset.id);
+                            this.renderTemp();
+                            this.renderDashboard();
+                        }
+                    });
+                });
             },
 
             renderExpenses() {
