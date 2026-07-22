@@ -232,8 +232,21 @@
         .expense-detail-grid .detail-item .label{font-size:0.7rem;color:var(--text-muted);font-weight:500}
         .expense-detail-grid .detail-item .value{font-size:0.9rem;font-weight:600;color:var(--text-primary)}
         .detail-divider{grid-column:1/-1;border-top:1px solid var(--bg-glass-border);margin:4px 0}
+        .key-input-group{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+        .key-input-group .form-input{flex:1;min-width:120px}
+        .key-input-group .btn-sm{padding:6px 12px;min-height:36px;font-size:0.8rem}
+        .keys-container{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;padding:4px}
+        .key-item{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bg-glass);border-radius:var(--radius-sm);border:1px solid var(--bg-glass-border)}
+        .key-item .key-text{flex:1;font-family:var(--font-mono);font-size:0.75rem;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .key-item .key-index{font-size:0.7rem;color:var(--text-muted);font-weight:600;min-width:24px}
+        .key-item .key-status{font-size:0.7rem;padding:2px 8px;border-radius:10px}
+        .key-status.active{background:var(--success);color:#fff}
+        .key-status.inactive{background:var(--text-muted);color:#fff}
+        .key-item .btn-remove{background:none;border:none;color:var(--danger);cursor:pointer;padding:4px 8px;font-size:0.9rem}
+        .key-item .btn-remove:hover{opacity:0.7}
+        .key-counter{font-size:0.75rem;color:var(--text-muted);margin-top:4px}
         @media(max-width:992px){.main-content{padding:0 16px 20px}.dashboard-cards{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}.category-budgets-grid{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}.reports-grid{grid-template-columns:1fr}}
-        @media(max-width:768px){.app-header h1{font-size:1.35rem}.sidebar-brand{font-size:1.25rem}#sidebar{transform:translateX(100%);width:280px;border-left:none;border-right:1px solid var(--bg-glass-border)}#sidebar.open{transform:translateX(0)}.main-content{margin-right:0;padding:0 12px 16px}.sidebar-toggle{display:block}.dashboard-cards{grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}.dash-card{padding:14px 16px;min-height:80px}.dash-card .card-value{font-size:1.1rem}.dash-card .card-icon{font-size:1.2rem;width:32px;height:32px}.expenses-toolbar{flex-direction:column;align-items:stretch}.expenses-toolbar .btn-primary{margin-left:0;width:100%;justify-content:center}.expenses-filters{flex-direction:column}.search-input,.filter-select{width:100%;min-width:0}.expense-item{flex-direction:column;align-items:stretch;padding:12px}.expense-amount{align-self:flex-start}.expense-actions{justify-content:flex-end}.modal-content{padding:16px;margin:8px;max-height:98vh}.modal-header h2{font-size:1.1rem}.settings-container{padding:16px}.analytics-header{flex-direction:column;align-items:stretch}.question-chips{flex-direction:column}.chip{text-align:center;justify-content:center}.report-card canvas{max-height:160px}.method-tabs{flex-direction:column}.chat-container{height:calc(100vh - 130px)}.chat-input-area{flex-direction:column}.chat-input-area .btn-primary{width:100%}.expense-detail-grid{grid-template-columns:1fr}}
+        @media(max-width:768px){.app-header h1{font-size:1.35rem}.sidebar-brand{font-size:1.25rem}#sidebar{transform:translateX(100%);width:280px;border-left:none;border-right:1px solid var(--bg-glass-border)}#sidebar.open{transform:translateX(0)}.main-content{margin-right:0;padding:0 12px 16px}.sidebar-toggle{display:block}.dashboard-cards{grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}.dash-card{padding:14px 16px;min-height:80px}.dash-card .card-value{font-size:1.1rem}.dash-card .card-icon{font-size:1.2rem;width:32px;height:32px}.expenses-toolbar{flex-direction:column;align-items:stretch}.expenses-toolbar .btn-primary{margin-left:0;width:100%;justify-content:center}.expenses-filters{flex-direction:column}.search-input,.filter-select{width:100%;min-width:0}.expense-item{flex-direction:column;align-items:stretch;padding:12px}.expense-amount{align-self:flex-start}.expense-actions{justify-content:flex-end}.modal-content{padding:16px;margin:8px;max-height:98vh}.modal-header h2{font-size:1.1rem}.settings-container{padding:16px}.analytics-header{flex-direction:column;align-items:stretch}.question-chips{flex-direction:column}.chip{text-align:center;justify-content:center}.report-card canvas{max-height:160px}.method-tabs{flex-direction:column}.chat-container{height:calc(100vh - 130px)}.chat-input-area{flex-direction:column}.chat-input-area .btn-primary{width:100%}.expense-detail-grid{grid-template-columns:1fr}.key-input-group{flex-direction:column}}
         @media(max-width:400px){.dashboard-cards{grid-template-columns:1fr 1fr;gap:8px}.dash-card{padding:10px 12px;min-height:70px}.dash-card .card-value{font-size:0.95rem}.dash-card .card-icon{font-size:1rem;width:28px;height:28px}.app-header h1{font-size:1.1rem}.current-date{font-size:0.6rem;padding:4px 10px}.chat-toggle-btn{font-size:0.7rem;padding:6px 12px;min-height:36px}.btn-primary,.btn-secondary,.btn-danger{font-size:0.85rem;padding:10px 16px;min-height:42px}.modal-content{padding:12px}.expense-info .desc{font-size:0.85rem}.expense-amount{font-size:0.85rem;padding:2px 10px}.settings-container h2{font-size:1rem}.category-budget-item input{min-height:32px;font-size:0.8rem}}
     </style>
 </head>
@@ -445,13 +458,38 @@
         </div>
     </div>
 
+    <!-- Gemini Modal with 12 keys support -->
     <div id="geminiModal" class="modal">
         <div class="modal-content glass">
             <div class="modal-header"><h2>⚙️ إعدادات Gemini AI</h2><button class="modal-close" id="closeGeminiModal">&times;</button></div>
             <div class="modal-body">
                 <form id="geminiSettingsForm" class="settings-form">
-                    <div class="form-group"><label for="geminiModel">نوع النموذج (اختر أولاً)</label><select id="geminiModel" class="form-input"><option value="gemini-3.6-flash" selected>Gemini 3.6 Flash</option><option value="gemini-3.5-flash">Gemini 3.5 Flash</option><option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite</option><option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite</option><option value="gemini-2.5-flash">Gemini 2.5 Flash</option><option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite</option></select><small class="form-hint">حدد نسخة Gemini Flash قبل إدخال المفتاح.</small></div>
-                    <div class="form-group"><label for="geminiApiKey">مفتاح API الخاص بـ Gemini</label><div class="password-wrapper"><input type="password" id="geminiApiKey" class="form-input" placeholder="أدخل مفتاح Gemini API" /><button type="button" id="toggleGeminiKey" class="password-toggle"><i class="fas fa-eye"></i></button></div><small class="form-hint">يُستخدم في كل ميزات الذكاء الاصطناعي بالتطبيق. يحفظ محلياً.</small></div>
+                    <div class="form-group">
+                        <label for="geminiModel">نوع النموذج</label>
+                        <select id="geminiModel" class="form-input">
+                            <option value="gemini-3.6-flash" selected>Gemini 3.6 Flash</option>
+                            <option value="gemini-3.5-flash">Gemini 3.5 Flash</option>
+                            <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite</option>
+                            <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite</option>
+                            <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                            <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>مفاتيح Gemini API (حتى 12 مفتاح)</label>
+                        <div class="key-input-group">
+                            <input type="password" id="geminiKeyInput" class="form-input" placeholder="أدخل مفتاح Gemini" />
+                            <button type="button" id="addKeyBtn" class="btn-primary btn-sm">إضافة</button>
+                            <button type="button" id="toggleKeysVisibility" class="btn-secondary btn-sm">إظهار</button>
+                        </div>
+                        <div id="keysList" class="keys-container"></div>
+                        <div id="keyCounter" class="key-counter">0 / 12 مفتاح</div>
+                        <small class="form-hint">يتم توزيع الطلبات بشكل دائري على المفاتيح النشطة. يمكنك إضافة حتى 12 مفتاح.</small>
+                    </div>
+                    <div class="form-group">
+                        <label>المفتاح النشط حالياً</label>
+                        <div id="activeKeyDisplay" style="font-family:var(--font-mono);font-size:0.8rem;color:var(--text-secondary);padding:8px 12px;background:var(--bg-glass);border-radius:var(--radius-sm);border:1px solid var(--bg-glass-border);">لا يوجد مفتاح نشط</div>
+                    </div>
                     <button type="submit" class="btn-primary">حفظ الإعدادات</button>
                 </form>
                 <div id="geminiStatus" class="api-status" style="margin-top:12px;"></div>
@@ -550,10 +588,12 @@
             setExpenses(exp) { this.set('expenses', exp); },
             getSettings() { const def = { salary: 0, salaryDate: Utils.today(), savingsGoal: 0, categoryBudgets: {} }; return this.get('settings', def); },
             setSettings(s) { this.set('settings', s); },
-            getGeminiKey() { return this.get('gemini_key', ''); },
-            setGeminiKey(key) { this.set('gemini_key', key); },
+            getGeminiKeys() { return this.get('gemini_keys', []); },
+            setGeminiKeys(keys) { this.set('gemini_keys', keys); },
             getGeminiModel() { return this.get('gemini_model', 'gemini-3.6-flash'); },
             setGeminiModel(model) { this.set('gemini_model', model); },
+            getGeminiKeyIndex() { return this.get('gemini_key_index', 0); },
+            setGeminiKeyIndex(idx) { this.set('gemini_key_index', idx); },
             getCategories() { const s = this.getSettings(); const cats = s.categoryBudgets ? Object.keys(s.categoryBudgets) : []; if (cats.length === 0) return Utils.defaultCategories(); return cats; },
             getCategoryBudget(cat) { const s = this.getSettings(); return (s.categoryBudgets && s.categoryBudgets[cat]) || 0; },
             isFirstLaunch() { return !localStorage.getItem('ai_budget_launched'); },
@@ -649,39 +689,88 @@
         };
 
         // ============================================================
-        // GEMINI
+        // GEMINI - with key rotation support
         // ============================================================
         const Gemini = {
-            getApiKey() { return Storage.getGeminiKey(); },
+            getKeys() { return Storage.getGeminiKeys(); },
             getModel() { return Storage.getGeminiModel(); },
-            async sendMessage(messages, systemPrompt) {
-                const key = this.getApiKey();
-                if (!key) throw new Error('مفتاح Gemini غير موجود. أضفه من خلال النقر على "Gemini AI v1" في الفوتر.');
+            getCurrentKey() {
+                const keys = this.getKeys();
+                if (keys.length === 0) return null;
+                const index = Storage.getGeminiKeyIndex() % keys.length;
+                return keys[index];
+            },
+            rotateKey() {
+                const keys = this.getKeys();
+                if (keys.length === 0) return null;
+                const currentIndex = Storage.getGeminiKeyIndex();
+                const newIndex = (currentIndex + 1) % keys.length;
+                Storage.setGeminiKeyIndex(newIndex);
+                return keys[newIndex];
+            },
+
+            async sendRequest(prompt, isSystemPrompt = false) {
+                const key = this.getCurrentKey();
+                if (!key) throw new Error('لا يوجد مفتاح Gemini نشط. أضف مفتاحاً من خلال النقر على "Gemini AI v1" في الفوتر.');
+
                 const model = this.getModel();
                 const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + key;
-                const contents = [];
-                contents.push({ role: 'user', parts: [{ text: systemPrompt }] });
-                for (const msg of messages) { contents.push({ role: msg.role === 'user' ? 'user' : 'model', parts: [{ text: msg.content }] }); }
-                const payload = { contents, generationConfig: { temperature: 0.7, maxOutputTokens: 2048, topP: 0.95 } };
+
+                let contents;
+                if (isSystemPrompt) {
+                    contents = [{ role: 'user', parts: [{ text: prompt }] }];
+                } else {
+                    contents = [{ role: 'user', parts: [{ text: prompt }] }];
+                }
+
+                const payload = {
+                    contents: contents,
+                    generationConfig: { temperature: 0.5, maxOutputTokens: 2048, topP: 0.95 }
+                };
+
                 try {
-                    const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                    if (!response.ok) { const errData = await response.json(); throw new Error(errData.error?.message || 'خطأ في الاتصال بـ Gemini'); }
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.status === 429 || response.status === 403 || response.status === 401) {
+                        // Key limit reached or invalid, rotate and retry once
+                        const newKey = this.rotateKey();
+                        if (newKey) {
+                            const retryUrl = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + newKey;
+                            const retryResponse = await fetch(retryUrl, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(payload)
+                            });
+                            if (retryResponse.ok) {
+                                const data = await retryResponse.json();
+                                return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                            }
+                        }
+                        throw new Error('تم استنفاذ جميع المفاتيح أو بعضها غير صالح.');
+                    }
+
+                    if (!response.ok) {
+                        const errData = await response.json();
+                        throw new Error(errData.error?.message || 'خطأ في الاتصال بـ Gemini');
+                    }
+
                     const data = await response.json();
-                    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'عذراً، لم أحصل على رد.';
-                    return text;
-                } catch (e) { throw new Error(e.message || 'فشل الاتصال بـ Gemini'); }
+                    return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                } catch (e) {
+                    // Try to rotate on any error
+                    this.rotateKey();
+                    throw new Error(e.message || 'فشل الاتصال بـ Gemini');
+                }
             },
+
             async generate(prompt) {
-                const key = this.getApiKey();
-                if (!key) throw new Error('مفتاح Gemini غير موجود.');
-                const model = this.getModel();
-                const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + key;
-                const payload = { contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { temperature: 0.5, maxOutputTokens: 1024, topP: 0.95 } };
-                const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                if (!response.ok) { const errData = await response.json(); throw new Error(errData.error?.message || 'خطأ في الاتصال بـ Gemini'); }
-                const data = await response.json();
-                return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                return await this.sendRequest(prompt, true);
             },
+
             async parseExpense(text) {
                 const prompt = 'أنت مساعد ذكي لتحليل المصروفات. قم بتحليل النص التالي واستخرج المعلومات التالية:\n- المبلغ (رقم فقط، اجمع كل المبالغ المذكورة إن وجدت)\n- التصنيف (من القائمة: المواد الغذائية, البنزين, الكهرباء, الماء, الإنترنت, الإيجار, الأقساط, المطاعم, المقاهي, الصحة, الترفيه, التسوق, التعليم, السيارة, مصروف شخصي, أخرى)\n- التاجر (اسم المتجر أو الجهة)\n- التاريخ (صيغة YYYY-MM-DD، إذا لم يحدد فاستخدم اليوم)\n- وصف مختصر (اجمع الأصناف إن كانت متعددة)\nأعد النتيجة بصيغة JSON فقط بدون أي نص إضافي، مثل:\n{"amount": 52.50, "category": "المواد الغذائية", "merchant": "", "date": "2026-07-22", "description": "فطور + شاهي + عصائر"}\nالنص: ' + text;
                 try {
@@ -697,8 +786,10 @@
                     throw new Error(e.message || 'فشل تحليل النص');
                 }
             },
+
             localParse(text) { const amountMatch = text.match(/(\d+\.?\d*)\s*ريال/i); const amount = amountMatch ? parseFloat(amountMatch[1]) : 0; const categories = Utils.defaultCategories(); let category = 'أخرى'; for (const cat of categories) { if (text.includes(cat)) { category = cat; break; } } const merchantMatch = text.match(/(?:من|في|عند|من عند)\s*([^\d,،]+)/i); const merchant = merchantMatch ? merchantMatch[1].trim() : ''; return { amount, category, merchant, date: Utils.today(), description: text }; },
             localParseAdvanced(text) { const result = Budget.parseMultipleItems(text); if (result.total > 0) { const categories = Utils.defaultCategories(); let category = 'أخرى'; for (const cat of categories) { if (text.includes(cat)) { category = cat; break; } } const merchantMatch = text.match(/(?:من|في|عند|من عند)\s*([^\d,،]+)/i); const merchant = merchantMatch ? merchantMatch[1].trim() : ''; return { amount: result.total, category, merchant, date: Utils.today(), description: result.description || text }; } return null; },
+
             async runAnalytics(expenses, settings) {
                 const totalExpenses = Budget.getTotal(expenses);
                 const remaining = (parseFloat(settings.salary) || 0) - totalExpenses;
@@ -712,6 +803,7 @@
                 const prompt = 'أنت مستشار مالي خبير. بناءً على البيانات التالية، قدم تحليلاً ذكياً متقدماً:\nالراتب الشهري: ' + settings.salary + ' ريال\nإجمالي المصروفات هذا الشهر: ' + totalExpenses.toFixed(2) + ' ريال\nالمتبقي: ' + remaining.toFixed(2) + ' ريال\nهدف الادخار: ' + (settings.savingsGoal || 0) + ' ريال\nتفاصيل المصروفات حسب التصنيف:\n' + catSummary + '\nالتحليلات المتقدمة:\n- متوسط الإنفاق اليومي: ' + forecast.dailyAvg.toFixed(2) + ' ريال\n- التوقع للشهر القادم: ' + forecast.forecast.toFixed(2) + ' ريال\n- أعلى 3 تصنيفات إنفاق: ' + patterns.biggestSpenders.map(s => s.category + ' (' + s.percentage.toFixed(0) + '%)').join(', ') + '\n\nالمطلوب:\n1. تحليل عميق للأنماط المالية\n2. اقتراحات ذكية لتقليل المصروفات بناءً على الأنماط المكتشفة\n3. تحذيرات فورية للتجاوزات\n4. خطة ادخار مقترحة للشهر القادم\n5. توقع مالي شامل\nكن مختصراً ومفيداً، أجب باللغة العربية.';
                 return await this.generate(prompt);
             },
+
             async askQuestion(question, expenses, settings) {
                 const totalExpenses = Budget.getTotal(expenses);
                 const remaining = (parseFloat(settings.salary) || 0) - totalExpenses;
@@ -722,6 +814,7 @@
                 const prompt = 'أنت مستشار مالي خبير. أجب على السؤال التالي بناءً على البيانات والتحليلات المتقدمة:\nالراتب: ' + settings.salary + ' ريال\nالمصروفات الكلية: ' + totalExpenses.toFixed(2) + ' ريال\nالمتبقي: ' + remaining.toFixed(2) + ' ريال\nالمصروفات حسب التصنيف:\n' + catStr + '\nمتوسط الإنفاق اليومي: ' + forecast.dailyAvg.toFixed(2) + ' ريال\nالتوقع للشهر القادم: ' + forecast.forecast.toFixed(2) + ' ريال\n\nالسؤال: ' + question + '\n\nأجب بذكاء، مع مراعاة السياق الكامل للبيانات، وقدم نصائح عملية قابلة للتنفيذ.\nأجب باللغة العربية.';
                 return await this.generate(prompt);
             },
+
             async answerFinancialQuery(query, expenses, settings) {
                 const today = Utils.today();
                 const todayExpenses = Budget.getTodayExpenses();
@@ -742,6 +835,7 @@
                 }
                 return null;
             },
+
             async thinkAndDecide(query, context) {
                 const directAnswer = await this.answerFinancialQuery(query, context.expenses || [], context.settings || {});
                 if (directAnswer) { return directAnswer; }
@@ -1307,36 +1401,118 @@
                 const trigger = Utils.id('geminiSecretTrigger');
                 const closeBtn = Utils.id('closeGeminiModal');
                 const form = Utils.id('geminiSettingsForm');
-                const keyInput = Utils.id('geminiApiKey');
-                const toggleBtn = Utils.id('toggleGeminiKey');
+                const keyInput = Utils.id('geminiKeyInput');
+                const addBtn = Utils.id('addKeyBtn');
+                const toggleVisBtn = Utils.id('toggleKeysVisibility');
+                const keysList = Utils.id('keysList');
+                const keyCounter = Utils.id('keyCounter');
+                const activeDisplay = Utils.id('activeKeyDisplay');
                 const status = Utils.id('geminiStatus');
                 const modelSelect = Utils.id('geminiModel');
+                let showKeys = false;
+
+                const renderKeys = () => {
+                    const keys = Storage.getGeminiKeys();
+                    const currentIndex = Storage.getGeminiKeyIndex();
+                    const activeKey = keys.length > 0 ? keys[currentIndex % keys.length] : null;
+
+                    keysList.innerHTML = keys.map((k, i) => {
+                        const isActive = i === (currentIndex % keys.length);
+                        const displayKey = showKeys ? k : k.substring(0, 8) + '••••••••' + k.substring(k.length - 4);
+                        return '<div class="key-item"><span class="key-index">#' + (i + 1) + '</span><span class="key-text">' + displayKey + '</span><span class="key-status ' + (isActive ? 'active' : 'inactive') + '">' + (isActive ? 'نشط' : '') + '</span><button class="btn-remove" data-index="' + i + '"><i class="fas fa-times"></i></button></div>';
+                    }).join('');
+
+                    keyCounter.textContent = keys.length + ' / 12 مفتاح';
+                    activeDisplay.textContent = activeKey ? (showKeys ? activeKey : activeKey.substring(0, 8) + '••••••••' + activeKey.substring(activeKey.length - 4)) : 'لا يوجد مفتاح نشط';
+
+                    // Attach remove handlers
+                    Utils.qsa('.btn-remove').forEach(btn => {
+                        Utils.on(btn, 'click', () => {
+                            const idx = parseInt(btn.dataset.index);
+                            const keysArr = Storage.getGeminiKeys();
+                            keysArr.splice(idx, 1);
+                            Storage.setGeminiKeys(keysArr);
+                            if (Storage.getGeminiKeyIndex() >= keysArr.length && keysArr.length > 0) {
+                                Storage.setGeminiKeyIndex(0);
+                            } else if (keysArr.length === 0) {
+                                Storage.setGeminiKeyIndex(0);
+                            }
+                            renderKeys();
+                            updateStatus();
+                        });
+                    });
+                };
+
+                const updateStatus = () => {
+                    const keys = Storage.getGeminiKeys();
+                    if (keys.length === 0) {
+                        status.className = 'api-status error';
+                        status.textContent = '⚠️ لا توجد مفاتيح Gemini. أضف مفتاحاً واحداً على الأقل.';
+                    } else {
+                        status.className = 'api-status success';
+                        status.textContent = '✅ ' + keys.length + ' مفتاح محفوظ، يتم التوزيع بشكل دائري.';
+                    }
+                };
+
                 Utils.on(trigger, 'click', () => {
                     modal.classList.add('open');
-                    const savedKey = Storage.getGeminiKey();
-                    if (savedKey) { keyInput.value = savedKey;
-                        status.className = 'api-status success';
-                        status.textContent = '✅ مفتاح Gemini محفوظ'; } else { status.className = 'api-status error';
-                        status.textContent = '⚠️ لم يتم إضافة مفتاح Gemini بعد'; }
                     const savedModel = Storage.getGeminiModel();
                     modelSelect.value = savedModel || 'gemini-3.6-flash';
+                    renderKeys();
+                    updateStatus();
                 });
+
                 Utils.on(closeBtn, 'click', () => { modal.classList.remove('open'); });
                 modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
-                Utils.on(toggleBtn, 'click', () => { const type = keyInput.type === 'password' ? 'text' : 'password';
-                    keyInput.type = type;
-                    toggleBtn.querySelector('i').className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash'; });
+
+                Utils.on(addBtn, 'click', () => {
+                    const key = keyInput.value.trim();
+                    if (!key) { status.className = 'api-status error';
+                        status.textContent = '⚠️ الرجاء إدخال مفتاح صالح.'; return; }
+                    const keys = Storage.getGeminiKeys();
+                    if (keys.length >= 12) { status.className = 'api-status error';
+                        status.textContent = '⚠️ تم الوصول للحد الأقصى 12 مفتاح.'; return; }
+                    keys.push(key);
+                    Storage.setGeminiKeys(keys);
+                    keyInput.value = '';
+                    renderKeys();
+                    updateStatus();
+                    status.className = 'api-status success';
+                    status.textContent = '✅ تمت إضافة المفتاح بنجاح. (' + keys.length + '/12)';
+                });
+
+                Utils.on(toggleVisBtn, 'click', () => {
+                    showKeys = !showKeys;
+                    toggleVisBtn.textContent = showKeys ? 'إخفاء' : 'إظهار';
+                    renderKeys();
+                });
+
                 Utils.on(form, 'submit', (e) => {
                     e.preventDefault();
-                    const key = keyInput.value.trim();
                     const model = modelSelect.value;
-                    if (!key) { status.className = 'api-status error';
-                        status.textContent = '⚠️ الرجاء إدخال مفتاح Gemini'; return; }
-                    Storage.setGeminiKey(key);
                     Storage.setGeminiModel(model);
+                    const keys = Storage.getGeminiKeys();
+                    if (keys.length === 0) {
+                        status.className = 'api-status error';
+                        status.textContent = '⚠️ يجب إضافة مفتاح واحد على الأقل.';
+                        return;
+                    }
+                    // Reset index to ensure valid
+                    if (Storage.getGeminiKeyIndex() >= keys.length) {
+                        Storage.setGeminiKeyIndex(0);
+                    }
                     status.className = 'api-status success';
-                    status.textContent = '✅ تم حفظ مفتاح ونموذج Gemini بنجاح';
+                    status.textContent = '✅ تم حفظ الإعدادات بنجاح. (' + keys.length + ' مفاتيح، النموذج: ' + model + ')';
+                    renderKeys();
                     setTimeout(() => modal.classList.remove('open'), 1200);
+                });
+
+                // Enter key on input
+                Utils.on(keyInput, 'keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addBtn.click();
+                    }
                 });
             },
             setupChat() {
