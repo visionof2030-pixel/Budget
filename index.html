@@ -377,6 +377,7 @@
             min-height: 100px;
             display: flex;
             flex-direction: column;
+            cursor: pointer;
         }
         .dash-card:hover {
             transform: translateY(-3px);
@@ -1185,6 +1186,39 @@
             margin-bottom: 6px;
         }
 
+        /* ===== EXPENSE DETAIL MODAL ===== */
+        .expense-detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 16px;
+            background: var(--bg-glass);
+            padding: 16px;
+            border-radius: var(--radius-sm);
+            margin-top: 8px;
+        }
+        .expense-detail-grid .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--bg-glass-border);
+        }
+        .expense-detail-grid .detail-item .label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .expense-detail-grid .detail-item .value {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .detail-divider {
+            grid-column: 1 / -1;
+            border-top: 1px solid var(--bg-glass-border);
+            margin: 4px 0;
+        }
+
         /* ===== RESPONSIVE ===== */
         @media (max-width: 992px) {
             .main-content {
@@ -1306,6 +1340,9 @@
             }
             .chat-input-area .btn-primary {
                 width: 100%;
+            }
+            .expense-detail-grid {
+                grid-template-columns: 1fr;
             }
         }
         @media (max-width: 400px) {
@@ -1628,7 +1665,7 @@
     </div>
 
     <!-- ============================================================
-    MODAL: ADD EXPENSE (نفس السابق)
+    MODAL: ADD EXPENSE
     ============================================================ -->
     <div id="expenseModal" class="modal">
         <div class="modal-content glass">
@@ -1732,6 +1769,27 @@
                 <div class="modal-actions">
                     <button class="btn-secondary" id="cancelQuickExpenseBtn">إلغاء</button>
                     <button class="btn-primary" id="saveQuickExpenseBtn">حفظ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    MODAL: EXPENSE DETAIL
+    ============================================================ -->
+    <div id="expenseDetailModal" class="modal">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <h2 id="detailModalTitle">تفاصيل المصروف</h2>
+                <button class="modal-close" id="closeDetailModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="expenseDetailContent"></div>
+                <div class="modal-actions">
+                    <button class="btn-secondary" id="closeDetailBtn">إغلاق</button>
+                    <button class="btn-danger" id="deleteDetailBtn" style="background:#B3452A;color:#fff;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:700;min-height:48px;">
+                        <i class="fas fa-trash"></i> حذف
+                    </button>
                 </div>
             </div>
         </div>
@@ -1851,13 +1909,11 @@
                 'الإيجار', 'الأقساط', 'المطاعم', 'المقاهي', 'الصحة',
                 'الترفيه', 'التسوق', 'التعليم', 'السيارة', 'مصروف شخصي', 'أخرى'
             ],
-            // بنود ميزانية السفر
             travelCategories: () => [
                 'تذاكر الطيران', 'الفنادق والسكن', 'المواصلات الداخلية',
                 'الإنترنت والاتصالات', 'الفعاليات والأنشطة', 'الطعام والمطاعم',
                 'التسوق والهدايا', 'التأشيرة والتأمين', 'الطوارئ', 'أخرى'
             ],
-            // بنود الميزانية المؤقتة
             tempCategories: () => [
                 'كشتة', 'قطة', 'واجب', 'فزعة', 'صدقة', 'أخرى'
             ]
@@ -1865,8 +1921,6 @@
 
         /* ============================================================
            WORLDTIME.JS - تاريخ ميلادي حقيقي عبر API خارجي
-           يستخدمه الذكاء الاصطناعي وكل حسابات التواريخ في التطبيق
-           بدلاً من الاعتماد على ساعة الجهاز فقط
            ============================================================ */
         const WorldTime = {
             offsetMs: 0,
@@ -1919,7 +1973,6 @@
                 return this.synced;
             },
 
-            // الوقت الحقيقي الحالي (تاريخ ميلادي دقيق)
             now() {
                 return new Date(Date.now() + this.offsetMs);
             },
@@ -1958,7 +2011,6 @@
                 return this.get('settings', def);
             },
             setSettings(s) { this.set('settings', s); },
-            // Gemini specific (المصدر الوحيد للذكاء الاصطناعي)
             getGeminiKey() { return this.get('gemini_key', ''); },
             setGeminiKey(key) { this.set('gemini_key', key); },
             getGeminiModel() { return this.get('gemini_model', 'gemini-3.6-flash'); },
@@ -1979,8 +2031,6 @@
             markLaunched() {
                 localStorage.setItem('ai_budget_launched', 'true');
             },
-
-            // ===== ميزانية السفر (منفصلة تماماً عن الميزانية الأساسية) =====
             getTravelBudget() {
                 const def = { enabled: false, tripName: '', totalBudget: 0, categoryBudgets: {} };
                 return this.get('travel_budget', def);
@@ -1988,8 +2038,6 @@
             setTravelBudget(v) { this.set('travel_budget', v); },
             getTravelExpenses() { return this.get('travel_expenses', []); },
             setTravelExpenses(exp) { this.set('travel_expenses', exp); },
-
-            // ===== الميزانية المؤقتة (كشتة، قطة، واجب، فزعة، صدقة...) - منفصلة عن الأساسية =====
             getTempBudget() {
                 const def = { totalBudget: 0, categoryBudgets: {} };
                 return this.get('temp_budget', def);
@@ -2000,11 +2048,12 @@
         };
 
         /* ============================================================
-           BUDGET.JS (نفس السابق)
+           BUDGET.JS - مع دوال متقدمة للذكاء الاصطناعي
            ============================================================ */
         const Budget = {
             getExpenses() { return Storage.getExpenses(); },
             saveExpenses(exp) { Storage.setExpenses(exp); },
+
             addExpense(data) {
                 const exp = this.getExpenses();
                 const entry = {
@@ -2023,30 +2072,41 @@
                 this.saveExpenses(exp);
                 return entry;
             },
+
             deleteExpense(id) {
                 let exp = this.getExpenses();
                 exp = exp.filter(e => e.id !== id);
                 this.saveExpenses(exp);
             },
+
+            getExpense(id) {
+                return this.getExpenses().find(e => e.id === id);
+            },
+
             getExpensesByDateRange(start, end) {
                 const exp = this.getExpenses();
                 return exp.filter(e => e.date >= start && e.date <= end);
             },
+
             getTodayExpenses() {
                 const d = Utils.today();
                 return this.getExpenses().filter(e => e.date === d);
             },
+
             getWeekExpenses() {
                 const w = Utils.getWeekRange();
                 return this.getExpensesByDateRange(w.start, w.end);
             },
+
             getMonthExpenses() {
                 const m = Utils.getMonthRange();
                 return this.getExpensesByDateRange(m.start, m.end);
             },
+
             getTotal(expenses) {
                 return expenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
             },
+
             getByCategory(expenses) {
                 const map = {};
                 expenses.forEach(e => {
@@ -2055,6 +2115,7 @@
                 });
                 return map;
             },
+
             getDailyTotals(expenses) {
                 const map = {};
                 expenses.forEach(e => {
@@ -2062,6 +2123,7 @@
                 });
                 return map;
             },
+
             getMonthlyTotals(expenses) {
                 const map = {};
                 expenses.forEach(e => {
@@ -2070,11 +2132,13 @@
                 });
                 return map;
             },
+
             getRemaining(expenses) {
                 const settings = Storage.getSettings();
                 const total = this.getTotal(expenses);
                 return (parseFloat(settings.salary) || 0) - total;
             },
+
             getDailyBudget() {
                 const settings = Storage.getSettings();
                 const salary = parseFloat(settings.salary) || 0;
@@ -2085,9 +2149,9 @@
                 ).getDate();
                 return daysInMonth > 0 ? salary / daysInMonth : 0;
             },
+
             getWeeklyBudget() { return this.getDailyBudget() * 7; },
 
-            // ----- عد تنازلي حقيقي لنزول الراتب القادم (يعتمد على WorldTime) -----
             getNextSalaryDate() {
                 const settings = Storage.getSettings();
                 if (!settings.salaryDate) return null;
@@ -2102,6 +2166,7 @@
                 }
                 return candidate;
             },
+
             getDaysUntilSalary() {
                 const next = this.getNextSalaryDate();
                 if (!next) return null;
@@ -2110,7 +2175,128 @@
                 return Math.round((next - today0) / 86400000);
             },
 
-            // ===== ميزانية السفر (حسابها منفصل تماماً عن الأساسية) =====
+            // ===== دوال متقدمة للذكاء الاصطناعي =====
+
+            // تحديث ميزانية اليوم (تؤثر على ميزانية الأسبوع والشهر)
+            setDailyBudget(amount) {
+                const settings = Storage.getSettings();
+                const daysInMonth = new Date(WorldTime.now().getFullYear(), WorldTime.now().getMonth() + 1, 0).getDate();
+                const newSalary = amount * daysInMonth;
+                settings.salary = parseFloat(newSalary) || 0;
+                Storage.setSettings(settings);
+                return newSalary;
+            },
+
+            // تحديث ميزانية الأسبوع (تؤثر على اليوم والشهر)
+            setWeeklyBudget(amount) {
+                const daily = amount / 7;
+                return this.setDailyBudget(daily);
+            },
+
+            // تحديث ميزانية الشهر (تؤثر على اليوم والأسبوع)
+            setMonthlyBudget(amount) {
+                const settings = Storage.getSettings();
+                settings.salary = parseFloat(amount) || 0;
+                Storage.setSettings(settings);
+                return amount;
+            },
+
+            // إعادة توزيع الميزانية حسب أولويات المستخدم
+            rebalanceBudget(priorities) {
+                const settings = Storage.getSettings();
+                const total = parseFloat(settings.salary) || 0;
+                const categoryBudgets = settings.categoryBudgets || {};
+
+                // حساب الوزن الإجمالي للأولويات
+                let totalWeight = 0;
+                const weights = {};
+                for (const [cat, weight] of Object.entries(priorities)) {
+                    weights[cat] = parseFloat(weight) || 0;
+                    totalWeight += weights[cat];
+                }
+
+                if (totalWeight === 0) return;
+
+                // توزيع الميزانية حسب الأوزان
+                for (const [cat, weight] of Object.entries(weights)) {
+                    categoryBudgets[cat] = (weight / totalWeight) * total;
+                }
+
+                settings.categoryBudgets = categoryBudgets;
+                Storage.setSettings(settings);
+                return categoryBudgets;
+            },
+
+            // التنبؤ بالمصروفات بناءً على البيانات السابقة
+            forecastExpenses(daysAhead) {
+                const expenses = this.getExpenses();
+                if (expenses.length === 0) return { dailyAvg: 0, forecast: 0 };
+
+                // حساب متوسط المصروفات اليومي
+                const sorted = [...expenses].sort((a, b) => a.date.localeCompare(b.date));
+                const firstDate = new Date(sorted[0].date);
+                const lastDate = new Date(sorted[sorted.length - 1].date);
+                const daysDiff = Math.max(1, Math.round((lastDate - firstDate) / 86400000));
+                const total = this.getTotal(expenses);
+                const dailyAvg = total / daysDiff;
+
+                return {
+                    dailyAvg,
+                    forecast: dailyAvg * daysAhead,
+                    totalExpenses: total,
+                    daysCovered: daysDiff
+                };
+            },
+
+            // تحليل أنماط الإنفاق
+            analyzeSpendingPatterns() {
+                const monthExp = this.getMonthExpenses();
+                const catMap = this.getByCategory(monthExp);
+                const total = this.getTotal(monthExp);
+
+                const patterns = {
+                    categories: [],
+                    biggestSpenders: [],
+                    recommendations: []
+                };
+
+                // ترتيب التصنيفات حسب الإنفاق
+                const sortedCats = Object.entries(catMap).sort((a, b) => b[1] - a[1]);
+                patterns.categories = sortedCats;
+
+                // أعلى 3 تصنيفات إنفاقاً
+                patterns.biggestSpenders = sortedCats.slice(0, 3).map(([cat, amount]) => ({
+                    category: cat,
+                    amount,
+                    percentage: total > 0 ? (amount / total) * 100 : 0
+                }));
+
+                // توصيات تلقائية
+                const settings = Storage.getSettings();
+                const salary = parseFloat(settings.salary) || 0;
+
+                if (total > salary * 0.8) {
+                    patterns.recommendations.push('⚠️ أنت تنفق أكثر من 80% من راتبك. حاول تقليل المصروفات غير الضرورية.');
+                }
+
+                for (const [cat, amount] of sortedCats) {
+                    const budget = Storage.getCategoryBudget(cat);
+                    if (budget > 0 && amount > budget) {
+                        patterns.recommendations.push(`⚠️ تجاوزت ميزانية "${cat}" بمبلغ ${(amount - budget).toFixed(2)} ريال.`);
+                    }
+                }
+
+                if (patterns.biggestSpenders.length > 0) {
+                    const top = patterns.biggestSpenders[0];
+                    patterns.recommendations.push(
+                        `📊 أكبر تصنيف إنفاق هو "${top.category}" بنسبة ${top.percentage.toFixed(0)}% من إجمالي المصروفات.`
+                    );
+                }
+
+                return patterns;
+            },
+
+            // ===== ميزانية السفر =====
             addTravelExpense(data) {
                 const exp = Storage.getTravelExpenses();
                 const entry = {
@@ -2126,11 +2312,13 @@
                 Storage.setTravelExpenses(exp);
                 return entry;
             },
+
             deleteTravelExpense(id) {
                 let exp = Storage.getTravelExpenses();
                 exp = exp.filter(e => e.id !== id);
                 Storage.setTravelExpenses(exp);
             },
+
             getTravelTotal() { return this.getTotal(Storage.getTravelExpenses()); },
             getTravelByCategory() { return this.getByCategory(Storage.getTravelExpenses()); },
             getTravelRemaining() {
@@ -2138,7 +2326,7 @@
                 return (parseFloat(b.totalBudget) || 0) - this.getTravelTotal();
             },
 
-            // ===== الميزانية المؤقتة (حسابها منفصل تماماً عن الأساسية) =====
+            // ===== الميزانية المؤقتة =====
             addTempExpense(data) {
                 const exp = Storage.getTempExpenses();
                 const entry = {
@@ -2154,11 +2342,13 @@
                 Storage.setTempExpenses(exp);
                 return entry;
             },
+
             deleteTempExpense(id) {
                 let exp = Storage.getTempExpenses();
                 exp = exp.filter(e => e.id !== id);
                 Storage.setTempExpenses(exp);
             },
+
             getTempTotal() { return this.getTotal(Storage.getTempExpenses()); },
             getTempByCategory() { return this.getByCategory(Storage.getTempExpenses()); },
             getTempRemaining() {
@@ -2176,7 +2366,7 @@
         };
 
         /* ============================================================
-           GEMINI.JS - مساعد Gemini (المصدر الوحيد للذكاء الاصطناعي بالتطبيق)
+           GEMINI.JS - مساعد Gemini مع دوال متقدمة للتفكير
            ============================================================ */
         const Gemini = {
             getApiKey() { return Storage.getGeminiKey(); },
@@ -2188,16 +2378,13 @@
 
                 const model = this.getModel();
                 const url =
-                `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+                    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
 
-                // بناء المحتوى: system prompt + تاريخ المحادثة
                 const contents = [];
-                // نضع system prompt كأول جزء
                 contents.push({
                     role: 'user',
                     parts: [{ text: systemPrompt }]
                 });
-                // ثم نضيف المحادثة السابقة (messages) - نحرص على أن تكون roles صحيحة
                 for (const msg of messages) {
                     contents.push({
                         role: msg.role === 'user' ? 'user' : 'model',
@@ -2209,7 +2396,7 @@
                     contents: contents,
                     generationConfig: {
                         temperature: 0.7,
-                        maxOutputTokens: 1024,
+                        maxOutputTokens: 2048,
                         topP: 0.95,
                     }
                 };
@@ -2227,7 +2414,6 @@
                     }
 
                     const data = await response.json();
-                    // استخراج النص
                     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'عذراً، لم أحصل على رد.';
                     return text;
                 } catch (e) {
@@ -2235,16 +2421,15 @@
                 }
             },
 
-            // ----- طلب نصي مباشر (سؤال واحد بدون محادثة) -----
             async generate(prompt) {
                 const key = this.getApiKey();
                 if (!key) throw new Error('مفتاح Gemini غير موجود.');
                 const model = this.getModel();
                 const url =
-                `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+                    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
                 const payload = {
                     contents: [{ role: 'user', parts: [{ text: prompt }] }],
-                    generationConfig: { temperature: 0.5, maxOutputTokens: 800, topP: 0.95 }
+                    generationConfig: { temperature: 0.5, maxOutputTokens: 1024, topP: 0.95 }
                 };
                 const response = await fetch(url, {
                     method: 'POST',
@@ -2259,7 +2444,6 @@
                 return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
             },
 
-            // ----- تحليل نص مصروف تلقائياً -----
             async parseExpense(text) {
                 const prompt =
                     `أنت مساعد ذكي لتحليل المصروفات. قم بتحليل النص التالي واستخرج المعلومات التالية:
@@ -2286,6 +2470,7 @@
                     throw new Error(e.message || 'فشل تحليل النص');
                 }
             },
+
             localParse(text) {
                 const amountMatch = text.match(/(\d+\.?\d*)\s*ريال/i);
                 const amount = amountMatch ? parseFloat(amountMatch[1]) : 0;
@@ -2297,7 +2482,6 @@
                 return { amount, category, merchant, date: Utils.today() };
             },
 
-            // ----- تحليل مالي شامل -----
             async runAnalytics(expenses, settings) {
                 const totalExpenses = Budget.getTotal(expenses);
                 const remaining = (parseFloat(settings.salary) || 0) - totalExpenses;
@@ -2309,25 +2493,36 @@
                     const pct = budget > 0 ? ((spent / budget) * 100).toFixed(0) : 0;
                     catSummary += `- ${cat}: صرف ${spent.toFixed(2)} ريال، الميزانية ${budget.toFixed(2)} ريال (${pct}%)\n`;
                 }
+
+                // تحليل الأنماط والتوقعات
+                const forecast = Budget.forecastExpenses(30);
+                const patterns = Budget.analyzeSpendingPatterns();
+
                 const prompt =
-                    `أنت مستشار مالي خبير. بناءً على البيانات التالية، قدم تحليلاً ذكياً:
+                    `أنت مستشار مالي خبير. بناءً على البيانات التالية، قدم تحليلاً ذكياً متقدماً:
                 الراتب الشهري: ${settings.salary} ريال
                 إجمالي المصروفات هذا الشهر: ${totalExpenses.toFixed(2)} ريال
                 المتبقي: ${remaining.toFixed(2)} ريال
                 هدف الادخار: ${settings.savingsGoal || 0} ريال
                 تفاصيل المصروفات حسب التصنيف:
                 ${catSummary}
+
+                التحليلات المتقدمة:
+                - متوسط الإنفاق اليومي: ${forecast.dailyAvg.toFixed(2)} ريال
+                - التوقع للشهر القادم: ${forecast.forecast.toFixed(2)} ريال
+                - أعلى 3 تصنيفات إنفاق: ${patterns.biggestSpenders.map(s => `${s.category} (${s.percentage.toFixed(0)}%)`).join(', ')}
+
                 المطلوب:
-                1. اقتراحات لتقليل المصروفات
-                2. تحذيرات إذا تجاوزت ميزانية أي تصنيف
-                3. نصائح عامة
-                4. توقع نهاية الشهر
-                5. أفضل ميزانية مقترحة للشهر القادم
+                1. تحليل عميق للأنماط المالية
+                2. اقتراحات ذكية لتقليل المصروفات بناءً على الأنماط المكتشفة
+                3. تحذيرات فورية للتجاوزات
+                4. خطة ادخار مقترحة للشهر القادم
+                5. توقع مالي شامل
                 كن مختصراً ومفيداً، أجب باللغة العربية.`;
+
                 return await this.generate(prompt);
             },
 
-            // ----- الإجابة على سؤال سريع -----
             async askQuestion(question, expenses, settings) {
                 const totalExpenses = Budget.getTotal(expenses);
                 const remaining = (parseFloat(settings.salary) || 0) - totalExpenses;
@@ -2336,28 +2531,56 @@
                 for (const [cat, spent] of Object.entries(catMap)) {
                     catStr += `- ${cat}: ${spent.toFixed(2)} ريال\n`;
                 }
+
+                const forecast = Budget.forecastExpenses(30);
+
                 const prompt =
-                    `أنت مستشار مالي. أجب على السؤال التالي بناءً على البيانات:
+                    `أنت مستشار مالي خبير. أجب على السؤال التالي بناءً على البيانات والتحليلات المتقدمة:
                 الراتب: ${settings.salary} ريال
                 المصروفات الكلية: ${totalExpenses.toFixed(2)} ريال
                 المتبقي: ${remaining.toFixed(2)} ريال
                 المصروفات حسب التصنيف:
                 ${catStr}
+                متوسط الإنفاق اليومي: ${forecast.dailyAvg.toFixed(2)} ريال
+                التوقع للشهر القادم: ${forecast.forecast.toFixed(2)} ريال
+
                 السؤال: ${question}
-                أجب باختصار وبشكل مفيد باللغة العربية.`;
+
+                أجب بذكاء، مع مراعاة السياق الكامل للبيانات، وقدم نصائح عملية قابلة للتنفيذ.
+                أجب باللغة العربية.`;
+
+                return await this.generate(prompt);
+            },
+
+            // ===== دالة متقدمة للتفكير واتخاذ القرارات =====
+            async thinkAndDecide(query, context) {
+                const prompt =
+                    `أنت Budget AI Agent، وكيل ذكاء اصطناعي متخصص في الإدارة المالية.
+                لديك صلاحيات كاملة على التطبيق. بناءً على طلب المستخدم التالي، قرر الإجراءات المناسبة.
+
+                السياق:
+                ${JSON.stringify(context, null, 2)}
+
+                طلب المستخدم: ${query}
+
+                قم بتحليل الطلب وقرر:
+                1. ما هو الإجراء المطلوب (إضافة، حذف، تعديل، تحديث، تحليل، توقع، إعادة توزيع)
+                2. ما هي البيانات المطلوبة
+                3. ما هو الرد المناسب
+
+                أعد رداً مقنعاً يشرح ما ستفعله، مع كتلة json-actions في النهاية إذا كان هناك إجراءات فعلية.
+
+                تذكر: يمكنك تنفيذ أي إجراء على التطبيق بما في ذلك تغيير ميزانية اليوم والأسبوع والشهر،
+                إعادة توزيع الميزانية حسب الأولويات، تحليل الأنماط، التوقعات، وغيرها.`;
+
                 return await this.generate(prompt);
             }
         };
 
         /* ============================================================
-           COMMANDS.JS - تحكم كامل للذكاء الاصطناعي عبر أوامر المحادثة
-           يقرأ الذكاء الاصطناعي طلب المستخدم في الدردشة، ويرفق في رده كتلة
-           JSON مخفية من نوع "إجراءات" (actions)، فيقوم هذا الوحدة بتنفيذها
-           فعلياً على كل قوائم التطبيق (المصروفات، ميزانية السفر، الميزانية
-           المؤقتة، الإعدادات) ثم يحدّث كل الواجهات المرتبطة تلقائياً.
+           COMMANDS.JS - تحكم كامل للذكاء الاصطناعي مع دوال متقدمة
            ============================================================ */
         const Commands = {
-            // يبحث في رد الذكاء الاصطناعي عن كتلة الإجراءات ```json-actions ... ```
             extract(text) {
                 if (!text) return { cleanText: text, actions: [] };
                 const match = text.match(/```json-actions\s*([\s\S]*?)```/i);
@@ -2373,7 +2596,6 @@
                 return { cleanText, actions };
             },
 
-            // ينفذ قائمة الإجراءات فعلياً على التخزين المحلي، ويعيد ملخصاً نصياً بما تم
             execute(actions) {
                 const log = [];
                 if (!Array.isArray(actions) || actions.length === 0) return log;
@@ -2429,6 +2651,26 @@
                                 if (!(a.name in s.categoryBudgets)) s.categoryBudgets[a.name] = parseFloat(a.budget) || 0;
                                 Storage.setSettings(s);
                                 log.push(`🏷️ تمت إضافة تصنيف جديد: ${a.name}`);
+                                break;
+                            }
+                            case 'set_daily_budget': {
+                                const newSalary = Budget.setDailyBudget(a.amount);
+                                log.push(`📊 تم تحديث ميزانية اليوم إلى ${Utils.formatCurrency(a.amount)} (الراتب الجديد: ${Utils.formatCurrency(newSalary)})`);
+                                break;
+                            }
+                            case 'set_weekly_budget': {
+                                const newSalary = Budget.setWeeklyBudget(a.amount);
+                                log.push(`📊 تم تحديث ميزانية الأسبوع إلى ${Utils.formatCurrency(a.amount)} (الراتب الجديد: ${Utils.formatCurrency(newSalary)})`);
+                                break;
+                            }
+                            case 'set_monthly_budget': {
+                                Budget.setMonthlyBudget(a.amount);
+                                log.push(`📊 تم تحديث ميزانية الشهر إلى ${Utils.formatCurrency(a.amount)}`);
+                                break;
+                            }
+                            case 'rebalance_budget': {
+                                const result = Budget.rebalanceBudget(a.priorities);
+                                log.push(`🔄 تم إعادة توزيع الميزانية حسب الأولويات المحددة.`);
                                 break;
                             }
                             case 'add_travel_expense': {
@@ -2489,7 +2731,7 @@
                     }
                 });
 
-                // تحديث كل الواجهات المتأثرة فور تنفيذ أي إجراء
+                // تحديث كل الواجهات
                 if (typeof UI !== 'undefined') {
                     UI.renderDashboard();
                     UI.renderExpenses();
@@ -2637,7 +2879,7 @@
         }
 
         /* ============================================================
-           UI.JS - مُحسَّن مع Gemini والدردشة
+           UI.JS - مُحسَّن مع عرض تفصيلي للمصروفات عند الضغط
            ============================================================ */
         const UI = {
             init() {
@@ -2654,6 +2896,7 @@
                 this.setupQuickExpenseModal();
                 this.setupTravel();
                 this.setupTemp();
+                this.setupExpenseDetailModal();
                 this.renderDashboard();
                 this.renderExpenses();
                 this.renderReports();
@@ -2661,7 +2904,6 @@
                 this.renderTemp();
                 this.updateCategoryFilters();
 
-                // مزامنة التاريخ الميلادي الحقيقي عبر API خارجي، ثم تحديث كل ما يعتمد عليه
                 WorldTime.init().then(() => {
                     this.setupDate();
                     this.renderDashboard();
@@ -2731,13 +2973,11 @@
                         if (page === 'travel') this.renderTravel();
                         if (page === 'temp') this.renderTemp();
                         if (page === 'chat') {
-                            // عند فتح الدردشة، نحرك التركيز إلى حقل الإدخال
                             setTimeout(() => Utils.id('chatInput').focus(), 200);
                         }
                     });
                 });
 
-                // زر الدردشة في الهيدر يفتح صفحة الدردشة
                 Utils.on(Utils.id('chatToggleBtn'), 'click', () => {
                     const chatLink = Utils.qs('.nav-link[data-page="chat"]');
                     if (chatLink) chatLink.click();
@@ -2771,7 +3011,92 @@
                 });
             },
 
-            // ----- Expense Modal (نفس السابق) -----
+            setupExpenseDetailModal() {
+                const modal = Utils.id('expenseDetailModal');
+                const closeBtn = Utils.id('closeDetailModal');
+                const closeBtn2 = Utils.id('closeDetailBtn');
+                const deleteBtn = Utils.id('deleteDetailBtn');
+                let currentExpenseId = null;
+
+                const closeModal = () => modal.classList.remove('open');
+
+                Utils.on(closeBtn, 'click', closeModal);
+                Utils.on(closeBtn2, 'click', closeModal);
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) closeModal();
+                });
+
+                Utils.on(deleteBtn, 'click', () => {
+                    if (!currentExpenseId) return;
+                    if (confirm('هل تريد حذف هذا المصروف؟')) {
+                        Budget.deleteExpense(currentExpenseId);
+                        closeModal();
+                        UI.renderDashboard();
+                        UI.renderExpenses();
+                        UI.renderReports();
+                    }
+                });
+            },
+
+            showExpenseDetail(expense) {
+                const modal = Utils.id('expenseDetailModal');
+                const content = Utils.id('expenseDetailContent');
+                const title = Utils.id('detailModalTitle');
+
+                title.textContent = `تفاصيل المصروف: ${expense.description || expense.category}`;
+                Utils.id('deleteDetailBtn').dataset.id = expense.id;
+
+                content.innerHTML = `
+                    <div class="expense-detail-grid">
+                        <div class="detail-item">
+                            <span class="label">المبلغ</span>
+                            <span class="value">${Utils.formatCurrency(expense.amount)}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">التاريخ</span>
+                            <span class="value">${Utils.formatDate(expense.date)}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">التصنيف</span>
+                            <span class="value">${expense.category || 'أخرى'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">التصنيف الفرعي</span>
+                            <span class="value">${expense.subCategory || '—'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">التاجر</span>
+                            <span class="value">${expense.merchant || '—'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">طريقة الدفع</span>
+                            <span class="value">${expense.paymentMethod || '—'}</span>
+                        </div>
+                        <div class="detail-divider"></div>
+                        <div class="detail-item" style="grid-column:1/-1;">
+                            <span class="label">الوصف</span>
+                            <span class="value">${expense.description || '—'}</span>
+                        </div>
+                        <div class="detail-item" style="grid-column:1/-1;">
+                            <span class="label">ملاحظات</span>
+                            <span class="value">${expense.notes || '—'}</span>
+                        </div>
+                        <div class="detail-item" style="grid-column:1/-1;">
+                            <span class="label">تاريخ الإضافة</span>
+                            <span class="value">${new Date(expense.createdAt).toLocaleString('ar-SA')}</span>
+                        </div>
+                        <div class="detail-item" style="grid-column:1/-1;">
+                            <span class="label">المعرف</span>
+                            <span class="value" style="font-size:0.7rem;color:var(--text-muted);">${expense.id}</span>
+                        </div>
+                    </div>
+                `;
+
+                modal.classList.add('open');
+                currentExpenseId = expense.id;
+            },
+
+            // ----- Expense Modal -----
             setupExpenseModal() {
                 const modal = Utils.id('expenseModal');
                 const openBtn = Utils.id('addExpenseBtn');
@@ -2907,7 +3232,7 @@
                 Budget.addExpense(data);
             },
 
-            // ----- Quick Expense Modal (تُستخدم لميزانية السفر والميزانية المؤقتة) -----
+            // ----- Quick Expense Modal -----
             quickExpenseTarget: null,
 
             openQuickExpenseModal(type) {
@@ -3038,7 +3363,7 @@
                 Utils.on(Utils.id('tempCategoryFilter'), 'change', () => this.renderTemp());
             },
 
-            // ----- Settings (نفس السابق) -----
+            // ----- Settings -----
             setupSettings() {
                 const form = Utils.id('settingsForm');
                 const salaryInput = Utils.id('settingsSalary');
@@ -3084,7 +3409,7 @@
                 });
             },
 
-            // ----- Analytics (نفس السابق) -----
+            // ----- Analytics -----
             setupAnalytics() {
                 const runBtn = Utils.id('runAnalyticsBtn');
                 const resultDiv = Utils.id('analyticsResult');
@@ -3124,7 +3449,7 @@
                 });
             },
 
-            // ----- Setup Wizard (نفس السابق) -----
+            // ----- Setup Wizard -----
             setupSetupWizard() {
                 const modal = Utils.id('setupModal');
                 const form = Utils.id('setupForm');
@@ -3185,7 +3510,7 @@
                 });
             },
 
-            // ----- Gemini Modal (مخفي) -----
+            // ----- Gemini Modal -----
             setupGeminiModal() {
                 const modal = Utils.id('geminiModal');
                 const trigger = Utils.id('geminiSecretTrigger');
@@ -3196,10 +3521,8 @@
                 const status = Utils.id('geminiStatus');
                 const modelSelect = Utils.id('geminiModel');
 
-                // فتح المودال عند النقر على الفوتر
                 Utils.on(trigger, 'click', () => {
                     modal.classList.add('open');
-                    // تحميل المفتاح المحفوظ
                     const savedKey = Storage.getGeminiKey();
                     if (savedKey) {
                         keyInput.value = savedKey;
@@ -3220,14 +3543,12 @@
                     if (e.target === modal) modal.classList.remove('open');
                 });
 
-                // إظهار/إخفاء المفتاح
                 Utils.on(toggleBtn, 'click', () => {
                     const type = keyInput.type === 'password' ? 'text' : 'password';
                     keyInput.type = type;
                     toggleBtn.querySelector('i').className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
                 });
 
-                // حفظ المفتاح والنموذج
                 Utils.on(form, 'submit', (e) => {
                     e.preventDefault();
                     const key = keyInput.value.trim();
@@ -3241,18 +3562,16 @@
                     Storage.setGeminiModel(model);
                     status.className = 'api-status success';
                     status.textContent = '✅ تم حفظ مفتاح ونموذج Gemini بنجاح';
-                    // إغلاق المودال بعد فترة
                     setTimeout(() => modal.classList.remove('open'), 1200);
                 });
             },
 
-            // ----- CHAT (المساعد) -----
+            // ----- CHAT (المساعد) مع دوال متقدمة للتفكير -----
             setupChat() {
                 const messagesContainer = Utils.id('chatMessages');
                 const input = Utils.id('chatInput');
                 const sendBtn = Utils.id('chatSendBtn');
 
-                // دالة لإضافة رسالة إلى الواجهة
                 const addMessage = (text, role) => {
                     const div = document.createElement('div');
                     div.className = `chat-message ${role}`;
@@ -3262,7 +3581,6 @@
                     messagesContainer.scrollTop = messagesContainer.scrollHeight;
                 };
 
-                // دالة عرض "يُفكِّر..."
                 let typingIndicator = null;
                 const showTyping = () => {
                     if (typingIndicator) return;
@@ -3279,25 +3597,21 @@
                     }
                 };
 
-                // حفظ تاريخ المحادثة (للسياق)
                 let chatHistory = [];
 
-                // دالة إرسال الرسالة
                 const sendMessage = async () => {
                     const text = input.value.trim();
                     if (!text) return;
 
-                    // إضافة رسالة المستخدم
                     addMessage(text, 'user');
                     chatHistory.push({ role: 'user', content: text });
                     input.value = '';
                     input.style.height = 'auto';
 
-                    // عرض مؤشر الكتابة
                     showTyping();
 
                     try {
-                        // تجهيز السياق المالي
+                        // تجهيز السياق الكامل
                         const expenses = Budget.getExpenses();
                         const settings = Storage.getSettings();
                         const monthExp = Budget.getMonthExpenses();
@@ -3305,6 +3619,8 @@
                         const remaining = Budget.getRemaining(monthExp);
                         const catMap = Budget.getByCategory(monthExp);
                         const catBudgets = settings.categoryBudgets || {};
+                        const forecast = Budget.forecastExpenses(30);
+                        const patterns = Budget.analyzeSpendingPatterns();
 
                         let catSummary = '';
                         for (const [cat, spent] of Object.entries(catMap)) {
@@ -3313,31 +3629,29 @@
                             catSummary += `- ${cat}: صرف ${spent.toFixed(2)} ريال، الميزانية ${budget.toFixed(2)} ريال (${pct}%)\n`;
                         }
 
-                        // التاريخ الميلادي الحقيقي (عبر API خارجي وليس ساعة الجهاز) + العد التنازلي للراتب
                         const realNow = WorldTime.now();
                         const realDateStr = realNow.toISOString().split('T')[0];
                         const realDayName = realNow.toLocaleDateString('ar-SA', { weekday: 'long' });
                         const daysUntilSalary = Budget.getDaysUntilSalary();
                         const nextSalaryDate = Budget.getNextSalaryDate();
 
-                        // ميزانية السفر
                         const travelBudget = Storage.getTravelBudget();
                         const travelExpenses = Storage.getTravelExpenses();
                         const travelSpent = Budget.getTravelTotal();
                         const travelRemaining = Budget.getTravelRemaining();
                         let travelSummary = 'ميزانية السفر غير مفعّلة حالياً.';
                         if (travelBudget.enabled || travelExpenses.length > 0) {
-                            travelSummary = `الرحلة: ${travelBudget.tripName || '(بدون اسم)'} | الميزانية الكلية: ${(travelBudget.totalBudget||0).toFixed(2)} ريال | المصروف: ${travelSpent.toFixed(2)} ريال | المتبقي: ${travelRemaining.toFixed(2)} ريال`;
+                            travelSummary =
+                                `الرحلة: ${travelBudget.tripName || '(بدون اسم)'} | الميزانية الكلية: ${(travelBudget.totalBudget||0).toFixed(2)} ريال | المصروف: ${travelSpent.toFixed(2)} ريال | المتبقي: ${travelRemaining.toFixed(2)} ريال`;
                         }
 
-                        // الميزانية المؤقتة
                         const tempBudget = Storage.getTempBudget();
                         const tempExpenses = Storage.getTempExpenses();
                         const tempSpent = Budget.getTempTotal();
                         const tempRemaining = Budget.getTempRemaining();
-                        const tempSummary = `الميزانية الكلية: ${(tempBudget.totalBudget||0).toFixed(2)} ريال | المصروف: ${tempSpent.toFixed(2)} ريال | المتبقي: ${tempRemaining.toFixed(2)} ريال`;
+                        const tempSummary =
+                            `الميزانية الكلية: ${(tempBudget.totalBudget||0).toFixed(2)} ريال | المصروف: ${tempSpent.toFixed(2)} ريال | المتبقي: ${tempRemaining.toFixed(2)} ريال`;
 
-                        // بناء System Prompt الرسمي
                         const systemPrompt = `أنت Budget AI Agent، المساعد المالي الذكي الرسمي داخل تطبيق Budget.
                         أنت لست ChatBot عام، بل وكيل ذكاء اصطناعي (AI Agent) متخصص في الإدارة المالية الشخصية، وتحليل البيانات، واتخاذ القرارات بناءً على البيانات الفعلية.
                         هويتك: اسمك Budget AI، وظيفتك Financial Intelligence Agent.
@@ -3358,15 +3672,11 @@
                         تنسيق الرد: يفضل استخدام العناوين، القوائم، الجداول، الرموز التعبيرية باعتدال.
                         الذاكرة: تذكر سياق المحادثة الحالية.
                         التفكير قبل الإجابة: 1. هل أحتاج بيانات؟ 2. هل البيانات موجودة؟ 3. هل أحتاج أدوات؟ 4. هل توجد معلومات ناقصة؟ إذا كانت الإجابة نعم، اطلب البيانات المناسبة أو استخدم الأداة المناسبة.
-                        المستقبل: قد يتم تزويدك مستقبلاً بإمكانية الاتصال بـ Supabase، Tool Calling، Function Calling، RAG، Embeddings، OCR، تحليل الفواتير، رفع ملفات، استيراد كشوف البنوك.
-                        الهدف النهائي: كن أفضل مستشار مالي شخصي داخل التطبيق، واجعل كل إجابة مبنية على البيانات الفعلية، وتساعد المستخدم على اتخاذ قرارات مالية أفضل، مع الحفاظ على الدقة والشفافية في كل رد.
 
-                        التاريخ والوقت (حقيقي عبر API خارجي - وليس تخميناً من ذاكرتك):
+                        التاريخ والوقت (حقيقي عبر API خارجي):
                         - التاريخ الميلادي الحقيقي الآن: ${realDateStr} (${realDayName})
                         - تاريخ نزول الراتب القادم: ${nextSalaryDate ? Utils.formatDate(nextSalaryDate.toISOString().split('T')[0]) : 'غير محدد'}
-                        - الأيام المتبقية لنزول الراتب القادم: ${daysUntilSalary !== null ? daysUntilSalary + ' يوم' : 'غير معروف (لم يُحدد تاريخ الراتب في الإعدادات)'}
-                        - حالة مزامنة الوقت: ${WorldTime.statusText()}
-                        استخدم هذا التاريخ الحقيقي دائماً عند حساب أي مدة أو عدد أيام متبقية، ولا تعتمد على تاريخ من ذاكرتك.
+                        - الأيام المتبقية لنزول الراتب القادم: ${daysUntilSalary !== null ? daysUntilSalary + ' يوم' : 'غير معروف'}
 
                         البيانات المالية الأساسية:
                         - الراتب الشهري: ${settings.salary || 0} ريال
@@ -3377,33 +3687,40 @@
                         ${catSummary || 'لا توجد مصروفات مسجلة هذا الشهر.'}
                         - عدد المصروفات الكلي: ${expenses.length}
 
-                        ميزانية السفر (منفصلة تماماً عن الميزانية الأساسية - بنودها: تذاكر الطيران، الفنادق والسكن، المواصلات الداخلية، الإنترنت والاتصالات، الفعاليات والأنشطة، الطعام والمطاعم، التسوق والهدايا، التأشيرة والتأمين، الطوارئ، أخرى):
-                        ${travelSummary}
+                        التحليلات المتقدمة:
+                        - متوسط الإنفاق اليومي: ${forecast.dailyAvg.toFixed(2)} ريال
+                        - التوقع للشهر القادم: ${forecast.forecast.toFixed(2)} ريال
+                        - أعلى 3 تصنيفات إنفاق: ${patterns.biggestSpenders.map(s => `${s.category} (${s.percentage.toFixed(0)}%)`).join(', ')}
+                        - التوصيات التلقائية: ${patterns.recommendations.join(' | ') || 'لا توجد توصيات حالياً'}
 
-                        الميزانية المؤقتة (منفصلة تماماً عن الميزانية الأساسية - بنودها: كشتة، قطة، واجب، فزعة، صدقة، أخرى):
-                        ${tempSummary}
+                        ميزانية السفر: ${travelSummary}
+                        الميزانية المؤقتة: ${tempSummary}
 
                         ============================================================
                         نظام التحكم الكامل عبر الأوامر (Actions) - صلاحياتك الفعلية:
                         ============================================================
-                        لديك تحكم كامل بكل قوائم التطبيق مباشرة من داخل هذه المحادثة. عندما يطلب المستخدم منك تنفيذ أي إجراء فعلي (إضافة/حذف/تعديل مصروف، تحديث الراتب أو تاريخه، تحديث هدف الادخار، تحديث ميزانية أي تصنيف أو إضافة تصنيف جديد، تفعيل/تحديث ميزانية السفر أو إضافة/حذف مصروف سفر، تحديث الميزانية المؤقتة أو إضافة/حذف مصروف منها)، يجب عليك تنفيذ ذلك فعلياً عبر إرفاق كتلة كود في نهاية ردك بهذا الشكل بالضبط:
+                        لديك تحكم كامل بكل قوائم التطبيق مباشرة من داخل هذه المحادثة. عندما يطلب المستخدم منك تنفيذ أي إجراء فعلي (إضافة/حذف/تعديل مصروف، تحديث الراتب أو تاريخه، تحديث هدف الادخار، تحديث ميزانية أي تصنيف أو إضافة تصنيف جديد، تحديث ميزانية اليوم/الأسبوع/الشهر، إعادة توزيع الميزانية حسب الأولويات، تفعيل/تحديث ميزانية السفر أو إضافة/حذف مصروف سفر، تحديث الميزانية المؤقتة أو إضافة/حذف مصروف منها)، يجب عليك تنفيذ ذلك فعلياً عبر إرفاق كتلة كود في نهاية ردك بهذا الشكل بالضبط:
 
                         \`\`\`json-actions
                         {"actions":[{"type":"...", "...": "..."}]}
                         \`\`\`
 
                         أنواع الإجراءات المتاحة (type) وحقولها:
-                        - add_expense: {amount, description, category, date(YYYY-MM-DD), merchant, notes} — إضافة مصروف للميزانية الأساسية
+                        - add_expense: {amount, description, category, date(YYYY-MM-DD), merchant, notes}
                         - delete_expense: {id}
                         - set_salary: {amount}
                         - set_salary_date: {date}
                         - set_savings_goal: {amount}
                         - set_category_budget: {category, amount}
                         - add_category: {name, budget}
-                        - add_travel_expense: {amount, description, category(من بنود السفر أعلاه), date}
+                        - set_daily_budget: {amount}  ← يغير ميزانية اليوم ويؤثر على الأسبوع والشهر
+                        - set_weekly_budget: {amount} ← يغير ميزانية الأسبوع ويؤثر على اليوم والشهر
+                        - set_monthly_budget: {amount} ← يغير ميزانية الشهر ويؤثر على اليوم والأسبوع
+                        - rebalance_budget: {priorities: {"تصنيف1": وزن, "تصنيف2": وزن, ...}} ← يعيد توزيع الميزانية حسب الأولويات
+                        - add_travel_expense: {amount, description, category, date}
                         - delete_travel_expense: {id}
-                        - set_travel_budget: {tripName, totalBudget, category, amount} — لتفعيل/تحديث ميزانية السفر أو ميزانية بند معين فيها
-                        - add_temp_expense: {amount, description, category(من: كشتة، قطة، واجب، فزعة، صدقة، أخرى), date}
+                        - set_travel_budget: {tripName, totalBudget, category, amount}
+                        - add_temp_expense: {amount, description, category, date}
                         - delete_temp_expense: {id}
                         - set_temp_budget: {totalBudget, category, amount}
 
@@ -3415,20 +3732,27 @@
                         5. التاريخ اليوم إذا لم يُحدد المستخدم تاريخاً هو ${realDateStr} (استخدمه كافتراضي).
                         6. يمكنك تضمين أكثر من إجراء في نفس الكتلة داخل مصفوفة actions إذا طلب المستخدم عدة عمليات دفعة واحدة.`;
 
-                        // إرسال الطلب إلى Gemini
-                        const rawResponse = await Gemini.sendMessage(chatHistory, systemPrompt);
+                        // استخدام دالة thinkAndDecide المتقدمة
+                        const rawResponse = await Gemini.thinkAndDecide(text, {
+                            settings,
+                            monthExp,
+                            totalMonth,
+                            remaining,
+                            catSummary,
+                            forecast,
+                            patterns,
+                            travelSummary,
+                            tempSummary,
+                            daysUntilSalary
+                        });
 
-                        // استخراج أي أوامر (actions) مرفقة في رد الذكاء الاصطناعي وتنفيذها فعلياً على كل القوائم
                         const { cleanText, actions } = Commands.extract(rawResponse);
 
-                        // إزالة مؤشر الكتابة
                         hideTyping();
 
-                        // إضافة رد المساعد (بدون كتلة الأوامر الخام)
                         addMessage(cleanText || rawResponse, 'assistant');
                         chatHistory.push({ role: 'assistant', content: cleanText || rawResponse });
 
-                        // تنفيذ الأوامر إن وجدت، وعرض ملخص بما تم تحديثه فعلياً
                         if (actions.length > 0) {
                             const log = Commands.execute(actions);
                             if (log.length > 0) {
@@ -3443,7 +3767,6 @@
                     }
                 };
 
-                // أحداث الإرسال
                 Utils.on(sendBtn, 'click', sendMessage);
                 Utils.on(input, 'keydown', (e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
@@ -3452,14 +3775,13 @@
                     }
                 });
 
-                // ضبط ارتفاع حقل الإدخال تلقائياً
                 Utils.on(input, 'input', () => {
                     input.style.height = 'auto';
                     input.style.height = Math.min(input.scrollHeight, 120) + 'px';
                 });
             },
 
-            // ----- RENDER FUNCTIONS (نفس السابق) -----
+            // ----- RENDER FUNCTIONS -----
             renderDashboard() {
                 const cardsContainer = Utils.id('dashboardCards');
                 const summaryContainer = Utils.id('dashboardSummary');
@@ -3472,9 +3794,12 @@
                 const monthlyBudget = Budget.getMonthlyBudget();
                 const settings = Storage.getSettings();
 
+                // تحليل الأنماط
+                const patterns = Budget.analyzeSpendingPatterns();
+
                 const cards = [
-                    { icon: 'fa-wallet', label: 'الرصيد الحالي', value: Utils.formatCurrency(settings.salary || 0),
-                        cls: 'accent' },
+                    { icon: 'fa-wallet', label: 'الرصيد الحالي', value: Utils.formatCurrency(remaining),
+                        cls: remaining >= 0 ? 'accent' : 'negative' },
                     { icon: 'fa-money-bill-wave', label: 'الراتب الشهري', value: Utils.formatCurrency(settings.salary ||
                             0), cls: 'accent' },
                     { icon: 'fa-arrow-down', label: 'إجمالي المصروفات', value: Utils.formatCurrency(totalMonth),
@@ -3491,6 +3816,18 @@
                             0), cls: 'accent' }
                 ];
 
+                // إضافة بطاقة التوصيات التلقائية
+                if (patterns.recommendations.length > 0) {
+                    cards.push({
+                        icon: 'fa-lightbulb',
+                        label: 'توصيات ذكية',
+                        value: patterns.recommendations[0].length > 25 ?
+                            patterns.recommendations[0].substring(0, 25) + '...' :
+                            patterns.recommendations[0],
+                        cls: 'accent'
+                    });
+                }
+
                 const daysLeft = Budget.getDaysUntilSalary();
                 if (daysLeft !== null) {
                     cards.push({
@@ -3501,15 +3838,56 @@
                     });
                 }
 
+                // إضافة حدث النقر لعرض تفاصيل المصروفات
                 cardsContainer.innerHTML = cards.map(c =>
-                    `<div class="dash-card ${c.cls}">
+                    `<div class="dash-card ${c.cls}" data-card="${c.label}">
                         <div class="card-icon"><i class="fas ${c.icon}"></i></div>
                         <div class="card-label">${c.label}</div>
                         <div class="card-value">${c.value}</div>
                     </div>`
                 ).join('');
 
-                // بطاقات إضافية: ميزانية السفر والميزانية المؤقتة (منفصلة عن الحساب الأساسي)
+                // عند النقر على إجمالي المصروفات، عرض التفاصيل
+                const totalCard = cardsContainer.querySelector('.dash-card.negative .card-value');
+                if (totalCard) {
+                    totalCard.closest('.dash-card').addEventListener('click', () => {
+                        const exp = Budget.getMonthExpenses().sort((a, b) => b.amount - a.amount);
+                        if (exp.length === 0) {
+                            alert('لا توجد مصروفات هذا الشهر');
+                            return;
+                        }
+                        let msg = '📊 تفاصيل المصروفات هذا الشهر:\n\n';
+                        exp.forEach((e, i) => {
+                            msg += `${i+1}. ${e.description || e.category}: ${Utils.formatCurrency(e.amount)} (${e.date})\n`;
+                        });
+                        const total = Budget.getTotal(exp);
+                        msg += `\nالمجموع: ${Utils.formatCurrency(total)}`;
+                        alert(msg);
+                    });
+                }
+
+                const catMap = Budget.getByCategory(monthExp);
+                const catEntries = Object.entries(catMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
+                summaryContainer.innerHTML = `
+                    <div class="summary-item glass">
+                        <div class="label">أعلى تصنيف صرف</div>
+                        <div class="value">${catEntries.length > 0 ? catEntries[0][0] + ' (' + Utils.formatCurrency(catEntries[0][1]) + ')' : '—'}</div>
+                    </div>
+                    <div class="summary-item glass">
+                        <div class="label">عدد المصروفات هذا الشهر</div>
+                        <div class="value">${monthExp.length}</div>
+                    </div>
+                    <div class="summary-item glass">
+                        <div class="label">متوسط المصروف اليومي</div>
+                        <div class="value">${monthExp.length > 0 ? Utils.formatCurrency(totalMonth / monthExp.length) : Utils.formatCurrency(0)}</div>
+                    </div>
+                    <div class="summary-item glass">
+                        <div class="label">التوصيات الذكية</div>
+                        <div class="value" style="font-size:0.85rem;">${patterns.recommendations.length > 0 ? patterns.recommendations[0] : 'لا توجد توصيات'}</div>
+                    </div>
+                `;
+
+                // البطاقات الإضافية (السفر والمؤقت)
                 const extraContainer = Utils.id('dashboardExtraCards');
                 if (extraContainer) {
                     const extraCards = [];
@@ -3537,23 +3915,6 @@
                         </div>`
                     ).join('');
                 }
-
-                const catMap = Budget.getByCategory(monthExp);
-                const catEntries = Object.entries(catMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
-                summaryContainer.innerHTML = `
-                    <div class="summary-item glass">
-                        <div class="label">أعلى تصنيف صرف</div>
-                        <div class="value">${catEntries.length > 0 ? catEntries[0][0] + ' (' + Utils.formatCurrency(catEntries[0][1]) + ')' : '—'}</div>
-                    </div>
-                    <div class="summary-item glass">
-                        <div class="label">عدد المصروفات هذا الشهر</div>
-                        <div class="value">${monthExp.length}</div>
-                    </div>
-                    <div class="summary-item glass">
-                        <div class="label">متوسط المصروف اليومي</div>
-                        <div class="value">${monthExp.length > 0 ? Utils.formatCurrency(totalMonth / monthExp.length) : Utils.formatCurrency(0)}</div>
-                    </div>
-                `;
             },
 
             renderTravel() {
@@ -3576,7 +3937,6 @@
                     </div>`
                 ).join('');
 
-                // فلتر البنود
                 const filter = Utils.id('travelCategoryFilter');
                 const currentFilter = filter.value || 'all';
                 filter.innerHTML = '<option value="all">جميع بنود السفر</option>' +
@@ -3701,7 +4061,7 @@
                     }
 
                     list.innerHTML = expenses.map(e =>
-                        `<div class="expense-item glass">
+                        `<div class="expense-item glass" data-id="${e.id}">
                             <div class="expense-info">
                                 <div class="desc">${e.description}</div>
                                 <div class="meta">
@@ -3713,13 +4073,42 @@
                             </div>
                             <div class="expense-amount">${Utils.formatCurrency(e.amount)}</div>
                             <div class="expense-actions">
+                                <button class="detail-btn" data-id="${e.id}" style="color:var(--accent);">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
                                 <button class="delete-btn" data-id="${e.id}"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>`
                     ).join('');
 
+                    // إضافة أحداث النقر لعرض التفاصيل
+                    Utils.qsa('.detail-btn').forEach(btn => {
+                        Utils.on(btn, 'click', (event) => {
+                            event.stopPropagation();
+                            const id = btn.dataset.id;
+                            const expense = Budget.getExpense(id);
+                            if (expense) {
+                                UI.showExpenseDetail(expense);
+                            }
+                        });
+                    });
+
+                    // جعل بطاقة المصروف بأكملها قابلة للنقر لعرض التفاصيل
+                    Utils.qsa('.expense-item').forEach(item => {
+                        Utils.on(item, 'click', (event) => {
+                            // منع التنفيذ إذا كان النقر على زر
+                            if (event.target.closest('button')) return;
+                            const id = item.dataset.id;
+                            const expense = Budget.getExpense(id);
+                            if (expense) {
+                                UI.showExpenseDetail(expense);
+                            }
+                        });
+                    });
+
                     Utils.qsa('.delete-btn').forEach(btn => {
-                        Utils.on(btn, 'click', () => {
+                        Utils.on(btn, 'click', (event) => {
+                            event.stopPropagation();
                             if (confirm('هل أنت متأكد من حذف هذا المصروف؟')) {
                                 Budget.deleteExpense(btn.dataset.id);
                                 render();
@@ -3800,4 +4189,4 @@
         });
     </script>
 </body>
-</html> 
+</html>
