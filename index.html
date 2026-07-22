@@ -2177,7 +2177,6 @@
 
             // ===== دوال متقدمة للذكاء الاصطناعي =====
 
-            // تحديث ميزانية اليوم (تؤثر على ميزانية الأسبوع والشهر)
             setDailyBudget(amount) {
                 const settings = Storage.getSettings();
                 const daysInMonth = new Date(WorldTime.now().getFullYear(), WorldTime.now().getMonth() + 1, 0).getDate();
@@ -2187,13 +2186,11 @@
                 return newSalary;
             },
 
-            // تحديث ميزانية الأسبوع (تؤثر على اليوم والشهر)
             setWeeklyBudget(amount) {
                 const daily = amount / 7;
                 return this.setDailyBudget(daily);
             },
 
-            // تحديث ميزانية الشهر (تؤثر على اليوم والأسبوع)
             setMonthlyBudget(amount) {
                 const settings = Storage.getSettings();
                 settings.salary = parseFloat(amount) || 0;
@@ -2201,13 +2198,11 @@
                 return amount;
             },
 
-            // إعادة توزيع الميزانية حسب أولويات المستخدم
             rebalanceBudget(priorities) {
                 const settings = Storage.getSettings();
                 const total = parseFloat(settings.salary) || 0;
                 const categoryBudgets = settings.categoryBudgets || {};
 
-                // حساب الوزن الإجمالي للأولويات
                 let totalWeight = 0;
                 const weights = {};
                 for (const [cat, weight] of Object.entries(priorities)) {
@@ -2217,7 +2212,6 @@
 
                 if (totalWeight === 0) return;
 
-                // توزيع الميزانية حسب الأوزان
                 for (const [cat, weight] of Object.entries(weights)) {
                     categoryBudgets[cat] = (weight / totalWeight) * total;
                 }
@@ -2227,12 +2221,10 @@
                 return categoryBudgets;
             },
 
-            // التنبؤ بالمصروفات بناءً على البيانات السابقة
             forecastExpenses(daysAhead) {
                 const expenses = this.getExpenses();
                 if (expenses.length === 0) return { dailyAvg: 0, forecast: 0 };
 
-                // حساب متوسط المصروفات اليومي
                 const sorted = [...expenses].sort((a, b) => a.date.localeCompare(b.date));
                 const firstDate = new Date(sorted[0].date);
                 const lastDate = new Date(sorted[sorted.length - 1].date);
@@ -2248,7 +2240,6 @@
                 };
             },
 
-            // تحليل أنماط الإنفاق
             analyzeSpendingPatterns() {
                 const monthExp = this.getMonthExpenses();
                 const catMap = this.getByCategory(monthExp);
@@ -2260,18 +2251,14 @@
                     recommendations: []
                 };
 
-                // ترتيب التصنيفات حسب الإنفاق
                 const sortedCats = Object.entries(catMap).sort((a, b) => b[1] - a[1]);
                 patterns.categories = sortedCats;
-
-                // أعلى 3 تصنيفات إنفاقاً
                 patterns.biggestSpenders = sortedCats.slice(0, 3).map(([cat, amount]) => ({
                     category: cat,
                     amount,
                     percentage: total > 0 ? (amount / total) * 100 : 0
                 }));
 
-                // توصيات تلقائية
                 const settings = Storage.getSettings();
                 const salary = parseFloat(settings.salary) || 0;
 
@@ -2294,6 +2281,64 @@
                 }
 
                 return patterns;
+            },
+
+            // ===== حساب مجموع عناصر متعددة من وصف واحد =====
+            parseMultipleItems(text) {
+                // يبحث عن أنماط مثل: "فطور بـ 15 ريال ثم 19 ريال ثم شاهي بـ 6 ريال"
+                // أو "5 حبات الحبة بـ 2.50 ريال"
+                const items = [];
+                let remaining = text;
+
+                // نمط: "X حبات الحبة بـ Y ريال" أو "X حبة بـ Y ريال"
+                const bulkPattern = /(\d+)\s*(حبات?|وحدات?|قطع?)\s*(الحبة|الوحدة|القطعة)?\s*بـ\s*([\d.]+)\s*ريال/i;
+                let bulkMatch = remaining.match(bulkPattern);
+                if (bulkMatch) {
+                    const count = parseFloat(bulkMatch[1]);
+                    const price = parseFloat(bulkMatch[4]);
+                    items.push({ count, price, total: count * price, desc: `${count} × ${price} ريال` });
+                    remaining = remaining.replace(bulkMatch[0], '');
+                }
+
+                // نمط: "شيء بـ X ريال" أو "شيء ب X ريال"
+                const singlePattern = /([^،,]+)\s*(بـ|ب)\s*([\d.]+)\s*ريال/gi;
+                let match;
+                while ((match = singlePattern.exec(remaining)) !== null) {
+                    const desc = match[1].trim();
+                    const amount = parseFloat(match[3]);
+                    items.push({ count: 1, price: amount, total: amount, desc: desc || 'مادة' });
+                }
+
+                // إذا لم يتم العثور على أي نمط، حاول البحث عن أرقام فقط
+                if (items.length === 0) {
+                    const numberPattern = /([\d.]+)\s*ريال/g;
+                    let numMatch;
+                    let tempRemaining = text;
+                    let total = 0;
+                    let parts = [];
+                    while ((numMatch = numberPattern.exec(tempRemaining)) !== null) {
+                        const amount = parseFloat(numMatch[1]);
+                        total += amount;
+                        parts.push(amount);
+                    }
+                    if (parts.length > 0) {
+                        return {
+                            items: parts.map((p, i) => ({ count: 1, price: p, total: p, desc: `عنصر ${i+1}` })),
+                            total,
+                            description: text,
+                            raw: text
+                        };
+                    }
+                }
+
+                const total = items.reduce((sum, i) => sum + i.total, 0);
+                const description = items.map(i => i.desc).join(' + ');
+                return {
+                    items,
+                    total,
+                    description: description || text,
+                    raw: text
+                };
             },
 
             // ===== ميزانية السفر =====
@@ -2447,12 +2492,13 @@
             async parseExpense(text) {
                 const prompt =
                     `أنت مساعد ذكي لتحليل المصروفات. قم بتحليل النص التالي واستخرج المعلومات التالية:
-                - المبلغ (رقم فقط)
+                - المبلغ (رقم فقط، اجمع كل المبالغ المذكورة إن وجدت)
                 - التصنيف (من القائمة: المواد الغذائية, البنزين, الكهرباء, الماء, الإنترنت, الإيجار, الأقساط, المطاعم, المقاهي, الصحة, الترفيه, التسوق, التعليم, السيارة, مصروف شخصي, أخرى)
                 - التاجر (اسم المتجر أو الجهة)
                 - التاريخ (صيغة YYYY-MM-DD، إذا لم يحدد فاستخدم اليوم)
+                - وصف مختصر (اجمع الأصناف إن كانت متعددة)
                 أعد النتيجة بصيغة JSON فقط بدون أي نص إضافي، مثل:
-                {"amount": 18, "category": "المطاعم", "merchant": "البيك", "date": "2026-06-27"}
+                {"amount": 52.50, "category": "المواد الغذائية", "merchant": "", "date": "2026-07-22", "description": "فطور + شاهي + عصائر"}
                 النص: ${text}`;
                 try {
                     const content = await this.generate(prompt);
@@ -2462,9 +2508,13 @@
                         amount: parseFloat(json.amount) || 0,
                         category: json.category || 'أخرى',
                         merchant: json.merchant || '',
-                        date: json.date || Utils.today()
+                        date: json.date || Utils.today(),
+                        description: json.description || ''
                     };
                 } catch (e) {
+                    // استخدام المعالج المحلي المتقدم
+                    const parsed = this.localParseAdvanced(text);
+                    if (parsed) return parsed;
                     const fallback = this.localParse(text);
                     if (fallback) return fallback;
                     throw new Error(e.message || 'فشل تحليل النص');
@@ -2479,7 +2529,30 @@
                 for (const cat of categories) { if (text.includes(cat)) { category = cat; break; } }
                 const merchantMatch = text.match(/(?:من|في|عند|من عند)\s*([^\d,،]+)/i);
                 const merchant = merchantMatch ? merchantMatch[1].trim() : '';
-                return { amount, category, merchant, date: Utils.today() };
+                return { amount, category, merchant, date: Utils.today(), description: text };
+            },
+
+            localParseAdvanced(text) {
+                // استخدام Budget.parseMultipleItems لحساب مجموع العناصر
+                const result = Budget.parseMultipleItems(text);
+                if (result.total > 0) {
+                    const categories = Utils.defaultCategories();
+                    let category = 'أخرى';
+                    for (const cat of categories) {
+                        if (text.includes(cat)) { category = cat; break; }
+                    }
+                    // محاولة استخراج التاجر
+                    const merchantMatch = text.match(/(?:من|في|عند|من عند)\s*([^\d,،]+)/i);
+                    const merchant = merchantMatch ? merchantMatch[1].trim() : '';
+                    return {
+                        amount: result.total,
+                        category: category,
+                        merchant: merchant,
+                        date: Utils.today(),
+                        description: result.description || text
+                    };
+                }
+                return null;
             },
 
             async runAnalytics(expenses, settings) {
@@ -2494,7 +2567,6 @@
                     catSummary += `- ${cat}: صرف ${spent.toFixed(2)} ريال، الميزانية ${budget.toFixed(2)} ريال (${pct}%)\n`;
                 }
 
-                // تحليل الأنماط والتوقعات
                 const forecast = Budget.forecastExpenses(30);
                 const patterns = Budget.analyzeSpendingPatterns();
 
@@ -2552,7 +2624,6 @@
                 return await this.generate(prompt);
             },
 
-            // ===== دالة متقدمة للتفكير واتخاذ القرارات =====
             async thinkAndDecide(query, context) {
                 const prompt =
                     `أنت Budget AI Agent، وكيل ذكاء اصطناعي متخصص في الإدارة المالية.
@@ -2571,7 +2642,8 @@
                 أعد رداً مقنعاً يشرح ما ستفعله، مع كتلة json-actions في النهاية إذا كان هناك إجراءات فعلية.
 
                 تذكر: يمكنك تنفيذ أي إجراء على التطبيق بما في ذلك تغيير ميزانية اليوم والأسبوع والشهر،
-                إعادة توزيع الميزانية حسب الأولويات، تحليل الأنماط، التوقعات، وغيرها.`;
+                إعادة توزيع الميزانية حسب الأولويات، تحليل الأنماط، التوقعات، وغيرها.
+                عند إضافة مصروف، احسب المجموع الإجمالي إذا كان الطلب يحتوي على عدة عناصر.`;
 
                 return await this.generate(prompt);
             }
@@ -2604,11 +2676,18 @@
                     try {
                         switch (a.type) {
                             case 'add_expense': {
+                                // دعم إضافة مصروف مع وصف تفصيلي
                                 const e = Budget.addExpense({
-                                    amount: a.amount, description: a.description, category: a.category,
-                                    date: a.date, merchant: a.merchant, notes: a.notes
+                                    amount: a.amount,
+                                    description: a.description || a.desc || 'مصروف',
+                                    category: a.category || 'أخرى',
+                                    date: a.date || Utils.today(),
+                                    merchant: a.merchant || '',
+                                    notes: a.notes || '',
+                                    subCategory: a.subCategory || '',
+                                    paymentMethod: a.paymentMethod || ''
                                 });
-                                log.push(`✅ أُضيف مصروف: ${e.description || e.category} بمبلغ ${Utils.formatCurrency(e.amount)} (${e.category})`);
+                                log.push(`✅ أُضيف مصروف: ${e.description} بمبلغ ${Utils.formatCurrency(e.amount)} (${e.category})`);
                                 break;
                             }
                             case 'delete_expense': {
@@ -2675,10 +2754,13 @@
                             }
                             case 'add_travel_expense': {
                                 const e = Budget.addTravelExpense({
-                                    amount: a.amount, description: a.description, category: a.category,
-                                    date: a.date, notes: a.notes
+                                    amount: a.amount,
+                                    description: a.description || 'مصروف سفر',
+                                    category: a.category || 'أخرى',
+                                    date: a.date || Utils.today(),
+                                    notes: a.notes || ''
                                 });
-                                log.push(`✈️ أُضيف مصروف سفر: ${e.description || e.category} بمبلغ ${Utils.formatCurrency(e.amount)} (${e.category})`);
+                                log.push(`✈️ أُضيف مصروف سفر: ${e.description} بمبلغ ${Utils.formatCurrency(e.amount)} (${e.category})`);
                                 break;
                             }
                             case 'delete_travel_expense': {
@@ -2701,10 +2783,13 @@
                             }
                             case 'add_temp_expense': {
                                 const e = Budget.addTempExpense({
-                                    amount: a.amount, description: a.description, category: a.category,
-                                    date: a.date, notes: a.notes
+                                    amount: a.amount,
+                                    description: a.description || 'مصروف مؤقت',
+                                    category: a.category || 'أخرى',
+                                    date: a.date || Utils.today(),
+                                    notes: a.notes || ''
                                 });
-                                log.push(`💰 أُضيف مصروف مؤقت: ${e.description || e.category} بمبلغ ${Utils.formatCurrency(e.amount)} (${e.category})`);
+                                log.push(`💰 أُضيف مصروف مؤقت: ${e.description} بمبلغ ${Utils.formatCurrency(e.amount)} (${e.category})`);
                                 break;
                             }
                             case 'delete_temp_expense': {
@@ -3153,10 +3238,11 @@
                         parsedData = result;
                         parseResult.innerHTML = `
                             <div class="parse-review">
-                                <div class="row"><span class="label">المبلغ</span><span class="value">${result.amount.toFixed(2)} ريال</span></div>
+                                <div class="row"><span class="label">المبلغ الإجمالي</span><span class="value">${result.amount.toFixed(2)} ريال</span></div>
                                 <div class="row"><span class="label">التصنيف</span><span class="value">${result.category}</span></div>
                                 <div class="row"><span class="label">التاجر</span><span class="value">${result.merchant || '—'}</span></div>
                                 <div class="row"><span class="label">التاريخ</span><span class="value">${Utils.formatDate(result.date)}</span></div>
+                                <div class="row"><span class="label">الوصف</span><span class="value">${result.description || text}</span></div>
                                 <div class="actions">
                                     <button class="btn-secondary" id="editParseBtn">تعديل</button>
                                     <button class="btn-primary" id="saveParseBtn">حفظ</button>
@@ -3167,7 +3253,7 @@
                             const tab = Utils.qs('.method-tab[data-method="manual"]');
                             tab.click();
                             Utils.id('manualAmount').value = result.amount;
-                            Utils.id('manualDescription').value = text;
+                            Utils.id('manualDescription').value = result.description || text;
                             Utils.id('manualCategory').value = result.category;
                             Utils.id('manualDate').value = result.date;
                             Utils.id('manualMerchant').value = result.merchant || '';
@@ -3177,7 +3263,7 @@
                         Utils.on(Utils.id('saveParseBtn'), 'click', () => {
                             this.saveExpenseFromData({
                                 amount: result.amount,
-                                description: text,
+                                description: result.description || text,
                                 category: result.category,
                                 date: result.date,
                                 merchant: result.merchant || '',
@@ -3671,7 +3757,6 @@
                         أسلوب الإجابة: ابدأ دائماً بملخص، ثم التحليل، ثم الملاحظات، ثم الاقتراحات، ثم الخطوات القادمة.
                         تنسيق الرد: يفضل استخدام العناوين، القوائم، الجداول، الرموز التعبيرية باعتدال.
                         الذاكرة: تذكر سياق المحادثة الحالية.
-                        التفكير قبل الإجابة: 1. هل أحتاج بيانات؟ 2. هل البيانات موجودة؟ 3. هل أحتاج أدوات؟ 4. هل توجد معلومات ناقصة؟ إذا كانت الإجابة نعم، اطلب البيانات المناسبة أو استخدم الأداة المناسبة.
 
                         التاريخ والوقت (حقيقي عبر API خارجي):
                         - التاريخ الميلادي الحقيقي الآن: ${realDateStr} (${realDayName})
@@ -3730,7 +3815,8 @@
                         3. لا تكتب أي نص JSON خارج كتلة \`\`\`json-actions\`\`\` هذه.
                         4. للحذف تحتاج معرف id للمصروف - إذا لم تعرفه اطلب من المستخدم توضيح المصروف المقصود بدلاً من تخمين id.
                         5. التاريخ اليوم إذا لم يُحدد المستخدم تاريخاً هو ${realDateStr} (استخدمه كافتراضي).
-                        6. يمكنك تضمين أكثر من إجراء في نفس الكتلة داخل مصفوفة actions إذا طلب المستخدم عدة عمليات دفعة واحدة.`;
+                        6. يمكنك تضمين أكثر من إجراء في نفس الكتلة داخل مصفوفة actions إذا طلب المستخدم عدة عمليات دفعة واحدة.
+                        7. عند إضافة مصروف يحتوي على عدة عناصر (مثل: فطور بـ 15 ريال ثم 19 ريال ثم شاهي بـ 6 ريال)، قم بحساب المجموع الإجمالي وإضافته كمصروف واحد مع وصف يوضح المكونات.`;
 
                         // استخدام دالة thinkAndDecide المتقدمة
                         const rawResponse = await Gemini.thinkAndDecide(text, {
@@ -3794,7 +3880,6 @@
                 const monthlyBudget = Budget.getMonthlyBudget();
                 const settings = Storage.getSettings();
 
-                // تحليل الأنماط
                 const patterns = Budget.analyzeSpendingPatterns();
 
                 const cards = [
@@ -3816,7 +3901,6 @@
                             0), cls: 'accent' }
                 ];
 
-                // إضافة بطاقة التوصيات التلقائية
                 if (patterns.recommendations.length > 0) {
                     cards.push({
                         icon: 'fa-lightbulb',
@@ -3838,7 +3922,6 @@
                     });
                 }
 
-                // إضافة حدث النقر لعرض تفاصيل المصروفات
                 cardsContainer.innerHTML = cards.map(c =>
                     `<div class="dash-card ${c.cls}" data-card="${c.label}">
                         <div class="card-icon"><i class="fas ${c.icon}"></i></div>
@@ -3887,7 +3970,6 @@
                     </div>
                 `;
 
-                // البطاقات الإضافية (السفر والمؤقت)
                 const extraContainer = Utils.id('dashboardExtraCards');
                 if (extraContainer) {
                     const extraCards = [];
@@ -4081,7 +4163,6 @@
                         </div>`
                     ).join('');
 
-                    // إضافة أحداث النقر لعرض التفاصيل
                     Utils.qsa('.detail-btn').forEach(btn => {
                         Utils.on(btn, 'click', (event) => {
                             event.stopPropagation();
@@ -4093,10 +4174,8 @@
                         });
                     });
 
-                    // جعل بطاقة المصروف بأكملها قابلة للنقر لعرض التفاصيل
                     Utils.qsa('.expense-item').forEach(item => {
                         Utils.on(item, 'click', (event) => {
-                            // منع التنفيذ إذا كان النقر على زر
                             if (event.target.closest('button')) return;
                             const id = item.dataset.id;
                             const expense = Budget.getExpense(id);
