@@ -1385,9 +1385,6 @@
                 <a href="#" class="nav-link" data-page="settings">
                     <i class="fas fa-cog"></i><span>الإعدادات</span>
                 </a>
-                <a href="#" class="nav-link" data-page="ai-settings">
-                    <i class="fas fa-microchip"></i><span>إعدادات الذكاء</span>
-                </a>
                 <!-- صفحة المساعد (الدردشة) -->
                 <a href="#" class="nav-link" data-page="chat">
                     <i class="fas fa-comment-dots"></i><span>المساعد</span>
@@ -1526,27 +1523,6 @@
                     </div>
                 </section>
 
-                <!-- ===== AI SETTINGS (OpenAI) ===== -->
-                <section id="page-ai-settings" class="page">
-                    <div class="settings-container glass">
-                        <h2>إعدادات الذكاء الاصطناعي (OpenAI)</h2>
-                        <form id="aiSettingsForm" class="settings-form">
-                            <div class="form-group">
-                                <label for="aiApiKey">مفتاح API</label>
-                                <div class="password-wrapper">
-                                    <input type="password" id="aiApiKey" class="form-input" placeholder="أدخل مفتاح API الخاص بك" />
-                                    <button type="button" id="toggleApiKey" class="password-toggle">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                                <small class="form-hint">المفتاح يُحفظ محلياً في المتصفح فقط.</small>
-                            </div>
-                            <button type="submit" class="btn-primary">حفظ المفتاح</button>
-                        </form>
-                        <div id="apiKeyStatus" class="api-status"></div>
-                    </div>
-                </section>
-
                 <!-- ===== CHAT PAGE (AI Assistant) ===== -->
                 <section id="page-chat" class="page">
                     <div class="chat-container glass">
@@ -1655,6 +1631,18 @@
             <div class="modal-body">
                 <form id="geminiSettingsForm" class="settings-form">
                     <div class="form-group">
+                        <label for="geminiModel">نوع النموذج (اختر أولاً)</label>
+                        <select id="geminiModel" class="form-input">
+                            <option value="gemini-3.6-flash" selected>Gemini 3.6 Flash</option>
+                            <option value="gemini-3.5-flash">Gemini 3.5 Flash</option>
+                            <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite</option>
+                            <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite</option>
+                            <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                            <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite</option>
+                        </select>
+                        <small class="form-hint">حدد نسخة Gemini Flash قبل إدخال المفتاح.</small>
+                    </div>
+                    <div class="form-group">
                         <label for="geminiApiKey">مفتاح API الخاص بـ Gemini</label>
                         <div class="password-wrapper">
                             <input type="password" id="geminiApiKey" class="form-input" placeholder="أدخل مفتاح Gemini API" />
@@ -1662,16 +1650,9 @@
                                 <i class="fas fa-eye"></i>
                             </button>
                         </div>
-                        <small class="form-hint">يُستخدم للدردشة مع المساعد المالي. يحفظ محلياً.</small>
+                        <small class="form-hint">يُستخدم في كل ميزات الذكاء الاصطناعي بالتطبيق. يحفظ محلياً.</small>
                     </div>
-                    <div class="form-group">
-                        <label>النموذج</label>
-                        <select id="geminiModel" class="form-input">
-                            <option value="gemini-1.5-pro">gemini-1.5-pro</option>
-                            <option value="gemini-2.0-flash" selected>gemini-2.0-flash</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn-primary">حفظ المفتاح</button>
+                    <button type="submit" class="btn-primary">حفظ الإعدادات</button>
                 </form>
                 <div id="geminiStatus" class="api-status" style="margin-top:12px;"></div>
             </div>
@@ -1777,12 +1758,10 @@
                 return this.get('settings', def);
             },
             setSettings(s) { this.set('settings', s); },
-            getApiKey() { return this.get('api_key', ''); },
-            setApiKey(key) { this.set('api_key', key); },
-            // Gemini specific
+            // Gemini specific (المصدر الوحيد للذكاء الاصطناعي)
             getGeminiKey() { return this.get('gemini_key', ''); },
             setGeminiKey(key) { this.set('gemini_key', key); },
-            getGeminiModel() { return this.get('gemini_model', 'gemini-2.0-flash'); },
+            getGeminiModel() { return this.get('gemini_model', 'gemini-3.6-flash'); },
             setGeminiModel(model) { this.set('gemini_model', model); },
             getCategories() {
                 const s = this.getSettings();
@@ -1899,147 +1878,7 @@
         };
 
         /* ============================================================
-           AI.JS (OpenAI - موجود سابقاً)
-           ============================================================ */
-        const AI = {
-            getApiKey() { return Storage.getApiKey(); },
-            async parseExpense(text) {
-                const key = this.getApiKey();
-                if (!key) throw new Error('مفتاح API غير موجود.');
-                const prompt =
-                    `أنت مساعد ذكي لتحليل المصروفات. قم بتحليل النص التالي واستخرج المعلومات التالية:
-                - المبلغ (رقم فقط)
-                - التصنيف (من القائمة: المواد الغذائية, البنزين, الكهرباء, الماء, الإنترنت, الإيجار, الأقساط, المطاعم, المقاهي, الصحة, الترفيه, التسوق, التعليم, السيارة, مصروف شخصي, أخرى)
-                - التاجر (اسم المتجر أو الجهة)
-                - التاريخ (صيغة YYYY-MM-DD، إذا لم يحدد فاستخدم اليوم)
-                أعد النتيجة بصيغة JSON فقط بدون أي نص إضافي، مثل:
-                {"amount": 18, "category": "المطاعم", "merchant": "البيك", "date": "2026-06-27"}
-                النص: ${text}`;
-                try {
-                    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
-                        body: JSON.stringify({
-                            model: 'gpt-3.5-turbo',
-                            messages: [{ role: 'user', content: prompt }],
-                            temperature: 0.3,
-                            max_tokens: 200
-                        })
-                    });
-                    if (!response.ok) {
-                        const err = await response.json();
-                        throw new Error(err.error?.message || 'خطأ في الاتصال');
-                    }
-                    const data = await response.json();
-                    const content = data.choices[0].message.content;
-                    const json = JSON.parse(content);
-                    return {
-                        amount: parseFloat(json.amount) || 0,
-                        category: json.category || 'أخرى',
-                        merchant: json.merchant || '',
-                        date: json.date || Utils.today()
-                    };
-                } catch (e) {
-                    const fallback = this.localParse(text);
-                    if (fallback) return fallback;
-                    throw new Error(e.message || 'فشل تحليل النص');
-                }
-            },
-            localParse(text) {
-                const amountMatch = text.match(/(\d+\.?\d*)\s*ريال/i);
-                const amount = amountMatch ? parseFloat(amountMatch[1]) : 0;
-                const categories = Utils.defaultCategories();
-                let category = 'أخرى';
-                for (const cat of categories) { if (text.includes(cat)) { category = cat; break; } }
-                const merchantMatch = text.match(/(?:من|في|عند|من عند)\s*([^\d,،]+)/i);
-                const merchant = merchantMatch ? merchantMatch[1].trim() : '';
-                return { amount, category, merchant, date: Utils.today() };
-            },
-            async runAnalytics(expenses, settings) {
-                const key = this.getApiKey();
-                if (!key) throw new Error('مفتاح API غير موجود.');
-                const totalExpenses = Budget.getTotal(expenses);
-                const remaining = (parseFloat(settings.salary) || 0) - totalExpenses;
-                const catMap = Budget.getByCategory(expenses);
-                const catBudgets = settings.categoryBudgets || {};
-                let catSummary = '';
-                for (const [cat, spent] of Object.entries(catMap)) {
-                    const budget = catBudgets[cat] || 0;
-                    const pct = budget > 0 ? ((spent / budget) * 100).toFixed(0) : 0;
-                    catSummary += `- ${cat}: صرف ${spent.toFixed(2)} ريال، الميزانية ${budget.toFixed(2)} ريال (${pct}%)\n`;
-                }
-                const prompt =
-                    `أنت مستشار مالي خبير. بناءً على البيانات التالية، قدم تحليلاً ذكياً:
-                الراتب الشهري: ${settings.salary} ريال
-                إجمالي المصروفات هذا الشهر: ${totalExpenses.toFixed(2)} ريال
-                المتبقي: ${remaining.toFixed(2)} ريال
-                هدف الادخار: ${settings.savingsGoal || 0} ريال
-                تفاصيل المصروفات حسب التصنيف:
-                ${catSummary}
-                المطلوب:
-                1. اقتراحات لتقليل المصروفات
-                2. تحذيرات إذا تجاوزت ميزانية أي تصنيف
-                3. نصائح عامة
-                4. توقع نهاية الشهر
-                5. أفضل ميزانية مقترحة للشهر القادم
-                كن مختصراً ومفيداً، أجب باللغة العربية.`;
-                const response = await fetch('https://api.openai.com/v1/chat/completions', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
-                    body: JSON.stringify({
-                        model: 'gpt-3.5-turbo',
-                        messages: [{ role: 'user', content: prompt }],
-                        temperature: 0.7,
-                        max_tokens: 800
-                    })
-                });
-                if (!response.ok) {
-                    const err = await response.json();
-                    throw new Error(err.error?.message || 'فشل تحليل البيانات');
-                }
-                const data = await response.json();
-                return data.choices[0].message.content;
-            },
-            async askQuestion(question, expenses, settings) {
-                const key = this.getApiKey();
-                if (!key) throw new Error('مفتاح API غير موجود.');
-                const totalExpenses = Budget.getTotal(expenses);
-                const remaining = (parseFloat(settings.salary) || 0) - totalExpenses;
-                const catMap = Budget.getByCategory(expenses);
-                let catStr = '';
-                for (const [cat, spent] of Object.entries(catMap)) {
-                    catStr += `- ${cat}: ${spent.toFixed(2)} ريال\n`;
-                }
-                const prompt =
-                    `أنت مستشار مالي. أجب على السؤال التالي بناءً على البيانات:
-                الراتب: ${settings.salary} ريال
-                المصروفات الكلية: ${totalExpenses.toFixed(2)} ريال
-                المتبقي: ${remaining.toFixed(2)} ريال
-                المصروفات حسب التصنيف:
-                ${catStr}
-                السؤال: ${question}
-                أجب باختصار وبشكل مفيد باللغة العربية.`;
-                const response = await fetch('https://api.openai.com/v1/chat/completions', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
-                    body: JSON.stringify({
-                        model: 'gpt-3.5-turbo',
-                        messages: [{ role: 'user', content: prompt }],
-                        temperature: 0.5,
-                        max_tokens: 400
-                    })
-                });
-                if (!response.ok) {
-                    const err = await response.json();
-                    throw new Error(err.error?.message || 'فشل الإجابة');
-                }
-                const data = await response.json();
-                return data.choices[0].message.content;
-            }
-        };
-
-        /* ============================================================
-           GEMINI.JS - مساعد Gemini الجديد
+           GEMINI.JS - مساعد Gemini (المصدر الوحيد للذكاء الاصطناعي بالتطبيق)
            ============================================================ */
         const Gemini = {
             getApiKey() { return Storage.getGeminiKey(); },
@@ -2096,6 +1935,119 @@
                 } catch (e) {
                     throw new Error(e.message || 'فشل الاتصال بـ Gemini');
                 }
+            },
+
+            // ----- طلب نصي مباشر (سؤال واحد بدون محادثة) -----
+            async generate(prompt) {
+                const key = this.getApiKey();
+                if (!key) throw new Error('مفتاح Gemini غير موجود.');
+                const model = this.getModel();
+                const url =
+                `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+                const payload = {
+                    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                    generationConfig: { temperature: 0.5, maxOutputTokens: 800, topP: 0.95 }
+                };
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.error?.message || 'خطأ في الاتصال بـ Gemini');
+                }
+                const data = await response.json();
+                return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+            },
+
+            // ----- تحليل نص مصروف تلقائياً -----
+            async parseExpense(text) {
+                const prompt =
+                    `أنت مساعد ذكي لتحليل المصروفات. قم بتحليل النص التالي واستخرج المعلومات التالية:
+                - المبلغ (رقم فقط)
+                - التصنيف (من القائمة: المواد الغذائية, البنزين, الكهرباء, الماء, الإنترنت, الإيجار, الأقساط, المطاعم, المقاهي, الصحة, الترفيه, التسوق, التعليم, السيارة, مصروف شخصي, أخرى)
+                - التاجر (اسم المتجر أو الجهة)
+                - التاريخ (صيغة YYYY-MM-DD، إذا لم يحدد فاستخدم اليوم)
+                أعد النتيجة بصيغة JSON فقط بدون أي نص إضافي، مثل:
+                {"amount": 18, "category": "المطاعم", "merchant": "البيك", "date": "2026-06-27"}
+                النص: ${text}`;
+                try {
+                    const content = await this.generate(prompt);
+                    const jsonMatch = content.match(/\{[\s\S]*\}/);
+                    const json = JSON.parse(jsonMatch ? jsonMatch[0] : content);
+                    return {
+                        amount: parseFloat(json.amount) || 0,
+                        category: json.category || 'أخرى',
+                        merchant: json.merchant || '',
+                        date: json.date || Utils.today()
+                    };
+                } catch (e) {
+                    const fallback = this.localParse(text);
+                    if (fallback) return fallback;
+                    throw new Error(e.message || 'فشل تحليل النص');
+                }
+            },
+            localParse(text) {
+                const amountMatch = text.match(/(\d+\.?\d*)\s*ريال/i);
+                const amount = amountMatch ? parseFloat(amountMatch[1]) : 0;
+                const categories = Utils.defaultCategories();
+                let category = 'أخرى';
+                for (const cat of categories) { if (text.includes(cat)) { category = cat; break; } }
+                const merchantMatch = text.match(/(?:من|في|عند|من عند)\s*([^\d,،]+)/i);
+                const merchant = merchantMatch ? merchantMatch[1].trim() : '';
+                return { amount, category, merchant, date: Utils.today() };
+            },
+
+            // ----- تحليل مالي شامل -----
+            async runAnalytics(expenses, settings) {
+                const totalExpenses = Budget.getTotal(expenses);
+                const remaining = (parseFloat(settings.salary) || 0) - totalExpenses;
+                const catMap = Budget.getByCategory(expenses);
+                const catBudgets = settings.categoryBudgets || {};
+                let catSummary = '';
+                for (const [cat, spent] of Object.entries(catMap)) {
+                    const budget = catBudgets[cat] || 0;
+                    const pct = budget > 0 ? ((spent / budget) * 100).toFixed(0) : 0;
+                    catSummary += `- ${cat}: صرف ${spent.toFixed(2)} ريال، الميزانية ${budget.toFixed(2)} ريال (${pct}%)\n`;
+                }
+                const prompt =
+                    `أنت مستشار مالي خبير. بناءً على البيانات التالية، قدم تحليلاً ذكياً:
+                الراتب الشهري: ${settings.salary} ريال
+                إجمالي المصروفات هذا الشهر: ${totalExpenses.toFixed(2)} ريال
+                المتبقي: ${remaining.toFixed(2)} ريال
+                هدف الادخار: ${settings.savingsGoal || 0} ريال
+                تفاصيل المصروفات حسب التصنيف:
+                ${catSummary}
+                المطلوب:
+                1. اقتراحات لتقليل المصروفات
+                2. تحذيرات إذا تجاوزت ميزانية أي تصنيف
+                3. نصائح عامة
+                4. توقع نهاية الشهر
+                5. أفضل ميزانية مقترحة للشهر القادم
+                كن مختصراً ومفيداً، أجب باللغة العربية.`;
+                return await this.generate(prompt);
+            },
+
+            // ----- الإجابة على سؤال سريع -----
+            async askQuestion(question, expenses, settings) {
+                const totalExpenses = Budget.getTotal(expenses);
+                const remaining = (parseFloat(settings.salary) || 0) - totalExpenses;
+                const catMap = Budget.getByCategory(expenses);
+                let catStr = '';
+                for (const [cat, spent] of Object.entries(catMap)) {
+                    catStr += `- ${cat}: ${spent.toFixed(2)} ريال\n`;
+                }
+                const prompt =
+                    `أنت مستشار مالي. أجب على السؤال التالي بناءً على البيانات:
+                الراتب: ${settings.salary} ريال
+                المصروفات الكلية: ${totalExpenses.toFixed(2)} ريال
+                المتبقي: ${remaining.toFixed(2)} ريال
+                المصروفات حسب التصنيف:
+                ${catStr}
+                السؤال: ${question}
+                أجب باختصار وبشكل مفيد باللغة العربية.`;
+                return await this.generate(prompt);
             }
         };
 
@@ -2244,7 +2196,6 @@
                 this.setupDate();
                 this.setupExpenseModal();
                 this.setupSettings();
-                this.setupAISettings();
                 this.setupAnalytics();
                 this.setupSetupWizard();
                 this.setupGeminiModal();
@@ -2284,7 +2235,6 @@
                     reports: Utils.id('page-reports'),
                     analytics: Utils.id('page-analytics'),
                     settings: Utils.id('page-settings'),
-                    'ai-settings': Utils.id('page-ai-settings'),
                     chat: Utils.id('page-chat')
                 };
                 const titles = {
@@ -2293,7 +2243,6 @@
                     reports: 'التقارير',
                     analytics: 'التحليلات',
                     settings: 'الإعدادات',
-                    'ai-settings': 'إعدادات الذكاء',
                     chat: 'المساعد'
                 };
 
@@ -2407,7 +2356,7 @@
                     }
                     parseResult.innerHTML = '<div class="parse-review">جاري التحليل...</div>';
                     try {
-                        const result = await AI.parseExpense(text);
+                        const result = await Gemini.parseExpense(text);
                         parsedData = result;
                         parseResult.innerHTML = `
                             <div class="parse-review">
@@ -2536,46 +2485,6 @@
                 });
             },
 
-            // ----- AI Settings (OpenAI) -----
-            setupAISettings() {
-                const form = Utils.id('aiSettingsForm');
-                const keyInput = Utils.id('aiApiKey');
-                const toggleBtn = Utils.id('toggleApiKey');
-                const status = Utils.id('apiKeyStatus');
-
-                const loadKey = () => {
-                    const key = Storage.getApiKey();
-                    if (key) {
-                        keyInput.value = key;
-                        status.className = 'api-status success';
-                        status.textContent = '✅ مفتاح API محفوظ';
-                    } else {
-                        status.className = 'api-status error';
-                        status.textContent = '⚠️ لم يتم إضافة مفتاح API بعد';
-                    }
-                };
-                loadKey();
-
-                Utils.on(toggleBtn, 'click', () => {
-                    const type = keyInput.type === 'password' ? 'text' : 'password';
-                    keyInput.type = type;
-                    toggleBtn.querySelector('i').className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
-                });
-
-                Utils.on(form, 'submit', (e) => {
-                    e.preventDefault();
-                    const key = keyInput.value.trim();
-                    if (!key) {
-                        status.className = 'api-status error';
-                        status.textContent = '⚠️ الرجاء إدخال مفتاح API';
-                        return;
-                    }
-                    Storage.setApiKey(key);
-                    status.className = 'api-status success';
-                    status.textContent = '✅ تم حفظ المفتاح بنجاح';
-                });
-            },
-
             // ----- Analytics (نفس السابق) -----
             setupAnalytics() {
                 const runBtn = Utils.id('runAnalyticsBtn');
@@ -2587,7 +2496,7 @@
                     try {
                         const expenses = Budget.getMonthExpenses();
                         const settings = Storage.getSettings();
-                        const response = await AI.runAnalytics(expenses, settings);
+                        const response = await Gemini.runAnalytics(expenses, settings);
                         resultDiv.innerHTML =
                             `<div class="analytics-response glass">${response.replace(/\n/g, '<br>')}</div>`;
                     } catch (err) {
@@ -2605,7 +2514,7 @@
                         try {
                             const expenses = Budget.getMonthExpenses();
                             const settings = Storage.getSettings();
-                            const response = await AI.askQuestion(q, expenses, settings);
+                            const response = await Gemini.askQuestion(q, expenses, settings);
                             resultDiv.innerHTML =
                                 `<div class="analytics-response glass"><strong>س: ${q}</strong><br><br>${response.replace(/\n/g, '<br>')}</div>`;
                         } catch (err) {
@@ -2702,7 +2611,7 @@
                         status.textContent = '⚠️ لم يتم إضافة مفتاح Gemini بعد';
                     }
                     const savedModel = Storage.getGeminiModel();
-                    modelSelect.value = savedModel || 'gemini-2.0-flash';
+                    modelSelect.value = savedModel || 'gemini-3.6-flash';
                 });
 
                 Utils.on(closeBtn, 'click', () => {
@@ -3054,4 +2963,4 @@
         });
     </script>
 </body>
-</html> 
+</html>
