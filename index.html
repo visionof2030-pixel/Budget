@@ -2285,12 +2285,9 @@
 
             // ===== حساب مجموع عناصر متعددة من وصف واحد =====
             parseMultipleItems(text) {
-                // يبحث عن أنماط مثل: "فطور بـ 15 ريال ثم 19 ريال ثم شاهي بـ 6 ريال"
-                // أو "5 حبات الحبة بـ 2.50 ريال"
                 const items = [];
                 let remaining = text;
 
-                // نمط: "X حبات الحبة بـ Y ريال" أو "X حبة بـ Y ريال"
                 const bulkPattern = /(\d+)\s*(حبات?|وحدات?|قطع?)\s*(الحبة|الوحدة|القطعة)?\s*بـ\s*([\d.]+)\s*ريال/i;
                 let bulkMatch = remaining.match(bulkPattern);
                 if (bulkMatch) {
@@ -2300,7 +2297,6 @@
                     remaining = remaining.replace(bulkMatch[0], '');
                 }
 
-                // نمط: "شيء بـ X ريال" أو "شيء ب X ريال"
                 const singlePattern = /([^،,]+)\s*(بـ|ب)\s*([\d.]+)\s*ريال/gi;
                 let match;
                 while ((match = singlePattern.exec(remaining)) !== null) {
@@ -2309,7 +2305,6 @@
                     items.push({ count: 1, price: amount, total: amount, desc: desc || 'مادة' });
                 }
 
-                // إذا لم يتم العثور على أي نمط، حاول البحث عن أرقام فقط
                 if (items.length === 0) {
                     const numberPattern = /([\d.]+)\s*ريال/g;
                     let numMatch;
@@ -2512,7 +2507,6 @@
                         description: json.description || ''
                     };
                 } catch (e) {
-                    // استخدام المعالج المحلي المتقدم
                     const parsed = this.localParseAdvanced(text);
                     if (parsed) return parsed;
                     const fallback = this.localParse(text);
@@ -2533,7 +2527,6 @@
             },
 
             localParseAdvanced(text) {
-                // استخدام Budget.parseMultipleItems لحساب مجموع العناصر
                 const result = Budget.parseMultipleItems(text);
                 if (result.total > 0) {
                     const categories = Utils.defaultCategories();
@@ -2541,7 +2534,6 @@
                     for (const cat of categories) {
                         if (text.includes(cat)) { category = cat; break; }
                     }
-                    // محاولة استخراج التاجر
                     const merchantMatch = text.match(/(?:من|في|عند|من عند)\s*([^\d,،]+)/i);
                     const merchant = merchantMatch ? merchantMatch[1].trim() : '';
                     return {
@@ -2624,7 +2616,84 @@
                 return await this.generate(prompt);
             },
 
+            // ===== دالة متقدمة للرد على الأسئلة المالية مباشرة =====
+            async answerFinancialQuery(query, expenses, settings) {
+                // تحليل نوع السؤال
+                const today = Utils.today();
+                const todayExpenses = Budget.getTodayExpenses();
+                const todayTotal = Budget.getTotal(todayExpenses);
+                const monthExpenses = Budget.getMonthExpenses();
+                const monthTotal = Budget.getTotal(monthExpenses);
+                const remaining = Budget.getRemaining(monthExpenses);
+                const dailyBudget = Budget.getDailyBudget();
+
+                // بناء سياق غني للإجابة
+                const context = {
+                    today: today,
+                    todayTotal: todayTotal,
+                    todayCount: todayExpenses.length,
+                    todayDetails: todayExpenses.map(e => `${e.description || e.category}: ${Utils.formatCurrency(e.amount)}`)
+                        .join('، '),
+                    monthTotal: monthTotal,
+                    monthCount: monthExpenses.length,
+                    remaining: remaining,
+                    dailyBudget: dailyBudget,
+                    salary: settings.salary || 0,
+                    savingsGoal: settings.savingsGoal || 0
+                };
+
+                // تحديد نوع السؤال
+                let answer = '';
+                const q = query.toLowerCase();
+
+                if (q.includes('كم مصروفي اليوم') || q.includes('مصروفات اليوم') || q.includes('كم أنفقت اليوم')) {
+                    if (todayTotal === 0) {
+                        answer = `📊 **مصروفات اليوم (${Utils.formatDate(today)})**\n\nلا توجد مصروفات مسجلة لهذا اليوم. مجموع مصروفاتك اليوم = 0 ريال.`;
+                    } else {
+                        answer =
+                            `📊 **مصروفات اليوم (${Utils.formatDate(today)})**\n\n` +
+                            `المجموع الكلي: **${Utils.formatCurrency(todayTotal)}**\n` +
+                            `عدد المصروفات: **${todayExpenses.length}**\n\n` +
+                            `📋 **التفاصيل:**\n${todayExpenses.map(e => `• ${e.description || e.category}: ${Utils.formatCurrency(e.amount)}`).join('\n')}\n\n` +
+                            `💰 المتبقي من ميزانية اليوم: **${Utils.formatCurrency(dailyBudget - todayTotal)}**`;
+                    }
+                    return answer;
+                }
+
+                if (q.includes('كم مصروفي هذا الشهر') || q.includes('مصروفات الشهر')) {
+                    answer =
+                        `📊 **مصروفات هذا الشهر**\n\n` +
+                        `المجموع الكلي: **${Utils.formatCurrency(monthTotal)}**\n` +
+                        `عدد المصروفات: **${monthExpenses.length}**\n` +
+                        `المتبقي من الراتب: **${Utils.formatCurrency(remaining)}**\n` +
+                        `ميزانية اليوم المتبقية: **${Utils.formatCurrency(dailyBudget)}**\n\n` +
+                        `📋 **التفاصيل حسب التصنيف:**\n${Object.entries(Budget.getByCategory(monthExpenses)).map(([cat, amt]) => `• ${cat}: ${Utils.formatCurrency(amt)}`).join('\n')}`;
+                    return answer;
+                }
+
+                if (q.includes('كم المتبقي') || q.includes('المتبقي من الراتب')) {
+                    answer =
+                        `💰 **المتبقي من الراتب هذا الشهر**\n\n` +
+                        `الراتب الشهري: **${Utils.formatCurrency(settings.salary || 0)}**\n` +
+                        `المصروفات: **${Utils.formatCurrency(monthTotal)}**\n` +
+                        `المتبقي: **${Utils.formatCurrency(remaining)}**\n` +
+                        `هدف الادخار: **${Utils.formatCurrency(settings.savingsGoal || 0)}**\n\n` +
+                        `${remaining >= (settings.savingsGoal || 0) ? '✅ أنت على المسار الصحيح لتحقيق هدف الادخار!' : '⚠️ أنت بحاجة لتقليل المصروفات لتحقيق هدف الادخار.'}`;
+                    return answer;
+                }
+
+                // إذا لم يكن السؤال من الأنواع المحددة، استخدم الذكاء الاصطناعي للإجابة
+                return null;
+            },
+
             async thinkAndDecide(query, context) {
+                // أولاً: حاول الإجابة مباشرة بدون استدعاء Gemini
+                const directAnswer = await this.answerFinancialQuery(query, context.expenses || [], context.settings || {});
+                if (directAnswer) {
+                    return directAnswer;
+                }
+
+                // إذا لم نستطع الإجابة مباشرة، استخدم Gemini
                 const prompt =
                     `أنت Budget AI Agent، وكيل ذكاء اصطناعي متخصص في الإدارة المالية.
                 لديك صلاحيات كاملة على التطبيق. بناءً على طلب المستخدم التالي، قرر الإجراءات المناسبة.
@@ -2643,7 +2712,9 @@
 
                 تذكر: يمكنك تنفيذ أي إجراء على التطبيق بما في ذلك تغيير ميزانية اليوم والأسبوع والشهر،
                 إعادة توزيع الميزانية حسب الأولويات، تحليل الأنماط، التوقعات، وغيرها.
-                عند إضافة مصروف، احسب المجموع الإجمالي إذا كان الطلب يحتوي على عدة عناصر.`;
+                عند إضافة مصروف، احسب المجموع الإجمالي إذا كان الطلب يحتوي على عدة عناصر.
+
+                إذا كان السؤال عن بيانات (مثل "كم مصروفي اليوم")، قم بحساب البيانات وعرضها مباشرة في الرد.`;
 
                 return await this.generate(prompt);
             }
@@ -2676,7 +2747,6 @@
                     try {
                         switch (a.type) {
                             case 'add_expense': {
-                                // دعم إضافة مصروف مع وصف تفصيلي
                                 const e = Budget.addExpense({
                                     amount: a.amount,
                                     description: a.description || a.desc || 'مصروف',
@@ -3816,7 +3886,8 @@
                         4. للحذف تحتاج معرف id للمصروف - إذا لم تعرفه اطلب من المستخدم توضيح المصروف المقصود بدلاً من تخمين id.
                         5. التاريخ اليوم إذا لم يُحدد المستخدم تاريخاً هو ${realDateStr} (استخدمه كافتراضي).
                         6. يمكنك تضمين أكثر من إجراء في نفس الكتلة داخل مصفوفة actions إذا طلب المستخدم عدة عمليات دفعة واحدة.
-                        7. عند إضافة مصروف يحتوي على عدة عناصر (مثل: فطور بـ 15 ريال ثم 19 ريال ثم شاهي بـ 6 ريال)، قم بحساب المجموع الإجمالي وإضافته كمصروف واحد مع وصف يوضح المكونات.`;
+                        7. عند إضافة مصروف يحتوي على عدة عناصر (مثل: فطور بـ 15 ريال ثم 19 ريال ثم شاهي بـ 6 ريال)، قم بحساب المجموع الإجمالي وإضافته كمصروف واحد مع وصف يوضح المكونات.
+                        8. إذا كان السؤال عن بيانات (مثل "كم مصروفي اليوم")، قم بحساب البيانات وعرضها مباشرة في الرد دون الحاجة إلى إجراءات.`;
 
                         // استخدام دالة thinkAndDecide المتقدمة
                         const rawResponse = await Gemini.thinkAndDecide(text, {
@@ -3829,17 +3900,23 @@
                             patterns,
                             travelSummary,
                             tempSummary,
-                            daysUntilSalary
+                            daysUntilSalary,
+                            expenses: expenses,
+                            todayExpenses: Budget.getTodayExpenses(),
+                            todayTotal: Budget.getTotal(Budget.getTodayExpenses())
                         });
 
                         const { cleanText, actions } = Commands.extract(rawResponse);
 
                         hideTyping();
 
-                        addMessage(cleanText || rawResponse, 'assistant');
-                        chatHistory.push({ role: 'assistant', content: cleanText || rawResponse });
-
-                        if (actions.length > 0) {
+                        // إذا كان الرد يحتوي على actions وكانت فارغة، نعرض الرد كما هو
+                        if (actions.length === 0) {
+                            addMessage(cleanText || rawResponse, 'assistant');
+                            chatHistory.push({ role: 'assistant', content: cleanText || rawResponse });
+                        } else {
+                            addMessage(cleanText || rawResponse, 'assistant');
+                            chatHistory.push({ role: 'assistant', content: cleanText || rawResponse });
                             const log = Commands.execute(actions);
                             if (log.length > 0) {
                                 addMessage(log.join('<br>'), 'system');
@@ -3930,7 +4007,6 @@
                     </div>`
                 ).join('');
 
-                // عند النقر على إجمالي المصروفات، عرض التفاصيل
                 const totalCard = cardsContainer.querySelector('.dash-card.negative .card-value');
                 if (totalCard) {
                     totalCard.closest('.dash-card').addEventListener('click', () => {
