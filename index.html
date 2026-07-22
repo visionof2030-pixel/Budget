@@ -1611,6 +1611,7 @@
                         <div class="chat-messages" id="chatMessages">
                             <div class="chat-message assistant">
                                 مرحباً! أنا Budget AI، مساعدك المالي الذكي. كيف يمكنني مساعدتك اليوم؟
+                                يمكنك أيضاً إخباري بأي مبلغ صرفته (مثال: "دفعت 50 ريال بنزين") وسأسجله لك تلقائياً وأحدّث لوحة التحكم.
                                 <div class="message-time">الآن</div>
                             </div>
                         </div>
@@ -3012,6 +3013,14 @@
                             catSummary += `- ${cat}: صرف ${spent.toFixed(2)} ريال، الميزانية ${budget.toFixed(2)} ريال (${pct}%)\n`;
                         }
 
+                        // قائمة التصنيفات والتصنيفات الفرعية المتاحة فعلياً في التطبيق
+                        const availableCats = Storage.getCategories();
+                        let subCatsInfo = '';
+                        availableCats.forEach(cat => {
+                            const subs = Utils.getSubCategories(cat);
+                            if (subs.length) subCatsInfo += `- ${cat} ← (${subs.join('، ')})\n`;
+                        });
+
                         // بناء System Prompt الرسمي
                         const systemPrompt = `أنت Budget AI Agent، المساعد المالي الذكي الرسمي داخل تطبيق Budget.
                         أنت لست ChatBot عام، بل وكيل ذكاء اصطناعي (AI Agent) متخصص في الإدارة المالية الشخصية، وتحليل البيانات، واتخاذ القرارات بناءً على البيانات الفعلية.
@@ -3036,6 +3045,14 @@
                         المستقبل: قد يتم تزويدك مستقبلاً بإمكانية الاتصال بـ Supabase، Tool Calling، Function Calling، RAG، Embeddings، OCR، تحليل الفواتير، رفع ملفات، استيراد كشوف البنوك.
                         الهدف النهائي: كن أفضل مستشار مالي شخصي داخل التطبيق، واجعل كل إجابة مبنية على البيانات الفعلية، وتساعد المستخدم على اتخاذ قرارات مالية أفضل، مع الحفاظ على الدقة والشفافية في كل رد.
 
+                        تسجيل المصروفات من المحادثة: إذا ذكر المستخدم أنه صرف أو دفع أو اشترى شيئاً بمبلغ فعلي محدد (مثال: "دفعت 50 ريال بنزين"، "صرفت 20 على قهوة"، "اشتريت غرض ابني بـ100 ريال")، فهذا يعني أنه يريد تسجيل هذا المبلغ كمصروف فعلي في التطبيق.
+                        في هذه الحالة فقط: بعد ردك الطبيعي المختصر، أضف في سطر منفصل وأخير النص التالي بالضبط: [EXPENSE_JSON] يليه كائن JSON صالح دون أي تنسيق Markdown حوله، بالشكل:
+                        {"amount": رقم فقط, "category": "أحد التصنيفات المتاحة أدناه بالضبط", "subCategory": "أحد التصنيفات الفرعية المتاحة إن وجدت وإلا اتركها فارغة", "description": "وصف مختصر", "merchant": "اسم المتجر إن ذُكر وإلا فارغ", "date": "YYYY-MM-DD (استخدم تاريخ اليوم إذا لم يُحدد المستخدم تاريخاً آخر)"}
+                        التصنيفات المتاحة (اختر الأقرب دلالياً، ولا تخترع تصنيفاً جديداً): ${availableCats.join('، ')}
+                        التصنيفات الفرعية المتاحة لبعض التصنيفات:
+                        ${subCatsInfo || 'لا توجد تصنيفات فرعية معرّفة حالياً.'}
+                        إذا لم يذكر المستخدم مصروفاً فعلياً بمبلغ محدد، لا تضف سطر [EXPENSE_JSON] إطلاقاً. لا تضف أكثر من مصروف واحد في نفس الرد؛ إذا ذكر المستخدم عدة مبالغ في رسالة واحدة اطلب منه إرسالها واحداً تلو الآخر بدلاً من محاولة تجميعها.
+
                         البيانات الحالية:
                         - الراتب الشهري: ${settings.salary || 0} ريال
                         - إجمالي المصروفات هذا الشهر: ${totalMonth.toFixed(2)} ريال
@@ -3051,9 +3068,40 @@
                         // إزالة مؤشر الكتابة
                         hideTyping();
 
+                        // فحص إن كان الرد يحتوي على أمر تسجيل مصروف [EXPENSE_JSON]
+                        let displayResponse = response;
+                        const expenseMatch = response.match(/\[EXPENSE_JSON\]\s*(\{[\s\S]*?\})\s*$/);
+                        if (expenseMatch) {
+                            displayResponse = response.slice(0, expenseMatch.index).trim();
+                            try {
+                                const data = JSON.parse(expenseMatch[1]);
+                                const amount = parseFloat(data.amount);
+                                if (amount && amount > 0) {
+                                    const entry = Budget.addExpense({
+                                        amount: amount,
+                                        description: data.description || text,
+                                        category: data.category || 'أخرى',
+                                        subCategory: data.subCategory || '',
+                                        date: data.date || Utils.today(),
+                                        merchant: data.merchant || '',
+                                        paymentMethod: '',
+                                        notes: ''
+                                    });
+                                    // تحديث الصفحة الرئيسية وكل الشاشات المرتبطة فوراً
+                                    this.renderDashboard();
+                                    this.renderExpenses();
+                                    this.renderReports();
+                                    this.updateCategoryFilters();
+                                    displayResponse += `${displayResponse ? '\n\n' : ''}✅ تم تسجيل مصروف بقيمة ${Utils.formatCurrency(entry.amount)} ضمن تصنيف "${entry.category}"${entry.subCategory ? ' (' + entry.subCategory + ')' : ''} وتحديث لوحة التحكم تلقائياً.`;
+                                }
+                            } catch (parseErr) {
+                                // تجاهل بصمت إن فشل تحليل JSON، ويُعرض الرد النصي فقط
+                            }
+                        }
+
                         // إضافة رد المساعد
-                        addMessage(response, 'assistant');
-                        chatHistory.push({ role: 'assistant', content: response });
+                        addMessage(displayResponse, 'assistant');
+                        chatHistory.push({ role: 'assistant', content: displayResponse });
 
                     } catch (err) {
                         hideTyping();
