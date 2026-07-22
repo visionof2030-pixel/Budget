@@ -2090,10 +2090,13 @@
                     UI.renderExpenses();
                     UI.renderReports();
                     UI.updateCategoryFilters();
-                    if (Utils.id('page-travel') && Utils.id('page-travel').classList.contains('active')) {
+                    // تحديث ميزانية السفر والمؤقتة إذا كانت الصفحة ظاهرة
+                    const travelPage = Utils.id('page-travel');
+                    if (travelPage && travelPage.classList.contains('active')) {
                         UI.renderTravel();
                     }
-                    if (Utils.id('page-temp') && Utils.id('page-temp').classList.contains('active')) {
+                    const tempPage = Utils.id('page-temp');
+                    if (tempPage && tempPage.classList.contains('active')) {
                         UI.renderTemp();
                     }
                 }
