@@ -525,6 +525,7 @@
             on: (el, ev, fn) => (typeof el === 'string' ? Utils.qs(el) : el).addEventListener(ev, fn, { passive: true }),
             formatCurrency: (val) => { const num = parseFloat(val) || 0; return num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' ريال'; },
             formatDate: (d) => { const dt = new Date(d); return dt.toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' }); },
+            formatDateFull: (d) => { const dt = new Date(d); return dt.toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' }); },
             today: () => (typeof WorldTime !== 'undefined' ? WorldTime.now() : new Date()).toISOString().split('T')[0],
             getWeekRange: () => { const now = (typeof WorldTime !== 'undefined' ? WorldTime.now() : new Date()); const day = now.getDay() || 7; const start = new Date(now); start.setDate(now.getDate() - day + 1); const end = new Date(start); end.setDate(start.getDate() + 6); return { start: start.toISOString().split('T')[0], end: end.toISOString().split('T')[0] }; },
             getMonthRange: () => { const now = (typeof WorldTime !== 'undefined' ? WorldTime.now() : new Date()); const start = new Date(now.getFullYear(), now.getMonth(), 1); const end = new Date(now.getFullYear(), now.getMonth() + 1, 0); return { start: start.toISOString().split('T')[0], end: end.toISOString().split('T')[0] }; },
@@ -1145,7 +1146,7 @@
                 const title = Utils.id('detailModalTitle');
                 title.textContent = 'تفاصيل المصروف: ' + (expense.description || expense.category);
                 Utils.id('deleteDetailBtn').dataset.id = expense.id;
-                content.innerHTML = '<div class="expense-detail-grid"><div class="detail-item"><span class="label">المبلغ</span><span class="value">' + Utils.formatCurrency(expense.amount) + '</span></div><div class="detail-item"><span class="label">التاريخ</span><span class="value">' + Utils.formatDate(expense.date) + '</span></div><div class="detail-item"><span class="label">التصنيف</span><span class="value">' + (expense.category || 'أخرى') + '</span></div><div class="detail-item"><span class="label">التصنيف الفرعي</span><span class="value">' + (expense.subCategory || '—') + '</span></div><div class="detail-item"><span class="label">التاجر</span><span class="value">' + (expense.merchant || '—') + '</span></div><div class="detail-item"><span class="label">طريقة الدفع</span><span class="value">' + (expense.paymentMethod || '—') + '</span></div><div class="detail-divider"></div><div class="detail-item" style="grid-column:1/-1;"><span class="label">الوصف</span><span class="value">' + (expense.description || '—') + '</span></div><div class="detail-item" style="grid-column:1/-1;"><span class="label">ملاحظات</span><span class="value">' + (expense.notes || '—') + '</span></div><div class="detail-item" style="grid-column:1/-1;"><span class="label">تاريخ الإضافة</span><span class="value">' + new Date(expense.createdAt).toLocaleString('ar-SA') + '</span></div><div class="detail-item" style="grid-column:1/-1;"><span class="label">المعرف</span><span class="value" style="font-size:0.7rem;color:var(--text-muted);">' + expense.id + '</span></div></div>';
+                content.innerHTML = '<div class="expense-detail-grid"><div class="detail-item"><span class="label">المبلغ</span><span class="value">' + Utils.formatCurrency(expense.amount) + '</span></div><div class="detail-item"><span class="label">التاريخ</span><span class="value">' + Utils.formatDateFull(expense.date) + '</span></div><div class="detail-item"><span class="label">التصنيف</span><span class="value">' + (expense.category || 'أخرى') + '</span></div><div class="detail-item"><span class="label">التصنيف الفرعي</span><span class="value">' + (expense.subCategory || '—') + '</span></div><div class="detail-item"><span class="label">التاجر</span><span class="value">' + (expense.merchant || '—') + '</span></div><div class="detail-item"><span class="label">طريقة الدفع</span><span class="value">' + (expense.paymentMethod || '—') + '</span></div><div class="detail-divider"></div><div class="detail-item" style="grid-column:1/-1;"><span class="label">الوصف</span><span class="value">' + (expense.description || '—') + '</span></div><div class="detail-item" style="grid-column:1/-1;"><span class="label">ملاحظات</span><span class="value">' + (expense.notes || '—') + '</span></div><div class="detail-item" style="grid-column:1/-1;"><span class="label">تاريخ الإضافة</span><span class="value">' + new Date(expense.createdAt).toLocaleString('ar-SA') + '</span></div><div class="detail-item" style="grid-column:1/-1;"><span class="label">المعرف</span><span class="value" style="font-size:0.7rem;color:var(--text-muted);">' + expense.id + '</span></div></div>';
                 modal.classList.add('open');
                 currentExpenseId = expense.id;
             },
@@ -1218,11 +1219,23 @@
                             parseResult.innerHTML = '';
                         });
                         Utils.on(Utils.id('saveParseBtn'), 'click', () => {
-                            this.saveExpenseFromData({ amount: result.amount, description: result.description || text, category: result.category, date: result.date, merchant: result.merchant || '', subCategory: '', paymentMethod: '', notes: '' });
+                            // FIXED: استخدام Budget.addExpense مباشرة مع البيانات المستخرجة
+                            const expenseData = {
+                                amount: result.amount,
+                                description: result.description || text,
+                                category: result.category || 'أخرى',
+                                date: result.date || Utils.today(),
+                                merchant: result.merchant || '',
+                                subCategory: '',
+                                paymentMethod: '',
+                                notes: ''
+                            };
+                            Budget.addExpense(expenseData);
                             closeModal();
                             this.renderDashboard();
                             this.renderExpenses();
                             this.renderReports();
+                            alert('تم حفظ المصروف بنجاح!');
                         });
                         saveBtn.style.display = 'none';
                     } catch (err) { parseResult.innerHTML = '<div class="parse-review" style="color:var(--danger);">' + err.message + '</div>'; }
@@ -1231,7 +1244,7 @@
                     const amount = parseFloat(Utils.id('manualAmount').value);
                     if (!amount || amount <= 0) { alert('الرجاء إدخال مبلغ صحيح'); return; }
                     const data = { amount, description: Utils.id('manualDescription').value || 'مصروف يدوي', category: Utils.id('manualCategory').value || 'أخرى', subCategory: Utils.id('manualSubCategory').value || '', date: Utils.id('manualDate').value || Utils.today(), paymentMethod: Utils.id('manualPaymentMethod').value || '', merchant: Utils.id('manualMerchant').value || '', notes: Utils.id('manualNotes').value || '' };
-                    this.saveExpenseFromData(data);
+                    Budget.addExpense(data);
                     closeModal();
                     this.renderDashboard();
                     this.renderExpenses();
@@ -1615,10 +1628,34 @@
                 if (patterns.recommendations.length > 0) { cards.push({ icon: 'fa-lightbulb', label: 'توصيات ذكية', value: patterns.recommendations[0].length > 25 ? patterns.recommendations[0].substring(0, 25) + '...' : patterns.recommendations[0], cls: 'accent' }); }
                 const daysLeft = Budget.getDaysUntilSalary(); if (daysLeft !== null) { cards.push({ icon: 'fa-hourglass-half', label: 'الأيام المتبقية لنزول الراتب القادم', value: daysLeft === 0 ? 'اليوم!' : daysLeft + ' يوم', cls: daysLeft <= 3 ? 'positive' : 'accent' }); }
                 cardsContainer.innerHTML = cards.map(c => '<div class="dash-card ' + c.cls + '" data-card="' + c.label + '"><div class="card-icon"><i class="fas ' + c.icon + '"></i></div><div class="card-label">' + c.label + '</div><div class="card-value">' + c.value + '</div></div>').join('');
-                const totalCard = cardsContainer.querySelector('.dash-card.negative .card-value'); if (totalCard) { totalCard.closest('.dash-card').addEventListener('click', () => { const exp = Budget.getMonthExpenses().sort((a, b) => b.amount - a.amount); if (exp.length === 0) { alert('لا توجد مصروفات هذا الشهر'); return; } let msg = '📊 تفاصيل المصروفات هذا الشهر:\n\n';
-                        exp.forEach((e, i) => { msg += (i + 1) + '. ' + (e.description || e.category) + ': ' + Utils.formatCurrency(e.amount) + ' (' + e.date + ')\n'; });
-                        msg += '\nالمجموع: ' + Utils.formatCurrency(Budget.getTotal(exp));
-                        alert(msg); }); }
+                
+                // FIXED: عرض جميع العمليات الشرائية عند النقر على بطاقة إجمالي المصروفات
+                const totalCard = cardsContainer.querySelector('.dash-card.negative .card-value');
+                if (totalCard) {
+                    totalCard.closest('.dash-card').addEventListener('click', () => {
+                        const monthExpenses = Budget.getMonthExpenses().sort((a, b) => b.date.localeCompare(a.date));
+                        if (monthExpenses.length === 0) { 
+                            alert('لا توجد مصروفات هذا الشهر'); 
+                            return; 
+                        }
+                        let msg = '📊 تفاصيل جميع المصروفات هذا الشهر:\n\n';
+                        msg += 'عدد العمليات: ' + monthExpenses.length + '\n';
+                        msg += 'إجمالي المبلغ: ' + Utils.formatCurrency(Budget.getTotal(monthExpenses)) + '\n';
+                        msg += '━'.repeat(30) + '\n\n';
+                        monthExpenses.forEach((e, i) => {
+                            msg += (i + 1) + '. ' + (e.description || e.category) + '\n';
+                            msg += '   المبلغ: ' + Utils.formatCurrency(e.amount) + '\n';
+                            msg += '   التاريخ: ' + Utils.formatDateFull(e.date) + '\n';
+                            if (e.merchant) msg += '   التاجر: ' + e.merchant + '\n';
+                            if (e.category) msg += '   التصنيف: ' + e.category + '\n';
+                            msg += '\n';
+                        });
+                        msg += '━'.repeat(30) + '\n';
+                        msg += '📌 إجمالي المصروفات: ' + Utils.formatCurrency(Budget.getTotal(monthExpenses));
+                        alert(msg);
+                    });
+                }
+
                 const catMap = Budget.getByCategory(monthExp);
                 const catEntries = Object.entries(catMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
                 summaryContainer.innerHTML = '<div class="summary-item glass"><div class="label">أعلى تصنيف صرف</div><div class="value">' + (catEntries.length > 0 ? catEntries[0][0] + ' (' + Utils.formatCurrency(catEntries[0][1]) + ')' : '—') + '</div></div><div class="summary-item glass"><div class="label">عدد المصروفات هذا الشهر</div><div class="value">' + monthExp.length + '</div></div><div class="summary-item glass"><div class="label">متوسط المصروف اليومي</div><div class="value">' + (monthExp.length > 0 ? Utils.formatCurrency(totalMonth / monthExp.length) : Utils.formatCurrency(0)) + '</div></div><div class="summary-item glass"><div class="label">التوصيات الذكية</div><div class="value" style="font-size:0.85rem;">' + (patterns.recommendations.length > 0 ? patterns.recommendations[0] : 'لا توجد توصيات') + '</div></div>';
