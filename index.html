@@ -532,7 +532,21 @@
             generateId: () => Date.now().toString(36) + Math.random().toString(36).substr(2, 6),
             defaultCategories: () => ['المواد الغذائية', 'البنزين', 'الكهرباء', 'الماء', 'الإنترنت', 'الإيجار', 'الأقساط', 'المطاعم', 'المقاهي', 'الصحة', 'الترفيه', 'التسوق', 'التعليم', 'السيارة', 'مصروف شخصي', 'أخرى'],
             travelCategories: () => ['تذاكر الطيران', 'الفنادق والسكن', 'المواصلات الداخلية', 'الإنترنت والاتصالات', 'الفعاليات والأنشطة', 'الطعام والمطاعم', 'التسوق والهدايا', 'التأشيرة والتأمين', 'الطوارئ', 'أخرى'],
-            tempCategories: () => ['كشتة', 'قطة', 'واجب', 'فزعة', 'صدقة', 'أخرى']
+            tempCategories: () => ['كشتة', 'قطة', 'واجب', 'فزعة', 'صدقة', 'أخرى'],
+            cleanNumber: (str) => {
+                if (!str) return 0;
+                // إزالة الفواصل والمسافات من الأرقام
+                const cleaned = String(str).replace(/,/g, '').replace(/\s/g, '');
+                const num = parseFloat(cleaned);
+                return isNaN(num) ? 0 : num;
+            },
+            extractAllNumbers: (text) => {
+                // استخراج جميع الأرقام من النص مع إزالة الفواصل
+                const cleaned = text.replace(/,/g, '');
+                const matches = cleaned.match(/\d+\.?\d*/g);
+                if (!matches) return [];
+                return matches.map(m => parseFloat(m)).filter(n => !isNaN(n) && n > 0);
+            }
         };
 
         // ============================================================
@@ -543,7 +557,7 @@
             async init() {
                 const endpoints = [
                     { name: 'worldtimeapi.org', url: 'https://worldtimeapi.org/api/timezone/Asia/Riyadh', parse: (d) => new Date(d.datetime) },
-                    { name: 'timeapi.io', url: 'https://timeapi.io/api/Time/current/zone?timeZone=UTC', parse: (d) => new Date(d.dateTime + 'Z') },
+                    { name: 'timeapi.io', url: 'https://timeapi.io/api/Time/current/zone?zone=Asia/Riyadh', parse: (d) => new Date(d.dateTime) },
                     { name: 'worldclockapi.com', url: 'https://worldclockapi.com/api/json/utc/now', parse: (d) => new Date(d.currentDateTime) }
                 ];
                 const withTimeout = (promise, ms) => Promise.race([promise, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
@@ -690,7 +704,7 @@
         };
 
         // ============================================================
-        // GEMINI - with key rotation support
+        // GEMINI - with key rotation support and improved number parsing
         // ============================================================
         const Gemini = {
             getKeys() { return Storage.getGeminiKeys(); },
@@ -772,6 +786,7 @@
                 return await this.sendRequest(prompt, true);
             },
 
+            // دالة parseExpense المحسنة للتعامل مع الأرقام الطويلة والفواصل
             async parseExpense(text) {
                 const prompt = 'أنت مساعد ذكي لتحليل المصروفات. قم بتحليل النص التالي واستخرج المعلومات التالية:\n- المبلغ (رقم فقط، اجمع كل المبالغ المذكورة إن وجدت)\n- التصنيف (من القائمة: المواد الغذائية, البنزين, الكهرباء, الماء, الإنترنت, الإيجار, الأقساط, المطاعم, المقاهي, الصحة, الترفيه, التسوق, التعليم, السيارة, مصروف شخصي, أخرى)\n- التاجر (اسم المتجر أو الجهة)\n- التاريخ (صيغة YYYY-MM-DD، إذا لم يحدد فاستخدم اليوم)\n- وصف مختصر (اجمع الأصناف إن كانت متعددة)\nأعد النتيجة بصيغة JSON فقط بدون أي نص إضافي، مثل:\n{"amount": 52.50, "category": "المواد الغذائية", "merchant": "", "date": "2026-07-22", "description": "فطور + شاهي + عصائر"}\nالنص: ' + text;
                 try {
@@ -780,6 +795,7 @@
                     const json = JSON.parse(jsonMatch ? jsonMatch[0] : content);
                     return { amount: parseFloat(json.amount) || 0, category: json.category || 'أخرى', merchant: json.merchant || '', date: json.date || Utils.today(), description: json.description || '' };
                 } catch (e) {
+                    // محاولة التحليل المحلي مع دعم الأرقام المنسقة
                     const parsed = this.localParseAdvanced(text);
                     if (parsed) return parsed;
                     const fallback = this.localParse(text);
@@ -788,8 +804,160 @@
                 }
             },
 
-            localParse(text) { const amountMatch = text.match(/(\d+\.?\d*)\s*ريال/i); const amount = amountMatch ? parseFloat(amountMatch[1]) : 0; const categories = Utils.defaultCategories(); let category = 'أخرى'; for (const cat of categories) { if (text.includes(cat)) { category = cat; break; } } const merchantMatch = text.match(/(?:من|في|عند|من عند)\s*([^\d,،]+)/i); const merchant = merchantMatch ? merchantMatch[1].trim() : ''; return { amount, category, merchant, date: Utils.today(), description: text }; },
-            localParseAdvanced(text) { const result = Budget.parseMultipleItems(text); if (result.total > 0) { const categories = Utils.defaultCategories(); let category = 'أخرى'; for (const cat of categories) { if (text.includes(cat)) { category = cat; break; } } const merchantMatch = text.match(/(?:من|في|عند|من عند)\s*([^\d,،]+)/i); const merchant = merchantMatch ? merchantMatch[1].trim() : ''; return { amount: result.total, category, merchant, date: Utils.today(), description: result.description || text }; } return null; },
+            // دالة localParse المحسنة
+            localParse(text) {
+                // إزالة فواصل الآلاف
+                const cleanText = text.replace(/,/g, '');
+                const amountMatch = cleanText.match(/(\d+\.?\d*)\s*ريال/i);
+                const amount = amountMatch ? parseFloat(amountMatch[1]) : 0;
+
+                // إذا لم يتم العثور على مبلغ، حاول البحث عن أي رقم
+                let finalAmount = amount;
+                if (finalAmount === 0) {
+                    const anyNum = cleanText.match(/(\d+\.?\d*)/);
+                    if (anyNum) {
+                        const num = parseFloat(anyNum[1]);
+                        if (!isNaN(num) && num > 0 && num < 1000000) {
+                            finalAmount = num;
+                        }
+                    }
+                }
+
+                const categories = Utils.defaultCategories();
+                let category = 'أخرى';
+                for (const cat of categories) {
+                    if (text.includes(cat)) {
+                        category = cat;
+                        break;
+                    }
+                }
+                const merchantMatch = text.match(/(?:من|في|عند|من عند)\s*([^\d,،]+)/i);
+                const merchant = merchantMatch ? merchantMatch[1].trim() : '';
+
+                // استخراج وصف من النص
+                let description = text;
+                // إزالة الأرقام والعملات من الوصف
+                description = description.replace(/[\d,]+.*ريال/g, '').trim();
+                if (!description || description.length < 2) {
+                    description = text.substring(0, 30);
+                }
+
+                return {
+                    amount: finalAmount,
+                    category: category,
+                    merchant: merchant,
+                    date: Utils.today(),
+                    description: description || text
+                };
+            },
+
+            // دالة localParseAdvanced المحسنة للتعامل مع الأرقام الطويلة
+            localParseAdvanced(text) {
+                // إزالة فواصل الآلاف من الأرقام أولاً
+                const cleanText = text.replace(/,/g, '');
+
+                // محاولة استخراج جميع المبالغ
+                const numberPattern = /(\d+\.?\d*)\s*ريال/gi;
+                let match;
+                let total = 0;
+                let amounts = [];
+                let descriptions = [];
+
+                // نسخة من النص للبحث عن الأوصاف
+                let tempText = text;
+
+                while ((match = numberPattern.exec(cleanText)) !== null) {
+                    const amount = parseFloat(match[1]);
+                    if (!isNaN(amount) && amount > 0) {
+                        total += amount;
+                        amounts.push(amount);
+                    }
+                }
+
+                // إذا لم يتم العثور على أرقام مع "ريال"، حاول البحث عن أي أرقام
+                if (amounts.length === 0) {
+                    // استخراج جميع الأرقام من النص
+                    const allNumbers = Utils.extractAllNumbers(text);
+                    if (allNumbers.length > 0) {
+                        // جمع كل الأرقام
+                        total = allNumbers.reduce((sum, n) => sum + n, 0);
+                        amounts = allNumbers;
+                    }
+                }
+
+                // إذا كان هناك أرقام متعددة، حاول استخراج أوصاف من النص
+                if (amounts.length > 1) {
+                    // تقسيم النص إلى سطور
+                    const lines = text.split(/[\n\r]+/).filter(line => line.trim());
+                    for (const line of lines) {
+                        // استخراج الوصف قبل الرقم
+                        const cleanLine = line.replace(/,/g, '');
+                        const descMatch = cleanLine.match(/^([^\d]+)/);
+                        if (descMatch) {
+                            const desc = descMatch[1].trim();
+                            if (desc && desc.length > 1) {
+                                descriptions.push(desc);
+                            }
+                        }
+                    }
+                }
+
+                // إذا كان هناك رقم واحد فقط، استخدمه
+                if (amounts.length === 1 && total === 0) {
+                    total = amounts[0];
+                }
+
+                if (total > 0) {
+                    const categories = Utils.defaultCategories();
+                    let category = 'أخرى';
+                    for (const cat of categories) {
+                        if (text.includes(cat)) {
+                            category = cat;
+                            break;
+                        }
+                    }
+
+                    // محاولة استخراج وصف عام
+                    let description = '';
+                    if (descriptions.length > 0) {
+                        // استخدام الأوصاف المستخرجة
+                        const uniqueDescs = [...new Set(descriptions)];
+                        description = uniqueDescs.join(' + ');
+                    } else {
+                        // استخراج أول سطر غير فارغ
+                        const lines = text.split(/[\n\r]+/).filter(line => line.trim());
+                        if (lines.length > 0) {
+                            // إزالة الأرقام من السطر الأول
+                            let firstLine = lines[0].replace(/,/g, '');
+                            firstLine = firstLine.replace(/[\d]+.*ريال/g, '').trim();
+                            if (firstLine && firstLine.length > 2) {
+                                description = firstLine;
+                            } else {
+                                // إذا كان السطر الأول لا يحتوي على وصف مفيد، استخدم جميع الأسطر
+                                const allText = lines.join(' + ');
+                                description = allText.replace(/[\d,]+.*ريال/g, '').trim();
+                                if (!description || description.length < 2) {
+                                    description = 'مصروفات متعددة';
+                                }
+                            }
+                        } else {
+                            description = 'مصروفات متعددة';
+                        }
+                    }
+
+                    const merchantMatch = text.match(/(?:من|في|عند|من عند)\s*([^\d,،]+)/i);
+                    const merchant = merchantMatch ? merchantMatch[1].trim() : '';
+
+                    return {
+                        amount: total,
+                        category: category,
+                        merchant: merchant,
+                        date: Utils.today(),
+                        description: description || text.substring(0, 50)
+                    };
+                }
+                return null;
+            },
 
             async runAnalytics(expenses, settings) {
                 const totalExpenses = Budget.getTotal(expenses);
@@ -1219,7 +1387,6 @@
                             parseResult.innerHTML = '';
                         });
                         Utils.on(Utils.id('saveParseBtn'), 'click', () => {
-                            // FIXED: استخدام Budget.addExpense مباشرة مع البيانات المستخرجة
                             const expenseData = {
                                 amount: result.amount,
                                 description: result.description || text,
@@ -1438,7 +1605,6 @@
                     keyCounter.textContent = keys.length + ' / 12 مفتاح';
                     activeDisplay.textContent = activeKey ? (showKeys ? activeKey : activeKey.substring(0, 8) + '••••••••' + activeKey.substring(activeKey.length - 4)) : 'لا يوجد مفتاح نشط';
 
-                    // Attach remove handlers
                     Utils.qsa('.btn-remove').forEach(btn => {
                         Utils.on(btn, 'click', () => {
                             const idx = parseInt(btn.dataset.index);
@@ -1510,7 +1676,6 @@
                         status.textContent = '⚠️ يجب إضافة مفتاح واحد على الأقل.';
                         return;
                     }
-                    // Reset index to ensure valid
                     if (Storage.getGeminiKeyIndex() >= keys.length) {
                         Storage.setGeminiKeyIndex(0);
                     }
@@ -1520,7 +1685,6 @@
                     setTimeout(() => modal.classList.remove('open'), 1200);
                 });
 
-                // Enter key on input
                 Utils.on(keyInput, 'keydown', (e) => {
                     if (e.key === 'Enter') {
                         e.preventDefault();
@@ -1628,8 +1792,8 @@
                 if (patterns.recommendations.length > 0) { cards.push({ icon: 'fa-lightbulb', label: 'توصيات ذكية', value: patterns.recommendations[0].length > 25 ? patterns.recommendations[0].substring(0, 25) + '...' : patterns.recommendations[0], cls: 'accent' }); }
                 const daysLeft = Budget.getDaysUntilSalary(); if (daysLeft !== null) { cards.push({ icon: 'fa-hourglass-half', label: 'الأيام المتبقية لنزول الراتب القادم', value: daysLeft === 0 ? 'اليوم!' : daysLeft + ' يوم', cls: daysLeft <= 3 ? 'positive' : 'accent' }); }
                 cardsContainer.innerHTML = cards.map(c => '<div class="dash-card ' + c.cls + '" data-card="' + c.label + '"><div class="card-icon"><i class="fas ' + c.icon + '"></i></div><div class="card-label">' + c.label + '</div><div class="card-value">' + c.value + '</div></div>').join('');
-                
-                // FIXED: عرض جميع العمليات الشرائية عند النقر على بطاقة إجمالي المصروفات
+
+                // عرض جميع العمليات الشرائية عند النقر على بطاقة إجمالي المصروفات
                 const totalCard = cardsContainer.querySelector('.dash-card.negative .card-value');
                 if (totalCard) {
                     totalCard.closest('.dash-card').addEventListener('click', () => {
