@@ -3958,7 +3958,7 @@
                 const distribution = [];
                 const topCats = Object.entries(catMap).sort((a, b) => b[1] - a[1]).slice(0, 6);
                 const remainingBudget = netLivingBudget;
-                let allocated = 0;
+                let allocation = 0;
                 topCats.forEach(([cat, amount], index) => {
                     const percent = (amount / total6Months) * 100;
                     let categoryAmount = (percent / 100) * remainingBudget * 0.8;
