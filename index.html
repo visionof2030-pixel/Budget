@@ -41,6 +41,7 @@
             --font: 'IBM Plex Sans Arabic','Cairo',sans-serif;
             --font-display: 'Markazi Text','Cairo',serif;
             --font-mono: 'IBM Plex Mono',monospace;
+            --chat-max-height: 65vh;
         }
         [data-theme="dark"] {
             --bg-primary: #0A141C;
@@ -205,9 +206,9 @@
         .api-status{margin-top:12px;padding:12px 16px;border-radius:var(--radius-sm);font-weight:500;font-size:0.9rem}
         .api-status.success{background:var(--success-bg);color:var(--success);border:1px solid var(--success)}
         .api-status.error{background:var(--danger-bg);color:var(--danger);border:1px solid var(--danger)}
-        .chat-container{display:flex;flex-direction:column;height:calc(100vh - 140px);background:var(--bg-card);border-radius:var(--radius);border:1px solid var(--bg-glass-border);overflow:hidden;box-shadow:var(--shadow)}
-        .chat-messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px}
-        .chat-message{max-width:85%;padding:12px 18px;border-radius:var(--radius-sm);animation:messageIn 0.3s ease}
+        .chat-container{display:flex;flex-direction:column;height:var(--chat-max-height);max-height:var(--chat-max-height);min-height:400px;background:var(--bg-card);border-radius:var(--radius);border:1px solid var(--bg-glass-border);overflow:hidden;box-shadow:var(--shadow)}
+        .chat-messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px;min-height:0}
+        .chat-message{max-width:85%;padding:12px 18px;border-radius:var(--radius-sm);animation:messageIn 0.3s ease;word-wrap:break-word;overflow-wrap:break-word}
         .chat-message.user{align-self:flex-end;background:var(--accent-gradient);color:#fff;border-bottom-right-radius:4px}
         .chat-message.assistant{align-self:flex-start;background:var(--bg-glass);border:1px solid var(--bg-glass-border);border-bottom-left-radius:4px;color:var(--text-primary)}
         .chat-message.system{align-self:flex-start;background:rgba(31,122,92,0.1);border:1px solid rgba(31,122,92,0.3);border-bottom-left-radius:4px;color:var(--success);font-size:0.85rem}
@@ -217,7 +218,7 @@
         .chat-message.user .message-time{color:rgba(255,255,255,0.7)}
         .chat-message.financial-advisor .message-time{color:var(--text-muted)}
         @keyframes messageIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-        .chat-input-area{display:flex;gap:12px;padding:16px 20px;border-top:1px solid var(--bg-glass-border);background:var(--bg-glass);backdrop-filter:blur(10px)}
+        .chat-input-area{display:flex;gap:12px;padding:16px 20px;border-top:1px solid var(--bg-glass-border);background:var(--bg-glass);backdrop-filter:blur(10px);flex-shrink:0}
         .chat-input-area textarea{flex:1;padding:10px 14px;border-radius:var(--radius-sm);border:1px solid var(--bg-glass-border);background:var(--bg-card);color:var(--text-primary);font-family:var(--font);font-size:0.95rem;resize:none;min-height:48px;max-height:120px;transition:border var(--transition)}
         .chat-input-area textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(46,125,181,0.16)}
         .chat-input-area .btn-primary{min-height:48px;padding:0 20px;flex-shrink:0}
@@ -248,15 +249,78 @@
         .key-item .btn-remove:hover{opacity:0.7}
         .key-counter{font-size:0.75rem;color:var(--text-muted);margin-top:4px}
         @media(max-width:992px){.main-content{padding:0 16px 20px}.dashboard-cards{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}.category-budgets-grid{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}.reports-grid{grid-template-columns:1fr}}
-        @media(max-width:768px){.app-header h1{font-size:1.35rem}.sidebar-brand{font-size:1.25rem}#sidebar{transform:translateX(100%);width:280px;border-left:none;border-right:1px solid var(--bg-glass-border)}#sidebar.open{transform:translateX(0)}.main-content{margin-right:0;padding:0 12px 16px}.sidebar-toggle{display:block}.dashboard-cards{grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}.dash-card{padding:14px 16px;min-height:80px}.dash-card .card-value{font-size:1.1rem}.dash-card .card-icon{font-size:1.2rem;width:32px;height:32px}.expenses-toolbar{flex-direction:column;align-items:stretch}.expenses-toolbar .btn-primary{margin-left:0;width:100%;justify-content:center}.expenses-filters{flex-direction:column}.search-input,.filter-select{width:100%;min-width:0}.expense-item{flex-direction:column;align-items:stretch;padding:12px}.expense-amount{align-self:flex-start}.expense-actions{justify-content:flex-end}.modal-content{padding:16px;margin:8px;max-height:98vh}.modal-header h2{font-size:1.1rem}.settings-container{padding:16px}.analytics-header{flex-direction:column;align-items:stretch}.question-chips{flex-direction:column}.chip{text-align:center;justify-content:center}.report-card canvas{max-height:160px}.method-tabs{flex-direction:column}.chat-container{height:calc(100vh - 130px)}.chat-input-area{flex-direction:column}.chat-input-area .btn-primary{width:100%}.expense-detail-grid{grid-template-columns:1fr}.key-input-group{flex-direction:column}}
+        @media(max-width:768px){.app-header h1{font-size:1.35rem}.sidebar-brand{font-size:1.25rem}#sidebar{transform:translateX(100%);width:280px;border-left:none;border-right:1px solid var(--bg-glass-border)}#sidebar.open{transform:translateX(0)}.main-content{margin-right:0;padding:0 12px 16px}.sidebar-toggle{display:block}.dashboard-cards{grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}.dash-card{padding:14px 16px;min-height:80px}.dash-card .card-value{font-size:1.1rem}.dash-card .card-icon{font-size:1.2rem;width:32px;height:32px}.expenses-toolbar{flex-direction:column;align-items:stretch}.expenses-toolbar .btn-primary{margin-left:0;width:100%;justify-content:center}.expenses-filters{flex-direction:column}.search-input,.filter-select{width:100%;min-width:0}.expense-item{flex-direction:column;align-items:stretch;padding:12px}.expense-amount{align-self:flex-start}.expense-actions{justify-content:flex-end}.modal-content{padding:16px;margin:8px;max-height:98vh}.modal-header h2{font-size:1.1rem}.settings-container{padding:16px}.analytics-header{flex-direction:column;align-items:stretch}.question-chips{flex-direction:column}.chip{text-align:center;justify-content:center}.report-card canvas{max-height:160px}.method-tabs{flex-direction:column}.chat-container{height:var(--chat-max-height);max-height:var(--chat-max-height);min-height:350px}.chat-input-area{flex-direction:column}.chat-input-area .btn-primary{width:100%}.expense-detail-grid{grid-template-columns:1fr}.key-input-group{flex-direction:column}}
         @media(max-width:400px){.dashboard-cards{grid-template-columns:1fr 1fr;gap:8px}.dash-card{padding:10px 12px;min-height:70px}.dash-card .card-value{font-size:0.95rem}.dash-card .card-icon{font-size:1rem;width:28px;height:28px}.app-header h1{font-size:1.1rem}.current-date{font-size:0.6rem;padding:4px 10px}.chat-toggle-btn{font-size:0.7rem;padding:6px 12px;min-height:36px}.btn-primary,.btn-secondary,.btn-danger{font-size:0.85rem;padding:10px 16px;min-height:42px}.modal-content{padding:12px}.expense-info .desc{font-size:0.85rem}.expense-amount{font-size:0.85rem;padding:2px 10px}.settings-container h2{font-size:1rem}.category-budget-item input{min-height:32px;font-size:0.8rem}}
+        /* تنسيقات رسائل المستشار المالي */
+        .advisor-message {
+            background: linear-gradient(135deg, rgba(46,125,181,0.06) 0%, rgba(18,60,87,0.04) 100%);
+            border-right: 3px solid var(--accent);
+            padding: 14px 18px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 8px;
+        }
+        .advisor-message .section {
+            margin-top: 10px;
+        }
+        .advisor-message .section-title {
+            font-weight: 700;
+            color: var(--accent);
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+        .advisor-message .action-item {
+            padding: 6px 10px;
+            background: var(--bg-card);
+            border-radius: 6px;
+            margin: 4px 0;
+            border: 1px solid var(--bg-glass-border);
+        }
+        .advisor-message .action-item .action-title {
+            font-weight: 600;
+        }
+        .advisor-message .action-item .action-detail {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .advisor-message .action-item .action-impact {
+            color: var(--success);
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+        .advisor-message .action-item .action-difficulty {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: var(--bg-glass);
+            display: inline-block;
+        }
+        .advisor-message .motivation {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+            padding: 8px 0;
+            border-top: 1px solid var(--bg-glass-border);
+            margin-top: 8px;
+        }
+        @media(max-width:768px){
+            .chat-message.financial-advisor {
+                max-width: 95%;
+                font-size: 0.88rem;
+            }
+            .advisor-message {
+                padding: 10px 12px;
+            }
+            .advisor-message .action-item {
+                padding: 4px 8px;
+            }
+        }
     </style>
 </head>
 <body>
 
     <div id="app">
 
-        <aside id="sidebar" class="sidebar">
+        <aside id="sidebar" class="sidebar closed">
             <div class="sidebar-brand">
                 <span class="brand-icon"><i class="fas fa-brain"></i></span>
                 <span class="brand-name">AI Budget</span>
@@ -469,12 +533,12 @@
                     <div class="form-group">
                         <label for="geminiModel">نوع النموذج</label>
                         <select id="geminiModel" class="form-input">
-                            <option value="gemini-3.6-flash" selected>Gemini 3.6 Flash</option>
-                            <option value="gemini-3.5-flash">Gemini 3.5 Flash</option>
-                            <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite</option>
-                            <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite</option>
+                            <option value="gemini-2.5-pro" selected>Gemini 2.5 Pro</option>
                             <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
                             <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite</option>
+                            <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                            <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -614,7 +678,7 @@
             setSettings(s) { this.set('settings', s); },
             getGeminiKeys() { return this.get('gemini_keys', []); },
             setGeminiKeys(keys) { this.set('gemini_keys', keys); },
-            getGeminiModel() { return this.get('gemini_model', 'gemini-3.6-flash'); },
+            getGeminiModel() { return this.get('gemini_model', 'gemini-2.5-pro'); },
             setGeminiModel(model) { this.set('gemini_model', model); },
             getGeminiKeyIndex() { return this.get('gemini_key_index', 0); },
             setGeminiKeyIndex(idx) { this.set('gemini_key_index', idx); },
@@ -633,7 +697,7 @@
         };
 
         // ============================================================
-        // BUDGET - مع تحليلات متقدمة للمستشار المالي
+        // BUDGET
         // ============================================================
         const Budget = {
             getExpenses() { return Storage.getExpenses(); },
@@ -651,19 +715,16 @@
                     merchant: data.merchant || '', 
                     notes: data.notes || '', 
                     createdAt: new Date().toISOString(),
-                    // تصنيف تلقائي للشراء حسب النوع
                     purchaseType: this.classifyPurchase(data.amount || 0, data.category || 'أخرى', data.description || '')
                 };
                 exp.push(entry);
                 this.saveExpenses(exp);
                 this.refreshUI();
-                // تشغيل التحليل الفوري للمستشار المالي
                 if (typeof FinancialAdvisor !== 'undefined') {
                     FinancialAdvisor.analyzeTransaction(entry);
                 }
                 return entry;
             },
-            // تصنيف الشراء تلقائياً
             classifyPurchase(amount, category, description) {
                 const essential = ['المواد الغذائية', 'الكهرباء', 'الماء', 'الإيجار', 'الصحة', 'السيارة', 'البنزين'];
                 const important = ['الإنترنت', 'الاتصالات', 'التعليم', 'الأقساط'];
@@ -675,7 +736,6 @@
                 if (luxury.includes(category)) return 'Luxury';
                 if (important.includes(category)) return 'Important';
                 
-                // تحليل الوصف
                 const desc = (description || '').toLowerCase();
                 if (desc.includes('قهوة') || desc.includes('كافيه')) return 'Luxury';
                 if (desc.includes('وجبة') || desc.includes('مطعم')) return 'Luxury';
@@ -722,7 +782,6 @@
                 patterns.categories = sortedCats;
                 patterns.biggestSpenders = sortedCats.slice(0, 3).map(([cat, amount]) => ({ category: cat, amount, percentage: total > 0 ? (amount / total) * 100 : 0 })); const settings = Storage.getSettings(); const salary = parseFloat(settings.salary) || 0; if (total > salary * 0.8) { patterns.recommendations.push('⚠️ أنت تنفق أكثر من 80% من راتبك. حاول تقليل المصروفات غير الضرورية.'); } for (const [cat, amount] of sortedCats) { const budget = Storage.getCategoryBudget(cat); if (budget > 0 && amount > budget) { patterns.recommendations.push('⚠️ تجاوزت ميزانية "' + cat + '" بمبلغ ' + (amount - budget).toFixed(2) + ' ريال.'); } } if (patterns.biggestSpenders.length > 0) { const top = patterns.biggestSpenders[0];
                     patterns.recommendations.push('📊 أكبر تصنيف إنفاق هو "' + top.category + '" بنسبة ' + top.percentage.toFixed(0) + '% من إجمالي المصروفات.'); } return patterns; },
-            // تحليلات متقدمة للمستشار المالي
             getSpendingVelocity() {
                 const expenses = this.getExpenses();
                 if (expenses.length < 2) return { velocity: 0, acceleration: 0 };
@@ -732,7 +791,6 @@
                 const totalRecent = this.getTotal(recent);
                 const daysSpan = Math.max(1, (new Date(recent[recent.length - 1].date) - new Date(recent[0].date)) / 86400000);
                 const velocity = totalRecent / daysSpan;
-                // حساب التسارع
                 const older = sorted.slice(-14, -7);
                 if (older.length < 2) return { velocity, acceleration: 0 };
                 const totalOlder = this.getTotal(older);
@@ -750,11 +808,9 @@
                 const total = this.getTotal(monthExp);
                 const remaining = salary - total;
                 
-                // نسبة الادخار
                 const savingsRate = Math.max(0, (remaining / salary) * 100);
                 const savingsScore = Math.min(100, savingsRate * 2);
                 
-                // الالتزام بالميزانية
                 const catMap = this.getByCategory(monthExp);
                 const catBudgets = settings.categoryBudgets || {};
                 let adherenceTotal = 0;
@@ -769,7 +825,6 @@
                 }
                 const budgetAdherence = adherenceCount > 0 ? adherenceTotal / adherenceCount : 50;
                 
-                // كفاءة الإنفاق
                 const essentialSpending = monthExp.filter(e => e.purchaseType === 'Essential').reduce((s, e) => s + e.amount, 0);
                 const luxurySpending = monthExp.filter(e => e.purchaseType === 'Luxury').reduce((s, e) => s + e.amount, 0);
                 const efficiency = total > 0 ? ((essentialSpending / total) * 100) : 0;
@@ -818,7 +873,6 @@
         // FINANCIAL ADVISOR - المستشار المالي الذكي
         // ============================================================
         const FinancialAdvisor = {
-            // تحليل المعاملة فور إضافتها
             analyzeTransaction(transaction) {
                 if (!transaction) return;
                 const insights = [];
@@ -830,7 +884,6 @@
                 const todayExp = Budget.getTodayExpenses();
                 const todayTotal = Budget.getTotal(todayExp);
                 
-                // 1. هل تجاوز ميزانية اليوم؟
                 if (todayTotal > dailyBudget) {
                     insights.push({
                         type: 'warning',
@@ -840,7 +893,6 @@
                     });
                 }
                 
-                // 2. هل تجاوز ميزانية التصنيف؟
                 const categoryBudget = Storage.getCategoryBudget(transaction.category);
                 if (categoryBudget > 0) {
                     const categoryTotal = monthExp.filter(e => e.category === transaction.category).reduce((s, e) => s + e.amount, 0);
@@ -854,7 +906,6 @@
                     }
                 }
                 
-                // 3. هل هناك خطر نفاده المال؟
                 const daysUntilSalary = Budget.getDaysUntilSalary();
                 if (daysUntilSalary !== null && daysUntilSalary > 0) {
                     const dailyAvg = totalMonth / (new Date().getDate() || 1);
@@ -869,7 +920,6 @@
                     }
                 }
                 
-                // 4. تحليل نوع الشراء
                 const purchaseType = transaction.purchaseType || 'Optional';
                 if (purchaseType === 'Luxury' && transaction.amount > 100) {
                     insights.push({
@@ -889,7 +939,6 @@
                     });
                 }
                 
-                // 5. تحليل السلوك - الإنفاق المتكرر
                 const similarExpenses = monthExp.filter(e => 
                     e.category === transaction.category && 
                     e.merchant === transaction.merchant &&
@@ -907,7 +956,6 @@
                     }
                 }
                 
-                // إضافة التحليلات إلى المحادثة إذا كانت نشطة
                 if (insights.length > 0 && typeof UI !== 'undefined' && UI.chatMessages) {
                     const summary = insights.map(i => `${i.title}\n${i.message}\n${i.suggestion}`).join('\n\n');
                     UI.addChatMessage('📊 تحليل مالي فوري\n\n' + summary, 'financial-advisor');
@@ -916,7 +964,6 @@
                 return insights;
             },
             
-            // توليد تقرير يومي تلقائي
             generateDailyReport() {
                 const today = Utils.today();
                 const todayExp = Budget.getTodayExpenses();
@@ -947,7 +994,6 @@
                 report += `💡 قرارات استثمارية اليوم: ${bestDecision}\n`;
                 report += `⚠️ إنفاق كمالي اليوم: ${Utils.formatCurrency(waste)}\n\n`;
                 
-                // تقييم الأداء
                 if (todayTotal <= dailyBudget) {
                     report += `✅ أداء ممتاز! أنت ضمن ميزانية اليوم.\n`;
                     if (remainingToday > dailyBudget * 0.3) {
@@ -958,7 +1004,6 @@
                     report += `💡 حاول تقليل الإنفاق في الأيام القادمة لتعويض هذا التجاوز.\n`;
                 }
                 
-                // نصائح مخصصة
                 if (health.score < 50) {
                     report += `\n🔴 تحذير: درجة الصحة المالية منخفضة.`;
                     report += `\n💡 ركز على تقليل الإنفاق الكمالي وزيادة نسبة الادخار.`;
@@ -969,7 +1014,6 @@
                 return report;
             },
             
-            // توليد تقرير أسبوعي تلقائي
             generateWeeklyReport() {
                 const weekRange = Utils.getWeekRange();
                 const weekExp = Budget.getExpensesByDateRange(weekRange.start, weekRange.end);
@@ -1004,7 +1048,6 @@
                     report += `  • ✅ أداء جيد، استمر في هذا المستوى.\n`;
                 }
                 
-                // تحليل أكبر زيادة في الإنفاق
                 if (sortedCats.length > 0) {
                     const top = sortedCats[0];
                     report += `  • 📈 أكبر تصنيف إنفاق: ${top[0]} (${Utils.formatCurrency(top[1])})\n`;
@@ -1244,597 +1287,95 @@
             },
 
             // ============================================================
-            // البرومبت المتقدم للمستشار المالي - Financial Advisor Prompt
+            // البرومبت المتقدم للمستشار المالي مع قواعد الرد الجديدة
             // ============================================================
             async thinkAndDecide(query, context) {
                 // التحقق من الأسئلة المباشرة أولاً
                 const directAnswer = await this.answerFinancialQuery(query, context.expenses || [], context.settings || {});
                 if (directAnswer) { return directAnswer; }
 
-                // برومبت المستشار المالي المتقدم
-                const advisorPrompt = `You are not a chatbot.
-
-You are an autonomous, world-class AI Financial Advisor, Personal CFO, Budget Planner, Spending Analyst, Behavioral Economist, Financial Strategist, Cash Flow Optimizer, Risk Analyst, Savings Coach, and Wealth Growth Assistant.
-
-Your mission is NOT answering questions.
-
-Your primary responsibility is continuously monitoring, analyzing, predicting, optimizing, and protecting the user's financial life.
-
-You already have complete real-time access to:
-
-• Every expense
-• Every income
-• Every salary
-• Every transfer
-• Every refund
-• Every recurring payment
-• Every subscription
-• Every installment
-• Every bill
-• Every budget
-• Every savings goal
-• Every financial target
-• Every spending category
-• Every merchant
-• Every payment method
-• Every historical transaction
-• Every trend
-• Every financial event
-
-Assume new financial data arrives instantly.
-
-Treat every transaction as an important financial event.
-
-Never wait until the user asks.
-
-Instead think continuously.
-
-──────────────────────────────────────
-
-YOUR MINDSET
-
-Act exactly like a real Chief Financial Officer (CFO).
-
-Protect the user's money.
-
-Increase savings.
-
-Reduce unnecessary spending.
-
-Optimize cash flow.
-
-Predict problems before they happen.
-
-Improve long-term financial health.
-
-Every decision must maximize financial stability.
-
-Never give generic advice.
-
-Everything must be based on the user's actual financial behavior.
-
-──────────────────────────────────────
-
-AUTOMATIC ANALYSIS
-
-Every time a new expense or income is added:
-
-Immediately perform a complete financial review.
-
-Analyze:
-
-• Current balance
-• Remaining salary
-• Remaining budget
-• Daily allowance
-• Weekly allowance
-• Monthly allowance
-• Category budget
-• Savings goal
-• Cash flow
-• Spending trends
-• Spending velocity
-• Spending acceleration
-• Spending consistency
-• Behavioral changes
-• Forecast changes
-• Financial risks
-
-Never wait for the user.
-
-──────────────────────────────────────
-
-ALWAYS ASK YOURSELF
-
-Did this transaction improve the user's financial situation?
-
-Did it reduce financial health?
-
-Did it reduce savings?
-
-Did it increase financial risk?
-
-Did it exceed today's allowance?
-
-Did it exceed weekly allowance?
-
-Did it exceed monthly allowance?
-
-Did it exceed category budget?
-
-Does it create future cash flow issues?
-
-Does it delay financial goals?
-
-Does it indicate a bad habit?
-
-Does it indicate improvement?
-
-Should the financial strategy change?
-
-Should the daily allowance change?
-
-Should category limits change?
-
-Should the savings plan change?
-
-Should priorities change?
-
-Should a warning be generated?
-
-Should positive reinforcement be generated?
-
-If YES
-
-Take action immediately.
-
-──────────────────────────────────────
-
-CONTINUOUS FORECASTING
-
-Continuously predict:
-
-Expected end-of-day balance
-
-Expected end-of-week balance
-
-Expected end-of-month balance
-
-Expected remaining salary
-
-Expected savings
-
-Expected deficit
-
-Probability of achieving savings goal
-
-Probability of exceeding budget
-
-Probability of running out of money
-
-Expected category overruns
-
-Expected recurring expenses
-
-Future financial risks
-
-Always update predictions whenever new data arrives.
-
-──────────────────────────────────────
-
-AUTOMATIC BUDGET ADAPTATION
-
-Whenever spending behavior changes:
-
-Recalculate:
-
-Daily spending allowance
-
-Weekly spending allowance
-
-Monthly spending allowance
-
-Category budgets
-
-Savings strategy
-
-Purchase priorities
-
-Cash flow strategy
-
-Explain WHY the plan changed.
-
-Never silently change recommendations.
-
-──────────────────────────────────────
-
-SMART PROACTIVE NOTIFICATIONS
-
-Generate proactive notifications whenever financially meaningful.
-
+                // التحقق مما إذا كان الطلب من نوع "حل" أو "ساعدني" أو "وش أسوي" أو "كيف أحسن وضعي"
+                const lowerQuery = query.toLowerCase();
+                const isSolutionRequest = lowerQuery.includes('حل') || 
+                                         lowerQuery.includes('ساعدني') || 
+                                         lowerQuery.includes('وش أسوي') || 
+                                         lowerQuery.includes('كيف أحسن') || 
+                                         lowerQuery.includes('اعطني حلول') || 
+                                         lowerQuery.includes('وش تنصح') ||
+                                         lowerQuery.includes('أنقذني') ||
+                                         lowerQuery.includes('أحتاج حل') ||
+                                         lowerQuery.includes('مشكلة مالية');
+
+                let advisorPrompt = '';
+
+                if (isSolutionRequest) {
+                    // برومبت الحلول - IMPORTANT RESPONSE RULES
+                    advisorPrompt = `You are a world-class Financial Advisor.
+
+IMPORTANT RESPONSE RULES:
+
+When the user asks for:
+"حل" or "ساعدني" or "وش أسوي" or "كيف أحسن وضعي" or "اعطني حلول" or "وش تنصح"
+
+DO NOT generate a financial report.
+DO NOT repeat numbers the user already knows.
+DO NOT summarize all financial data again.
+DO NOT explain every metric.
+
+Instead follow this exact response structure:
+
+────────────────────────
+
+1. Executive Summary (Maximum 2 sentences)
+Explain only the biggest financial problem.
+
+2. Highest Priority Actions
+Return exactly 3-7 actions ordered by financial impact.
+Each action must contain:
+• Title
+• Why this matters
+• Estimated savings or impact
+• Difficulty (Easy / Medium / Hard)
+
+Example format:
+**Stop restaurant spending**
+Reason: Restaurant spending exceeded your weekly budget.
+Impact: Save approximately 650 SAR this month.
+Difficulty: Easy
+
+3. Biggest Opportunities
+Identify where the user can save the most money.
+Rank opportunities from highest impact to lowest.
+
+4. Immediate Action Today
+Give exactly one action the user should do today.
+Example: Cancel unused subscription. Delay electronics purchase. Reduce restaurant spending today.
+
+5. Long-Term Strategy
+Give exactly three habits.
 Examples:
-
-High spending detected.
-
-Daily budget exceeded.
-
-Weekly budget exceeded.
-
-Monthly budget exceeded.
-
-Restaurant spending increased.
-
-Fuel spending unusually high.
-
-Shopping trend increasing.
-
-Entertainment spending rising.
-
-Savings improving.
-
-Financial discipline improving.
-
-Salary nearly exhausted.
-
-Upcoming bills.
-
-Subscription increase.
-
-Large purchase detected.
-
-Unusual transaction.
-
-Unexpected income received.
-
-Emergency spending detected.
-
-Savings milestone reached.
-
-Budget milestone reached.
-
-Never spam.
-
-Only notify when valuable.
-
-──────────────────────────────────────
-
-PREDICTIVE WARNINGS
-
-Never only describe current spending.
-
-Predict future consequences.
-
-Always explain:
-
-If you continue spending like today...
-
-If restaurant spending continues...
-
-If shopping continues...
-
-If entertainment continues...
-
-If unnecessary purchases continue...
-
-Estimate:
-
-Days until money runs out.
-
-Expected end-of-month deficit.
-
-Expected savings loss.
-
-Future financial impact.
-
-Recommend specific corrective actions.
-
-──────────────────────────────────────
-
-POSITIVE REINFORCEMENT
-
-Whenever the user follows the plan:
-
-Celebrate.
-
-Recognize improvement.
-
-Mention exactly what improved.
-
-Estimate money saved.
-
-Estimate yearly savings.
-
-Increase motivation.
-
-Reinforce good habits.
-
-Examples:
-
-Excellent discipline today.
-
-You spent 35% less than your normal Thursday.
-
-You saved 124 SAR today.
-
-If maintained, this becomes 3,720 SAR yearly.
-
-Great financial decision.
-
-──────────────────────────────────────
-
-BEHAVIORAL ANALYSIS
-
-Detect:
-
-Impulse purchases
-
-Emotional spending
-
-Stress spending
-
-Weekend overspending
-
-Late-night spending
-
-Lifestyle inflation
-
-Reward spending
-
-Convenience spending
-
-Subscription addiction
-
-Coffee addiction
-
-Restaurant dependency
-
-Shopping addiction
-
-Seasonal spending
-
-Habit spending
-
-Explain WHY this pattern exists.
-
-Coach the user.
-
-Never shame.
-
-Never criticize.
-
-Always educate.
-
-──────────────────────────────────────
-
-PURCHASE EVALUATION
-
-Evaluate every purchase.
-
-Classify it as:
-
-Essential
-
-Important
-
-Optional
-
-Luxury
-
-Investment
-
-Waste
-
-If the user is overspending,
-
-recommend reducing:
-
-Luxury first
-
-Optional second
-
-Important third
-
-Essential last
-
-Never recommend reducing necessities before luxuries.
-
-──────────────────────────────────────
-
-FINANCIAL HEALTH SCORES
-
-Continuously calculate:
-
-Overall Financial Health Score
-
-Savings Score
-
-Budget Discipline Score
-
-Cash Flow Score
-
-Overspending Risk Score
-
-Lifestyle Inflation Score
-
-Impulse Spending Score
-
-Category Efficiency Score
-
-Budget Accuracy Score
-
-Goal Achievement Score
-
-Show score changes over time.
-
-Explain every increase and decrease.
-
-──────────────────────────────────────
-
-TREND ANALYSIS
-
-Compare against:
-
-Yesterday
-
-Last 7 days
-
-Last 30 days
-
-Last salary cycle
-
-Same weekday
-
-Same month
-
-Historical average
-
-Category average
-
-Personal average
-
-Always detect:
-
-Increasing trends
-
-Decreasing trends
-
-New habits
-
-Broken habits
-
-Financial improvements
-
-Financial deterioration
-
-──────────────────────────────────────
-
-DAILY REPORT
-
-Generate automatically every day:
-
-Today's spending
-
-Today's allowance
-
-Remaining allowance
-
-Largest purchase
-
-Best financial decision
-
-Worst financial decision
-
-Money saved today
-
-Money wasted today
-
-Daily financial score
-
-Tomorrow recommendation
-
-Risk level
-
-Motivational summary
-
-──────────────────────────────────────
-
-WEEKLY REPORT
-
-Generate automatically every week:
-
-Weekly spending
-
-Weekly savings
-
-Budget adherence
-
-Category rankings
-
-Top increases
-
-Top decreases
-
-Best improvement
-
-Biggest concern
-
-Cash flow review
-
-Next week's strategy
-
-──────────────────────────────────────
-
-MONTHLY REPORT
-
-Generate automatically every month:
-
-Income
-
-Expenses
-
-Savings
-
-Net Cash Flow
-
-Budget Accuracy
-
-Financial Health
-
-Category Performance
-
-Unexpected Expenses
-
-Recurring Costs
-
-Optimization Opportunities
-
-Behavior Changes
-
-Annual Projection
-
-Goal Progress
-
-Professional Financial Summary
-
-Action Plan for Next Month
-
-──────────────────────────────────────
-
-COMMUNICATION STYLE
-
-Professional
-
-Friendly
-
-Supportive
-
-Highly intelligent
-
-Highly analytical
-
-Never robotic.
-
-Never generic.
-
-Never repetitive.
-
-Always personalized.
-
-Always data-driven.
-
-Always explain your reasoning.
-
-Always quantify impact whenever possible.
-
-Always estimate future outcomes.
-
-Always focus on improving the user's financial life.
-
-Your ultimate goal is simple:
-
-Help the user make smarter financial decisions every single day, protect their money, maximize savings, minimize waste, and become financially stronger over time—without waiting to be asked.
-
-──────────────────────────────────────
+Increase savings automatically after salary.
+Set category spending limits.
+Review expenses every Friday.
+
+6. Motivation
+End with one short encouraging sentence.
+Maximum 20 words.
+
+NEVER:
+❌ Repeat all statistics.
+❌ Repeat salary.
+❌ Repeat remaining balance.
+❌ Repeat daily spending.
+❌ Repeat health score.
+❌ Repeat every metric.
+Unless they are directly related to the recommendation.
+
+Your goal is helping the user make decisions, not generating reports.
+Less explanation. More action.
+Always prioritize action over description.
+
+───────────────
 
 السياق الحالي (بيانات المستخدم الحقيقية):
 
@@ -1848,45 +1389,129 @@ Help the user make smarter financial decisions every single day, protect their m
 تفاصيل المصروفات حسب التصنيف:
 ${context.catSummary || 'لا توجد بيانات'}
 
-التحليلات المتقدمة:
-- متوسط الإنفاق اليومي: ${context.forecast?.dailyAvg?.toFixed(2) || 0} ريال
-- التوقع للشهر القادم: ${context.forecast?.forecast?.toFixed(2) || 0} ريال
-- سرعة الإنفاق: ${context.spendingVelocity?.velocity?.toFixed(2) || 0} ريال/يوم
-- تسارع الإنفاق: ${(context.spendingVelocity?.acceleration * 100)?.toFixed(1) || 0}%
-
-ميزانية السفر: ${context.travelSummary || 'غير مفعّلة'}
-الميزانية المؤقتة: ${context.tempSummary || 'غير مفعّلة'}
-الأيام المتبقية لنزول الراتب: ${context.daysUntilSalary !== null ? context.daysUntilSalary + ' يوم' : 'غير محدد'}
-
 درجة الصحة المالية: ${context.healthScore?.score || 0}/100
 مخاطر الإنفاق: ${context.healthScore?.details?.riskLevel || 'غير معروف'}
+أيام حتى نزول الراتب: ${context.daysUntilSalary !== null ? context.daysUntilSalary + ' يوم' : 'غير محدد'}
 
 طلب المستخدم: ${query}
 
-قدم رداً شاملاً ومفيداً بناءً على جميع البيانات المتاحة، مع الالتزام الكامل بجميع قواعد المستشار المالي المتقدم المذكورة أعلاه.
+قدم رداً وفق الهيكل المطلوب أعلاه، باللغة العربية الفصحى، بأسلوب مهني ودود.
+إذا طلب المستخدم تنفيذ إجراء فعلي (إضافة/حذف/تعديل)، أرفق كتلة json-actions في نهاية الرد.`;
+                } else {
+                    // برومبت عادي للأسئلة الأخرى
+                    advisorPrompt = `You are a world-class Financial Advisor.
 
-أجب باللغة العربية الفصحى، بأسلوب مهني ودود.
+Provide a helpful, insightful response to the user's financial question.
 
-إذا طلب المستخدم تنفيذ إجراء فعلي (إضافة/حذف/تعديل)، أرفق كتلة json-actions في نهاية الرد.
+Use a professional yet friendly tone.
+Be specific and data-driven.
+Provide practical advice.
 
-التاريخ الحالي: ${Utils.today()} (${Utils.getDayName()})`;
+If the user asks about a specific financial topic, address it directly.
+If the user wants to take action (add/delete/modify), include a json-actions block at the end.
+
+السياق الحالي (بيانات المستخدم الحقيقية):
+
+الراتب الشهري: ${context.settings?.salary || 0} ريال
+تاريخ نزول الراتب: ${context.settings?.salaryDate || 'غير محدد'}
+هدف الادخار: ${context.settings?.savingsGoal || 0} ريال
+إجمالي المصروفات هذا الشهر: ${context.totalMonth?.toFixed(2) || 0} ريال
+المتبقي من الراتب: ${context.remaining?.toFixed(2) || 0} ريال
+عدد المصروفات هذا الشهر: ${context.monthExp?.length || 0}
+
+تفاصيل المصروفات حسب التصنيف:
+${context.catSummary || 'لا توجد بيانات'}
+
+درجة الصحة المالية: ${context.healthScore?.score || 0}/100
+مخاطر الإنفاق: ${context.healthScore?.details?.riskLevel || 'غير معروف'}
+أيام حتى نزول الراتب: ${context.daysUntilSalary !== null ? context.daysUntilSalary + ' يوم' : 'غير محدد'}
+
+طلب المستخدم: ${query}
+
+أجب باللغة العربية الفصحى، بأسلوب مهني ودود.`;
+                }
 
                 try {
-                    return await this.generate(advisorPrompt);
+                    const response = await this.generate(advisorPrompt);
+                    return response;
                 } catch (e) {
                     // Fallback إذا فشل Gemini
-                    return this.generateFallbackResponse(query, context);
+                    return this.generateFallbackResponse(query, context, isSolutionRequest);
                 }
             },
 
             // رد احتياطي إذا فشل Gemini
-            generateFallbackResponse(query, context) {
+            generateFallbackResponse(query, context, isSolutionRequest) {
                 const monthTotal = context.totalMonth || 0;
                 const remaining = context.remaining || 0;
                 const dailyBudget = Budget.getDailyBudget();
                 const health = Budget.getFinancialHealthScore();
                 
-                let response = `📊 تحليل مالي فوري\n\n`;
+                if (isSolutionRequest) {
+                    // رد على طلب حلول
+                    let response = `📋 **خلاصة المشكلة**\n`;
+                    if (remaining < 0) {
+                        response += `أنت تنفق أكثر من راتبك الشهري بمبلغ ${Utils.formatCurrency(Math.abs(remaining))}.\n\n`;
+                    } else if (remaining < dailyBudget * 5) {
+                        response += `المتبقي من الراتب قليل (${Utils.formatCurrency(remaining)})، وقد ينفد قبل نهاية الشهر.\n\n`;
+                    } else {
+                        response += `وضعك المالي مستقر، لكن هناك فرص لتحسين الادخار.\n\n`;
+                    }
+
+                    response += `**أهم الإجراءات العاجلة**\n`;
+                    const actions = [];
+                    
+                    // تحليل أكبر تصنيف إنفاق
+                    const monthExp = Budget.getMonthExpenses();
+                    const catMap = Budget.getByCategory(monthExp);
+                    const sortedCats = Object.entries(catMap).sort((a, b) => b[1] - a[1]);
+                    if (sortedCats.length > 0) {
+                        const top = sortedCats[0];
+                        actions.push(`**تقليل الإنفاق على "${top[0]}"**\nالسبب: هذا أكبر تصنيف إنفاق (${Utils.formatCurrency(top[1])}).\nالأثر: توفير ${Utils.formatCurrency(top[1] * 0.3)} هذا الشهر.\nالصعوبة: متوسط`);
+                    }
+
+                    if (remaining < 0) {
+                        actions.push(`**إيقاف جميع المشتريات غير الضرورية**\nالسبب: تجاوزت الراتب الشهري.\nالأثر: توفير ${Utils.formatCurrency(Math.abs(remaining))}.\nالصعوبة: صعب`);
+                    }
+
+                    const luxurySpending = monthExp.filter(e => e.purchaseType === 'Luxury').reduce((s, e) => s + e.amount, 0);
+                    if (luxurySpending > 100) {
+                        actions.push(`**تقليل المشتريات الكمالية**\nالسبب: أنفقت ${Utils.formatCurrency(luxurySpending)} على كماليات.\nالأثر: توفير ${Utils.formatCurrency(luxurySpending * 0.5)}.\nالصعوبة: متوسط`);
+                    }
+
+                    // تحقق من وجود اشتراكات متكررة
+                    const subscriptions = monthExp.filter(e => e.description.toLowerCase().includes('اشتراك') || e.category === 'الإنترنت');
+                    if (subscriptions.length > 0) {
+                        actions.push(`**مراجعة الاشتراكات**\nالسبب: لديك ${subscriptions.length} اشتراك نشط.\nالأثر: توفير ${Utils.formatCurrency(subscriptions.reduce((s, e) => s + e.amount, 0) * 0.2)}.\nالصعوبة: سهل`);
+                    }
+
+                    if (actions.length === 0) {
+                        actions.push(`**مراجعة المصروفات اليومية**\nالسبب: تحتاج إلى تحسين عادات الإنفاق.\nالأثر: توفير ${Utils.formatCurrency(dailyBudget * 0.2)} يومياً.\nالصعوبة: سهل`);
+                    }
+
+                    response += actions.slice(0, 5).map(a => `• ${a}`).join('\n\n');
+                    response += `\n\n**فرص التوفير الكبرى**\n`;
+                    response += `• ${sortedCats.length > 0 ? sortedCats[0][0] : 'المصروفات غير الضرورية'} - يمكن توفير ${Utils.formatCurrency((sortedCats.length > 0 ? sortedCats[0][1] : 100) * 0.3)} ريال\n`;
+                    if (luxurySpending > 100) {
+                        response += `• المشتريات الكمالية - يمكن توفير ${Utils.formatCurrency(luxurySpending * 0.5)} ريال\n`;
+                    }
+                    response += `• الوجبات الجاهزة - يمكن توفير 300-500 ريال شهرياً\n`;
+
+                    response += `\n**إجراء فوري اليوم**\n`;
+                    response += `• ${remaining < 0 ? 'لا تنفق أي ريال إضافي اليوم' : 'راجع مشتريات اليوم وتأكد من ضرورتها'}\n`;
+
+                    response += `\n**استراتيجية طويلة المدى**\n`;
+                    response += `• حدد ميزانية يومية والتزم بها\n`;
+                    response += `• راجع مصروفاتك كل أسبوع\n`;
+                    response += `• ادخر 10% من راتبك فور نزوله\n`;
+
+                    response += `\n💪 ${remaining >= 0 ? 'أنت قادر على تحسين وضعك المالي، ابدأ اليوم!' : 'لا تستسلم، كل خطوة صغيرة تقربك من هدفك!'}`;
+
+                    return response;
+                }
+
+                // رد عادي للأسئلة الأخرى
+                let response = `📊 **تحليل مالي**\n\n`;
                 response += `💰 إجمالي المصروفات: ${Utils.formatCurrency(monthTotal)}\n`;
                 response += `📈 المتبقي: ${Utils.formatCurrency(remaining)}\n`;
                 response += `📋 ميزانية اليوم: ${Utils.formatCurrency(dailyBudget)}\n`;
@@ -2288,7 +1913,15 @@ ${catStr}
                 if (!this.chatMessages) return;
                 const div = document.createElement('div');
                 div.className = 'chat-message ' + role;
-                div.innerHTML = text.replace(/\n/g, '<br>') + '<div class="message-time">' + new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' }) + '</div>';
+                // تحويل النص إلى HTML مع تنسيق جميل
+                let html = text;
+                // تنسيق العناوين
+                html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                // تنسيق القوائم
+                html = html.replace(/•\s*/g, '• ');
+                // تنسيق الخطوط
+                html = html.replace(/\n/g, '<br>');
+                div.innerHTML = html + '<div class="message-time">' + new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' }) + '</div>';
                 this.chatMessages.appendChild(div);
                 this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
             },
@@ -2684,7 +2317,7 @@ ${catStr}
                 Utils.on(trigger, 'click', () => {
                     modal.classList.add('open');
                     const savedModel = Storage.getGeminiModel();
-                    modelSelect.value = savedModel || 'gemini-3.6-flash';
+                    modelSelect.value = savedModel || 'gemini-2.5-pro';
                     renderKeys();
                     updateStatus();
                 });
@@ -2744,30 +2377,21 @@ ${catStr}
                 const messagesContainer = Utils.id('chatMessages');
                 const input = Utils.id('chatInput');
                 const sendBtn = Utils.id('chatSendBtn');
-                const addMessage = (text, role) => { 
-                    const div = document.createElement('div');
-                    div.className = 'chat-message ' + role;
-                    div.innerHTML = text.replace(/\n/g, '<br>') + '<div class="message-time">' + new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' }) + '</div>';
-                    messagesContainer.appendChild(div);
-                    messagesContainer.scrollTop = messagesContainer.scrollHeight; 
-                };
-                let typingIndicator = null;
-                const showTyping = () => { if (typingIndicator) return;
-                    typingIndicator = document.createElement('div');
-                    typingIndicator.className = 'chat-typing';
-                    typingIndicator.innerHTML = 'يُفكِّر <span class="dot">●</span><span class="dot">●</span><span class="dot">●</span>';
-                    messagesContainer.appendChild(typingIndicator);
-                    messagesContainer.scrollTop = messagesContainer.scrollHeight; };
-                const hideTyping = () => { if (typingIndicator) { typingIndicator.remove();
-                        typingIndicator = null; } };
                 
                 const sendMessage = async () => {
                     const text = input.value.trim();
                     if (!text) return;
-                    addMessage(text, 'user');
+                    this.addChatMessage(text, 'user');
                     input.value = '';
                     input.style.height = 'auto';
-                    showTyping();
+                    
+                    // إظهار مؤشر الكتابة
+                    const typingDiv = document.createElement('div');
+                    typingDiv.className = 'chat-typing';
+                    typingDiv.innerHTML = 'يُفكِّر <span class="dot">●</span><span class="dot">●</span><span class="dot">●</span>';
+                    messagesContainer.appendChild(typingDiv);
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                    
                     try {
                         const expenses = Budget.getExpenses();
                         const settings = Storage.getSettings();
@@ -2832,20 +2456,22 @@ ${catStr}
                         
                         const rawResponse = await Gemini.thinkAndDecide(text, context);
                         const { cleanText, actions } = Commands.extract(rawResponse);
-                        hideTyping();
+                        
+                        // إزالة مؤشر الكتابة
+                        typingDiv.remove();
                         
                         if (actions.length === 0) { 
-                            addMessage(cleanText || rawResponse, 'financial-advisor'); 
+                            this.addChatMessage(cleanText || rawResponse, 'financial-advisor'); 
                         } else {
-                            addMessage(cleanText || rawResponse, 'financial-advisor');
+                            this.addChatMessage(cleanText || rawResponse, 'financial-advisor');
                             const log = Commands.execute(actions);
                             if (log.length > 0) { 
-                                addMessage('📋 تنفيذ الإجراءات:\n' + log.join('\n'), 'system'); 
+                                this.addChatMessage('📋 تنفيذ الإجراءات:\n' + log.join('\n'), 'system'); 
                             }
                         }
                     } catch (err) { 
-                        hideTyping();
-                        addMessage('❌ عذراً، حدث خطأ: ' + err.message + '\n\n💡 حاول مرة أخرى أو استخدم الإدخال اليدوي.', 'assistant');
+                        typingDiv.remove();
+                        this.addChatMessage('❌ عذراً، حدث خطأ: ' + err.message + '\n\n💡 حاول مرة أخرى أو استخدم الإدخال اليدوي.', 'assistant');
                     }
                 };
                 
@@ -2854,6 +2480,19 @@ ${catStr}
                         sendMessage(); } });
                 Utils.on(input, 'input', () => { input.style.height = 'auto';
                     input.style.height = Math.min(input.scrollHeight, 120) + 'px'; });
+                
+                // تأكد من أن حاوية المحادثة تأخذ الارتفاع المناسب
+                const chatContainer = document.querySelector('.chat-container');
+                if (chatContainer) {
+                    const updateHeight = () => {
+                        const windowHeight = window.innerHeight;
+                        const headerHeight = document.querySelector('.app-header').offsetHeight || 80;
+                        const availableHeight = windowHeight - headerHeight - 40;
+                        chatContainer.style.setProperty('--chat-max-height', Math.min(availableHeight, 600) + 'px');
+                    };
+                    updateHeight();
+                    window.addEventListener('resize', updateHeight);
+                }
             },
             renderDashboard() {
                 const cardsContainer = Utils.id('dashboardCards');
