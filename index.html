@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>AI Budget Manager</title>
+    <title>AI Budget Manager - المستشار المالي الذكي</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -211,9 +211,11 @@
         .chat-message.user{align-self:flex-end;background:var(--accent-gradient);color:#fff;border-bottom-right-radius:4px}
         .chat-message.assistant{align-self:flex-start;background:var(--bg-glass);border:1px solid var(--bg-glass-border);border-bottom-left-radius:4px;color:var(--text-primary)}
         .chat-message.system{align-self:flex-start;background:rgba(31,122,92,0.1);border:1px solid rgba(31,122,92,0.3);border-bottom-left-radius:4px;color:var(--success);font-size:0.85rem}
+        .chat-message.financial-advisor{align-self:flex-start;background:linear-gradient(135deg, rgba(46,125,181,0.08) 0%, rgba(18,60,87,0.05) 100%);border:1px solid var(--accent-light);border-bottom-left-radius:4px;color:var(--text-primary);font-size:0.92rem;max-width:90%}
         .chat-message .message-time{font-size:0.6rem;opacity:0.6;margin-top:4px;text-align:left}
         .chat-message.assistant .message-time{color:var(--text-muted)}
         .chat-message.user .message-time{color:rgba(255,255,255,0.7)}
+        .chat-message.financial-advisor .message-time{color:var(--text-muted)}
         @keyframes messageIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
         .chat-input-area{display:flex;gap:12px;padding:16px 20px;border-top:1px solid var(--bg-glass-border);background:var(--bg-glass);backdrop-filter:blur(10px)}
         .chat-input-area textarea{flex:1;padding:10px 14px;border-radius:var(--radius-sm);border:1px solid var(--bg-glass-border);background:var(--bg-card);color:var(--text-primary);font-family:var(--font);font-size:0.95rem;resize:none;min-height:48px;max-height:120px;transition:border var(--transition)}
@@ -267,7 +269,7 @@
                 <a href="#" class="nav-link" data-page="settings"><i class="fas fa-cog"></i><span>الإعدادات</span></a>
                 <a href="#" class="nav-link" data-page="travel"><i class="fas fa-plane"></i><span>ميزانية السفر</span></a>
                 <a href="#" class="nav-link" data-page="temp"><i class="fas fa-umbrella-beach"></i><span>ميزانية مؤقتة</span></a>
-                <a href="#" class="nav-link" data-page="chat"><i class="fas fa-comment-dots"></i><span>المساعد</span></a>
+                <a href="#" class="nav-link" data-page="chat"><i class="fas fa-comment-dots"></i><span>المستشار المالي</span></a>
             </nav>
             <div class="sidebar-footer">
                 <button id="themeToggle" class="theme-toggle"><i class="fas fa-moon"></i></button>
@@ -281,7 +283,7 @@
                 <button id="sidebarToggle" class="sidebar-toggle"><i class="fas fa-bars"></i></button>
                 <h1 id="pageTitle">الرئيسية</h1>
                 <div class="header-actions">
-                    <button class="chat-toggle-btn" id="chatToggleBtn"><i class="fas fa-comment-dots"></i> الدردشة</button>
+                    <button class="chat-toggle-btn" id="chatToggleBtn"><i class="fas fa-comment-dots"></i> المستشار المالي</button>
                     <span id="currentDate" class="current-date"></span>
                 </div>
             </header>
@@ -392,7 +394,7 @@
                 <section id="page-chat" class="page">
                     <div class="chat-container glass">
                         <div class="chat-messages" id="chatMessages">
-                            <div class="chat-message assistant">مرحباً! أنا Budget AI، مساعدك المالي الذكي. كيف يمكنني مساعدتك اليوم؟<div class="message-time">الآن</div></div>
+                            <div class="chat-message financial-advisor">👋 مرحباً! أنا مستشارك المالي الشخصي، خبير في التخطيط المالي وتحليل الإنفاق. لدي وصول كامل لجميع بياناتك المالية وسأقوم بتحليلها بعمق لمساعدتك في تحقيق أهدافك المالية. كيف يمكنني مساعدتك اليوم؟<div class="message-time">الآن</div></div>
                         </div>
                         <div class="chat-input-area">
                             <textarea id="chatInput" rows="1" placeholder="اكتب سؤالك المالي..." style="resize:none;"></textarea>
@@ -524,6 +526,7 @@
             qsa: (sel, ctx = document) => [...ctx.querySelectorAll(sel)],
             on: (el, ev, fn) => (typeof el === 'string' ? Utils.qs(el) : el).addEventListener(ev, fn, { passive: true }),
             formatCurrency: (val) => { const num = parseFloat(val) || 0; return num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' ريال'; },
+            formatCurrencyShort: (val) => { const num = parseFloat(val) || 0; return num.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' ريال'; },
             formatDate: (d) => { const dt = new Date(d); return dt.toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' }); },
             formatDateFull: (d) => { const dt = new Date(d); return dt.toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' }); },
             today: () => (typeof WorldTime !== 'undefined' ? WorldTime.now() : new Date()).toISOString().split('T')[0],
@@ -535,17 +538,23 @@
             tempCategories: () => ['كشتة', 'قطة', 'واجب', 'فزعة', 'صدقة', 'أخرى'],
             cleanNumber: (str) => {
                 if (!str) return 0;
-                // إزالة الفواصل والمسافات من الأرقام
                 const cleaned = String(str).replace(/,/g, '').replace(/\s/g, '');
                 const num = parseFloat(cleaned);
                 return isNaN(num) ? 0 : num;
             },
             extractAllNumbers: (text) => {
-                // استخراج جميع الأرقام من النص مع إزالة الفواصل
                 const cleaned = text.replace(/,/g, '');
                 const matches = cleaned.match(/\d+\.?\d*/g);
                 if (!matches) return [];
                 return matches.map(m => parseFloat(m)).filter(n => !isNaN(n) && n > 0);
+            },
+            getDayName: () => {
+                const now = typeof WorldTime !== 'undefined' ? WorldTime.now() : new Date();
+                return now.toLocaleDateString('ar-SA', { weekday: 'long' });
+            },
+            getMonthName: () => {
+                const now = typeof WorldTime !== 'undefined' ? WorldTime.now() : new Date();
+                return now.toLocaleDateString('ar-SA', { month: 'long' });
             }
         };
 
@@ -624,18 +633,58 @@
         };
 
         // ============================================================
-        // BUDGET
+        // BUDGET - مع تحليلات متقدمة للمستشار المالي
         // ============================================================
         const Budget = {
             getExpenses() { return Storage.getExpenses(); },
             saveExpenses(exp) { Storage.setExpenses(exp); },
             addExpense(data) {
                 const exp = this.getExpenses();
-                const entry = { id: Utils.generateId(), amount: parseFloat(data.amount) || 0, description: data.description || '', category: data.category || 'أخرى', subCategory: data.subCategory || '', date: data.date || Utils.today(), paymentMethod: data.paymentMethod || '', merchant: data.merchant || '', notes: data.notes || '', createdAt: new Date().toISOString() };
+                const entry = { 
+                    id: Utils.generateId(), 
+                    amount: parseFloat(data.amount) || 0, 
+                    description: data.description || '', 
+                    category: data.category || 'أخرى', 
+                    subCategory: data.subCategory || '', 
+                    date: data.date || Utils.today(), 
+                    paymentMethod: data.paymentMethod || '', 
+                    merchant: data.merchant || '', 
+                    notes: data.notes || '', 
+                    createdAt: new Date().toISOString(),
+                    // تصنيف تلقائي للشراء حسب النوع
+                    purchaseType: this.classifyPurchase(data.amount || 0, data.category || 'أخرى', data.description || '')
+                };
                 exp.push(entry);
                 this.saveExpenses(exp);
                 this.refreshUI();
+                // تشغيل التحليل الفوري للمستشار المالي
+                if (typeof FinancialAdvisor !== 'undefined') {
+                    FinancialAdvisor.analyzeTransaction(entry);
+                }
                 return entry;
+            },
+            // تصنيف الشراء تلقائياً
+            classifyPurchase(amount, category, description) {
+                const essential = ['المواد الغذائية', 'الكهرباء', 'الماء', 'الإيجار', 'الصحة', 'السيارة', 'البنزين'];
+                const important = ['الإنترنت', 'الاتصالات', 'التعليم', 'الأقساط'];
+                const luxury = ['المطاعم', 'المقاهي', 'الترفيه', 'التسوق', 'الهدايا'];
+                const investment = ['التعليم', 'الصحة'];
+                
+                if (essential.includes(category)) return 'Essential';
+                if (investment.includes(category) && amount > 500) return 'Investment';
+                if (luxury.includes(category)) return 'Luxury';
+                if (important.includes(category)) return 'Important';
+                
+                // تحليل الوصف
+                const desc = (description || '').toLowerCase();
+                if (desc.includes('قهوة') || desc.includes('كافيه')) return 'Luxury';
+                if (desc.includes('وجبة') || desc.includes('مطعم')) return 'Luxury';
+                if (desc.includes('دواء') || desc.includes('علاج')) return 'Essential';
+                if (desc.includes('كتاب') || desc.includes('دورة')) return 'Investment';
+                if (desc.includes('هدية')) return 'Luxury';
+                if (desc.includes('اشتراك')) return 'Important';
+                
+                return amount > 500 ? 'Important' : 'Optional';
             },
             deleteExpense(id) { let exp = this.getExpenses();
                 exp = exp.filter(e => e.id !== id);
@@ -673,6 +722,68 @@
                 patterns.categories = sortedCats;
                 patterns.biggestSpenders = sortedCats.slice(0, 3).map(([cat, amount]) => ({ category: cat, amount, percentage: total > 0 ? (amount / total) * 100 : 0 })); const settings = Storage.getSettings(); const salary = parseFloat(settings.salary) || 0; if (total > salary * 0.8) { patterns.recommendations.push('⚠️ أنت تنفق أكثر من 80% من راتبك. حاول تقليل المصروفات غير الضرورية.'); } for (const [cat, amount] of sortedCats) { const budget = Storage.getCategoryBudget(cat); if (budget > 0 && amount > budget) { patterns.recommendations.push('⚠️ تجاوزت ميزانية "' + cat + '" بمبلغ ' + (amount - budget).toFixed(2) + ' ريال.'); } } if (patterns.biggestSpenders.length > 0) { const top = patterns.biggestSpenders[0];
                     patterns.recommendations.push('📊 أكبر تصنيف إنفاق هو "' + top.category + '" بنسبة ' + top.percentage.toFixed(0) + '% من إجمالي المصروفات.'); } return patterns; },
+            // تحليلات متقدمة للمستشار المالي
+            getSpendingVelocity() {
+                const expenses = this.getExpenses();
+                if (expenses.length < 2) return { velocity: 0, acceleration: 0 };
+                const sorted = [...expenses].sort((a, b) => new Date(a.date) - new Date(b.date));
+                const recent = sorted.slice(-7);
+                if (recent.length < 2) return { velocity: 0, acceleration: 0 };
+                const totalRecent = this.getTotal(recent);
+                const daysSpan = Math.max(1, (new Date(recent[recent.length - 1].date) - new Date(recent[0].date)) / 86400000);
+                const velocity = totalRecent / daysSpan;
+                // حساب التسارع
+                const older = sorted.slice(-14, -7);
+                if (older.length < 2) return { velocity, acceleration: 0 };
+                const totalOlder = this.getTotal(older);
+                const olderDays = Math.max(1, (new Date(older[older.length - 1].date) - new Date(older[0].date)) / 86400000);
+                const olderVelocity = totalOlder / olderDays;
+                const acceleration = olderVelocity > 0 ? (velocity - olderVelocity) / olderVelocity : 0;
+                return { velocity, acceleration };
+            },
+            getFinancialHealthScore() {
+                const settings = Storage.getSettings();
+                const salary = parseFloat(settings.salary) || 0;
+                if (salary === 0) return { score: 0, details: { savingsRate: 0, budgetAdherence: 0, spendingEfficiency: 0, riskLevel: 'غير معروف' } };
+                
+                const monthExp = this.getMonthExpenses();
+                const total = this.getTotal(monthExp);
+                const remaining = salary - total;
+                
+                // نسبة الادخار
+                const savingsRate = Math.max(0, (remaining / salary) * 100);
+                const savingsScore = Math.min(100, savingsRate * 2);
+                
+                // الالتزام بالميزانية
+                const catMap = this.getByCategory(monthExp);
+                const catBudgets = settings.categoryBudgets || {};
+                let adherenceTotal = 0;
+                let adherenceCount = 0;
+                for (const [cat, spent] of Object.entries(catMap)) {
+                    const budget = catBudgets[cat] || 0;
+                    if (budget > 0) {
+                        const ratio = Math.min(1, spent / budget);
+                        adherenceTotal += (1 - ratio) * 100;
+                        adherenceCount++;
+                    }
+                }
+                const budgetAdherence = adherenceCount > 0 ? adherenceTotal / adherenceCount : 50;
+                
+                // كفاءة الإنفاق
+                const essentialSpending = monthExp.filter(e => e.purchaseType === 'Essential').reduce((s, e) => s + e.amount, 0);
+                const luxurySpending = monthExp.filter(e => e.purchaseType === 'Luxury').reduce((s, e) => s + e.amount, 0);
+                const efficiency = total > 0 ? ((essentialSpending / total) * 100) : 0;
+                const spendingEfficiency = Math.min(100, efficiency * 1.2);
+                
+                const score = Math.min(100, (savingsScore * 0.4 + budgetAdherence * 0.3 + spendingEfficiency * 0.3));
+                
+                let riskLevel = 'منخفض';
+                if (score < 30) riskLevel = 'مرتفع جداً';
+                else if (score < 50) riskLevel = 'مرتفع';
+                else if (score < 70) riskLevel = 'متوسط';
+                
+                return { score: Math.round(score), details: { savingsRate: Math.round(savingsRate), budgetAdherence: Math.round(budgetAdherence), spendingEfficiency: Math.round(spendingEfficiency), riskLevel } };
+            },
             parseMultipleItems(text) { const items = []; let remaining = text; const bulkPattern = /(\d+)\s*(حبات?|وحدات?|قطع?)\s*(الحبة|الوحدة|القطعة)?\s*بـ\s*([\d.]+)\s*ريال/i; let bulkMatch = remaining.match(bulkPattern); if (bulkMatch) { const count = parseFloat(bulkMatch[1]); const price = parseFloat(bulkMatch[4]); items.push({ count, price, total: count * price, desc: count + ' × ' + price + ' ريال' });
                     remaining = remaining.replace(bulkMatch[0], ''); } const singlePattern = /([^،,]+)\s*(بـ|ب)\s*([\d.]+)\s*ريال/gi; let match; while ((match = singlePattern.exec(remaining)) !== null) { const desc = match[1].trim(); const amount = parseFloat(match[3]); items.push({ count: 1, price: amount, total: amount, desc: desc || 'مادة' }); } if (items.length === 0) { const numberPattern = /([\d.]+)\s*ريال/g; let numMatch; let tempRemaining = text; let total = 0; let parts = []; while ((numMatch = numberPattern.exec(tempRemaining)) !== null) { const amount = parseFloat(numMatch[1]);
                         total += amount;
@@ -704,7 +815,208 @@
         };
 
         // ============================================================
-        // GEMINI - with key rotation support and improved number parsing
+        // FINANCIAL ADVISOR - المستشار المالي الذكي
+        // ============================================================
+        const FinancialAdvisor = {
+            // تحليل المعاملة فور إضافتها
+            analyzeTransaction(transaction) {
+                if (!transaction) return;
+                const insights = [];
+                const settings = Storage.getSettings();
+                const dailyBudget = Budget.getDailyBudget();
+                const monthExp = Budget.getMonthExpenses();
+                const totalMonth = Budget.getTotal(monthExp);
+                const remaining = Budget.getRemaining(monthExp);
+                const todayExp = Budget.getTodayExpenses();
+                const todayTotal = Budget.getTotal(todayExp);
+                
+                // 1. هل تجاوز ميزانية اليوم؟
+                if (todayTotal > dailyBudget) {
+                    insights.push({
+                        type: 'warning',
+                        title: '⚠️ تجاوز ميزانية اليوم',
+                        message: `أنفقت اليوم ${Utils.formatCurrency(todayTotal)}، وهو أكثر من ميزانية اليوم ${Utils.formatCurrency(dailyBudget)}.`,
+                        suggestion: 'حاول تقليل المصروفات غير الضرورية لبقية اليوم.'
+                    });
+                }
+                
+                // 2. هل تجاوز ميزانية التصنيف؟
+                const categoryBudget = Storage.getCategoryBudget(transaction.category);
+                if (categoryBudget > 0) {
+                    const categoryTotal = monthExp.filter(e => e.category === transaction.category).reduce((s, e) => s + e.amount, 0);
+                    if (categoryTotal > categoryBudget) {
+                        insights.push({
+                            type: 'warning',
+                            title: `⚠️ تجاوز ميزانية "${transaction.category}"`,
+                            message: `إجمالي إنفاقك على ${transaction.category} هو ${Utils.formatCurrency(categoryTotal)}، والميزانية المحددة هي ${Utils.formatCurrency(categoryBudget)}.`,
+                            suggestion: `راجع إنفاقك على ${transaction.category} وحاول تقليله في الأيام القادمة.`
+                        });
+                    }
+                }
+                
+                // 3. هل هناك خطر نفاده المال؟
+                const daysUntilSalary = Budget.getDaysUntilSalary();
+                if (daysUntilSalary !== null && daysUntilSalary > 0) {
+                    const dailyAvg = totalMonth / (new Date().getDate() || 1);
+                    const projectedSpending = dailyAvg * daysUntilSalary;
+                    if (projectedSpending > remaining && remaining > 0) {
+                        insights.push({
+                            type: 'danger',
+                            title: '⚠️ خطر نفاده المال قبل نهاية الشهر',
+                            message: `بمعدل إنفاقك الحالي، من المتوقع أن ينفد المال قبل نزول الراتب بـ ${Math.round((projectedSpending - remaining) / dailyAvg)} يوم.`,
+                            suggestion: 'تحتاج إلى تقليل الإنفاق اليومي بمعدل ' + Utils.formatCurrency((projectedSpending - remaining) / daysUntilSalary) + ' ريال يومياً.'
+                        });
+                    }
+                }
+                
+                // 4. تحليل نوع الشراء
+                const purchaseType = transaction.purchaseType || 'Optional';
+                if (purchaseType === 'Luxury' && transaction.amount > 100) {
+                    insights.push({
+                        type: 'info',
+                        title: '💡 شراء كمالي',
+                        message: `هذا الشراء (${transaction.description || transaction.category}) مصنف كـ "كمالي" بقيمة ${Utils.formatCurrency(transaction.amount)}.`,
+                        suggestion: 'هل هذا الشراء ضروري؟ يمكنك توفير هذا المبلغ للادخار.'
+                    });
+                }
+                
+                if (purchaseType === 'Investment') {
+                    insights.push({
+                        type: 'success',
+                        title: '✅ استثمار ذكي',
+                        message: `هذا الشراء (${transaction.description || transaction.category}) مصنف كـ "استثمار" بقيمة ${Utils.formatCurrency(transaction.amount)}.`,
+                        suggestion: 'استمر في الاستثمار في نفسك! هذا سيعود عليك بالنفع على المدى الطويل.'
+                    });
+                }
+                
+                // 5. تحليل السلوك - الإنفاق المتكرر
+                const similarExpenses = monthExp.filter(e => 
+                    e.category === transaction.category && 
+                    e.merchant === transaction.merchant &&
+                    e.id !== transaction.id
+                );
+                if (similarExpenses.length >= 3) {
+                    const avgAmount = similarExpenses.reduce((s, e) => s + e.amount, 0) / similarExpenses.length;
+                    if (transaction.amount > avgAmount * 1.3) {
+                        insights.push({
+                            type: 'warning',
+                            title: '📈 زيادة في الإنفاق المعتاد',
+                            message: `أنفقت ${Utils.formatCurrency(transaction.amount)} على ${transaction.category}، وهو أكثر من متوسط إنفاقك السابق ${Utils.formatCurrency(avgAmount)}.`,
+                            suggestion: 'تأكد من أن هذه الزيادة مبررة وليست إنفاقاً عاطفياً.'
+                        });
+                    }
+                }
+                
+                // إضافة التحليلات إلى المحادثة إذا كانت نشطة
+                if (insights.length > 0 && typeof UI !== 'undefined' && UI.chatMessages) {
+                    const summary = insights.map(i => `${i.title}\n${i.message}\n${i.suggestion}`).join('\n\n');
+                    UI.addChatMessage('📊 تحليل مالي فوري\n\n' + summary, 'financial-advisor');
+                }
+                
+                return insights;
+            },
+            
+            // توليد تقرير يومي تلقائي
+            generateDailyReport() {
+                const today = Utils.today();
+                const todayExp = Budget.getTodayExpenses();
+                const todayTotal = Budget.getTotal(todayExp);
+                const dailyBudget = Budget.getDailyBudget();
+                const remainingToday = dailyBudget - todayTotal;
+                const monthExp = Budget.getMonthExpenses();
+                const totalMonth = Budget.getTotal(monthExp);
+                const remainingMonth = Budget.getRemaining(monthExp);
+                const health = Budget.getFinancialHealthScore();
+                
+                const largest = todayExp.length > 0 ? todayExp.reduce((a, b) => a.amount > b.amount ? a : b) : null;
+                const bestDecision = todayExp.filter(e => e.purchaseType === 'Investment' || e.purchaseType === 'Essential').length;
+                const waste = todayExp.filter(e => e.purchaseType === 'Luxury').reduce((s, e) => s + e.amount, 0);
+                
+                let report = `📊 التقرير المالي اليومي - ${Utils.formatDate(today)}\n`;
+                report += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+                report += `💰 الإنفاق اليومي: ${Utils.formatCurrency(todayTotal)}\n`;
+                report += `📋 ميزانية اليوم: ${Utils.formatCurrency(dailyBudget)}\n`;
+                report += `📈 المتبقي من ميزانية اليوم: ${Utils.formatCurrency(remainingToday)}\n`;
+                report += `📊 إجمالي المصروفات الشهرية: ${Utils.formatCurrency(totalMonth)}\n`;
+                report += `💵 المتبقي من الراتب: ${Utils.formatCurrency(remainingMonth)}\n`;
+                report += `🏥 درجة الصحة المالية: ${health.score}/100 (${health.details.riskLevel})\n\n`;
+                
+                if (largest) {
+                    report += `🛒 أكبر شراء اليوم: ${largest.description || largest.category} (${Utils.formatCurrency(largest.amount)})\n`;
+                }
+                report += `💡 قرارات استثمارية اليوم: ${bestDecision}\n`;
+                report += `⚠️ إنفاق كمالي اليوم: ${Utils.formatCurrency(waste)}\n\n`;
+                
+                // تقييم الأداء
+                if (todayTotal <= dailyBudget) {
+                    report += `✅ أداء ممتاز! أنت ضمن ميزانية اليوم.\n`;
+                    if (remainingToday > dailyBudget * 0.3) {
+                        report += `🎯 يمكنك توفير ${Utils.formatCurrency(remainingToday)} اليوم للادخار.\n`;
+                    }
+                } else {
+                    report += `⚠️ تجاوزت ميزانية اليوم بمبلغ ${Utils.formatCurrency(Math.abs(remainingToday))}.\n`;
+                    report += `💡 حاول تقليل الإنفاق في الأيام القادمة لتعويض هذا التجاوز.\n`;
+                }
+                
+                // نصائح مخصصة
+                if (health.score < 50) {
+                    report += `\n🔴 تحذير: درجة الصحة المالية منخفضة.`;
+                    report += `\n💡 ركز على تقليل الإنفاق الكمالي وزيادة نسبة الادخار.`;
+                } else if (health.score >= 70) {
+                    report += `\n🌟 ممتاز! استمر في هذا الأداء المالي الرائع.`;
+                }
+                
+                return report;
+            },
+            
+            // توليد تقرير أسبوعي تلقائي
+            generateWeeklyReport() {
+                const weekRange = Utils.getWeekRange();
+                const weekExp = Budget.getExpensesByDateRange(weekRange.start, weekRange.end);
+                const weekTotal = Budget.getTotal(weekExp);
+                const weeklyBudget = Budget.getWeeklyBudget();
+                const catMap = Budget.getByCategory(weekExp);
+                const sortedCats = Object.entries(catMap).sort((a, b) => b[1] - a[1]);
+                const health = Budget.getFinancialHealthScore();
+                
+                let report = `📊 التقرير المالي الأسبوعي\n`;
+                report += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+                report += `📅 الأسبوع: ${Utils.formatDate(weekRange.start)} - ${Utils.formatDate(weekRange.end)}\n`;
+                report += `💰 إجمالي الإنفاق: ${Utils.formatCurrency(weekTotal)}\n`;
+                report += `📋 ميزانية الأسبوع: ${Utils.formatCurrency(weeklyBudget)}\n`;
+                report += `📈 المتبقي: ${Utils.formatCurrency(weeklyBudget - weekTotal)}\n`;
+                report += `🏥 درجة الصحة المالية: ${health.score}/100\n\n`;
+                
+                report += `📊 توزيع الإنفاق حسب التصنيف:\n`;
+                sortedCats.slice(0, 5).forEach(([cat, amount]) => {
+                    const pct = weekTotal > 0 ? ((amount / weekTotal) * 100).toFixed(1) : 0;
+                    report += `  • ${cat}: ${Utils.formatCurrency(amount)} (${pct}%)\n`;
+                });
+                
+                if (sortedCats.length > 5) {
+                    report += `  • ... و ${sortedCats.length - 5} تصنيفات أخرى\n`;
+                }
+                
+                report += `\n💡 توصيات الأسبوع القادم:\n`;
+                if (weekTotal > weeklyBudget) {
+                    report += `  • 🔴 تجاوزت ميزانية الأسبوع، قلل الإنفاق في الأسبوع القادم.\n`;
+                } else {
+                    report += `  • ✅ أداء جيد، استمر في هذا المستوى.\n`;
+                }
+                
+                // تحليل أكبر زيادة في الإنفاق
+                if (sortedCats.length > 0) {
+                    const top = sortedCats[0];
+                    report += `  • 📈 أكبر تصنيف إنفاق: ${top[0]} (${Utils.formatCurrency(top[1])})\n`;
+                    report += `  • 💡 حاول البحث عن بدائل أقل تكلفة لـ ${top[0]}.\n`;
+                }
+                
+                return report;
+            }
+        };
+
+        // ============================================================
+        // GEMINI - مع برومبت المستشار المالي المتقدم
         // ============================================================
         const Gemini = {
             getKeys() { return Storage.getGeminiKeys(); },
@@ -751,7 +1063,6 @@
                     });
 
                     if (response.status === 429 || response.status === 403 || response.status === 401) {
-                        // Key limit reached or invalid, rotate and retry once
                         const newKey = this.rotateKey();
                         if (newKey) {
                             const retryUrl = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + newKey;
@@ -776,7 +1087,6 @@
                     const data = await response.json();
                     return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
                 } catch (e) {
-                    // Try to rotate on any error
                     this.rotateKey();
                     throw new Error(e.message || 'فشل الاتصال بـ Gemini');
                 }
@@ -786,7 +1096,6 @@
                 return await this.sendRequest(prompt, true);
             },
 
-            // دالة parseExpense المحسنة للتعامل مع الأرقام الطويلة والفواصل
             async parseExpense(text) {
                 const prompt = 'أنت مساعد ذكي لتحليل المصروفات. قم بتحليل النص التالي واستخرج المعلومات التالية:\n- المبلغ (رقم فقط، اجمع كل المبالغ المذكورة إن وجدت)\n- التصنيف (من القائمة: المواد الغذائية, البنزين, الكهرباء, الماء, الإنترنت, الإيجار, الأقساط, المطاعم, المقاهي, الصحة, الترفيه, التسوق, التعليم, السيارة, مصروف شخصي, أخرى)\n- التاجر (اسم المتجر أو الجهة)\n- التاريخ (صيغة YYYY-MM-DD، إذا لم يحدد فاستخدم اليوم)\n- وصف مختصر (اجمع الأصناف إن كانت متعددة)\nأعد النتيجة بصيغة JSON فقط بدون أي نص إضافي، مثل:\n{"amount": 52.50, "category": "المواد الغذائية", "merchant": "", "date": "2026-07-22", "description": "فطور + شاهي + عصائر"}\nالنص: ' + text;
                 try {
@@ -795,7 +1104,6 @@
                     const json = JSON.parse(jsonMatch ? jsonMatch[0] : content);
                     return { amount: parseFloat(json.amount) || 0, category: json.category || 'أخرى', merchant: json.merchant || '', date: json.date || Utils.today(), description: json.description || '' };
                 } catch (e) {
-                    // محاولة التحليل المحلي مع دعم الأرقام المنسقة
                     const parsed = this.localParseAdvanced(text);
                     if (parsed) return parsed;
                     const fallback = this.localParse(text);
@@ -804,14 +1112,11 @@
                 }
             },
 
-            // دالة localParse المحسنة
             localParse(text) {
-                // إزالة فواصل الآلاف
                 const cleanText = text.replace(/,/g, '');
                 const amountMatch = cleanText.match(/(\d+\.?\d*)\s*ريال/i);
                 const amount = amountMatch ? parseFloat(amountMatch[1]) : 0;
 
-                // إذا لم يتم العثور على مبلغ، حاول البحث عن أي رقم
                 let finalAmount = amount;
                 if (finalAmount === 0) {
                     const anyNum = cleanText.match(/(\d+\.?\d*)/);
@@ -834,9 +1139,7 @@
                 const merchantMatch = text.match(/(?:من|في|عند|من عند)\s*([^\d,،]+)/i);
                 const merchant = merchantMatch ? merchantMatch[1].trim() : '';
 
-                // استخراج وصف من النص
                 let description = text;
-                // إزالة الأرقام والعملات من الوصف
                 description = description.replace(/[\d,]+.*ريال/g, '').trim();
                 if (!description || description.length < 2) {
                     description = text.substring(0, 30);
@@ -851,20 +1154,13 @@
                 };
             },
 
-            // دالة localParseAdvanced المحسنة للتعامل مع الأرقام الطويلة
             localParseAdvanced(text) {
-                // إزالة فواصل الآلاف من الأرقام أولاً
                 const cleanText = text.replace(/,/g, '');
-
-                // محاولة استخراج جميع المبالغ
                 const numberPattern = /(\d+\.?\d*)\s*ريال/gi;
                 let match;
                 let total = 0;
                 let amounts = [];
                 let descriptions = [];
-
-                // نسخة من النص للبحث عن الأوصاف
-                let tempText = text;
 
                 while ((match = numberPattern.exec(cleanText)) !== null) {
                     const amount = parseFloat(match[1]);
@@ -874,23 +1170,17 @@
                     }
                 }
 
-                // إذا لم يتم العثور على أرقام مع "ريال"، حاول البحث عن أي أرقام
                 if (amounts.length === 0) {
-                    // استخراج جميع الأرقام من النص
                     const allNumbers = Utils.extractAllNumbers(text);
                     if (allNumbers.length > 0) {
-                        // جمع كل الأرقام
                         total = allNumbers.reduce((sum, n) => sum + n, 0);
                         amounts = allNumbers;
                     }
                 }
 
-                // إذا كان هناك أرقام متعددة، حاول استخراج أوصاف من النص
                 if (amounts.length > 1) {
-                    // تقسيم النص إلى سطور
                     const lines = text.split(/[\n\r]+/).filter(line => line.trim());
                     for (const line of lines) {
-                        // استخراج الوصف قبل الرقم
                         const cleanLine = line.replace(/,/g, '');
                         const descMatch = cleanLine.match(/^([^\d]+)/);
                         if (descMatch) {
@@ -902,7 +1192,6 @@
                     }
                 }
 
-                // إذا كان هناك رقم واحد فقط، استخدمه
                 if (amounts.length === 1 && total === 0) {
                     total = amounts[0];
                 }
@@ -917,23 +1206,18 @@
                         }
                     }
 
-                    // محاولة استخراج وصف عام
                     let description = '';
                     if (descriptions.length > 0) {
-                        // استخدام الأوصاف المستخرجة
                         const uniqueDescs = [...new Set(descriptions)];
                         description = uniqueDescs.join(' + ');
                     } else {
-                        // استخراج أول سطر غير فارغ
                         const lines = text.split(/[\n\r]+/).filter(line => line.trim());
                         if (lines.length > 0) {
-                            // إزالة الأرقام من السطر الأول
                             let firstLine = lines[0].replace(/,/g, '');
                             firstLine = firstLine.replace(/[\d]+.*ريال/g, '').trim();
                             if (firstLine && firstLine.length > 2) {
                                 description = firstLine;
                             } else {
-                                // إذا كان السطر الأول لا يحتوي على وصف مفيد، استخدم جميع الأسطر
                                 const allText = lines.join(' + ');
                                 description = allText.replace(/[\d,]+.*ريال/g, '').trim();
                                 if (!description || description.length < 2) {
@@ -959,29 +1243,675 @@
                 return null;
             },
 
-            async runAnalytics(expenses, settings) {
-                const totalExpenses = Budget.getTotal(expenses);
-                const remaining = (parseFloat(settings.salary) || 0) - totalExpenses;
-                const catMap = Budget.getByCategory(expenses);
-                const catBudgets = settings.categoryBudgets || {};
-                let catSummary = '';
-                for (const [cat, spent] of Object.entries(catMap)) { const budget = catBudgets[cat] || 0; const pct = budget > 0 ? ((spent / budget) * 100).toFixed(0) : 0;
-                    catSummary += '- ' + cat + ': صرف ' + spent.toFixed(2) + ' ريال، الميزانية ' + budget.toFixed(2) + ' ريال (' + pct + '%)\n'; }
-                const forecast = Budget.forecastExpenses(30);
-                const patterns = Budget.analyzeSpendingPatterns();
-                const prompt = 'أنت مستشار مالي خبير. بناءً على البيانات التالية، قدم تحليلاً ذكياً متقدماً:\nالراتب الشهري: ' + settings.salary + ' ريال\nإجمالي المصروفات هذا الشهر: ' + totalExpenses.toFixed(2) + ' ريال\nالمتبقي: ' + remaining.toFixed(2) + ' ريال\nهدف الادخار: ' + (settings.savingsGoal || 0) + ' ريال\nتفاصيل المصروفات حسب التصنيف:\n' + catSummary + '\nالتحليلات المتقدمة:\n- متوسط الإنفاق اليومي: ' + forecast.dailyAvg.toFixed(2) + ' ريال\n- التوقع للشهر القادم: ' + forecast.forecast.toFixed(2) + ' ريال\n- أعلى 3 تصنيفات إنفاق: ' + patterns.biggestSpenders.map(s => s.category + ' (' + s.percentage.toFixed(0) + '%)').join(', ') + '\n\nالمطلوب:\n1. تحليل عميق للأنماط المالية\n2. اقتراحات ذكية لتقليل المصروفات بناءً على الأنماط المكتشفة\n3. تحذيرات فورية للتجاوزات\n4. خطة ادخار مقترحة للشهر القادم\n5. توقع مالي شامل\nكن مختصراً ومفيداً، أجب باللغة العربية.';
-                return await this.generate(prompt);
+            // ============================================================
+            // البرومبت المتقدم للمستشار المالي - Financial Advisor Prompt
+            // ============================================================
+            async thinkAndDecide(query, context) {
+                // التحقق من الأسئلة المباشرة أولاً
+                const directAnswer = await this.answerFinancialQuery(query, context.expenses || [], context.settings || {});
+                if (directAnswer) { return directAnswer; }
+
+                // برومبت المستشار المالي المتقدم
+                const advisorPrompt = `You are not a chatbot.
+
+You are an autonomous, world-class AI Financial Advisor, Personal CFO, Budget Planner, Spending Analyst, Behavioral Economist, Financial Strategist, Cash Flow Optimizer, Risk Analyst, Savings Coach, and Wealth Growth Assistant.
+
+Your mission is NOT answering questions.
+
+Your primary responsibility is continuously monitoring, analyzing, predicting, optimizing, and protecting the user's financial life.
+
+You already have complete real-time access to:
+
+• Every expense
+• Every income
+• Every salary
+• Every transfer
+• Every refund
+• Every recurring payment
+• Every subscription
+• Every installment
+• Every bill
+• Every budget
+• Every savings goal
+• Every financial target
+• Every spending category
+• Every merchant
+• Every payment method
+• Every historical transaction
+• Every trend
+• Every financial event
+
+Assume new financial data arrives instantly.
+
+Treat every transaction as an important financial event.
+
+Never wait until the user asks.
+
+Instead think continuously.
+
+──────────────────────────────────────
+
+YOUR MINDSET
+
+Act exactly like a real Chief Financial Officer (CFO).
+
+Protect the user's money.
+
+Increase savings.
+
+Reduce unnecessary spending.
+
+Optimize cash flow.
+
+Predict problems before they happen.
+
+Improve long-term financial health.
+
+Every decision must maximize financial stability.
+
+Never give generic advice.
+
+Everything must be based on the user's actual financial behavior.
+
+──────────────────────────────────────
+
+AUTOMATIC ANALYSIS
+
+Every time a new expense or income is added:
+
+Immediately perform a complete financial review.
+
+Analyze:
+
+• Current balance
+• Remaining salary
+• Remaining budget
+• Daily allowance
+• Weekly allowance
+• Monthly allowance
+• Category budget
+• Savings goal
+• Cash flow
+• Spending trends
+• Spending velocity
+• Spending acceleration
+• Spending consistency
+• Behavioral changes
+• Forecast changes
+• Financial risks
+
+Never wait for the user.
+
+──────────────────────────────────────
+
+ALWAYS ASK YOURSELF
+
+Did this transaction improve the user's financial situation?
+
+Did it reduce financial health?
+
+Did it reduce savings?
+
+Did it increase financial risk?
+
+Did it exceed today's allowance?
+
+Did it exceed weekly allowance?
+
+Did it exceed monthly allowance?
+
+Did it exceed category budget?
+
+Does it create future cash flow issues?
+
+Does it delay financial goals?
+
+Does it indicate a bad habit?
+
+Does it indicate improvement?
+
+Should the financial strategy change?
+
+Should the daily allowance change?
+
+Should category limits change?
+
+Should the savings plan change?
+
+Should priorities change?
+
+Should a warning be generated?
+
+Should positive reinforcement be generated?
+
+If YES
+
+Take action immediately.
+
+──────────────────────────────────────
+
+CONTINUOUS FORECASTING
+
+Continuously predict:
+
+Expected end-of-day balance
+
+Expected end-of-week balance
+
+Expected end-of-month balance
+
+Expected remaining salary
+
+Expected savings
+
+Expected deficit
+
+Probability of achieving savings goal
+
+Probability of exceeding budget
+
+Probability of running out of money
+
+Expected category overruns
+
+Expected recurring expenses
+
+Future financial risks
+
+Always update predictions whenever new data arrives.
+
+──────────────────────────────────────
+
+AUTOMATIC BUDGET ADAPTATION
+
+Whenever spending behavior changes:
+
+Recalculate:
+
+Daily spending allowance
+
+Weekly spending allowance
+
+Monthly spending allowance
+
+Category budgets
+
+Savings strategy
+
+Purchase priorities
+
+Cash flow strategy
+
+Explain WHY the plan changed.
+
+Never silently change recommendations.
+
+──────────────────────────────────────
+
+SMART PROACTIVE NOTIFICATIONS
+
+Generate proactive notifications whenever financially meaningful.
+
+Examples:
+
+High spending detected.
+
+Daily budget exceeded.
+
+Weekly budget exceeded.
+
+Monthly budget exceeded.
+
+Restaurant spending increased.
+
+Fuel spending unusually high.
+
+Shopping trend increasing.
+
+Entertainment spending rising.
+
+Savings improving.
+
+Financial discipline improving.
+
+Salary nearly exhausted.
+
+Upcoming bills.
+
+Subscription increase.
+
+Large purchase detected.
+
+Unusual transaction.
+
+Unexpected income received.
+
+Emergency spending detected.
+
+Savings milestone reached.
+
+Budget milestone reached.
+
+Never spam.
+
+Only notify when valuable.
+
+──────────────────────────────────────
+
+PREDICTIVE WARNINGS
+
+Never only describe current spending.
+
+Predict future consequences.
+
+Always explain:
+
+If you continue spending like today...
+
+If restaurant spending continues...
+
+If shopping continues...
+
+If entertainment continues...
+
+If unnecessary purchases continue...
+
+Estimate:
+
+Days until money runs out.
+
+Expected end-of-month deficit.
+
+Expected savings loss.
+
+Future financial impact.
+
+Recommend specific corrective actions.
+
+──────────────────────────────────────
+
+POSITIVE REINFORCEMENT
+
+Whenever the user follows the plan:
+
+Celebrate.
+
+Recognize improvement.
+
+Mention exactly what improved.
+
+Estimate money saved.
+
+Estimate yearly savings.
+
+Increase motivation.
+
+Reinforce good habits.
+
+Examples:
+
+Excellent discipline today.
+
+You spent 35% less than your normal Thursday.
+
+You saved 124 SAR today.
+
+If maintained, this becomes 3,720 SAR yearly.
+
+Great financial decision.
+
+──────────────────────────────────────
+
+BEHAVIORAL ANALYSIS
+
+Detect:
+
+Impulse purchases
+
+Emotional spending
+
+Stress spending
+
+Weekend overspending
+
+Late-night spending
+
+Lifestyle inflation
+
+Reward spending
+
+Convenience spending
+
+Subscription addiction
+
+Coffee addiction
+
+Restaurant dependency
+
+Shopping addiction
+
+Seasonal spending
+
+Habit spending
+
+Explain WHY this pattern exists.
+
+Coach the user.
+
+Never shame.
+
+Never criticize.
+
+Always educate.
+
+──────────────────────────────────────
+
+PURCHASE EVALUATION
+
+Evaluate every purchase.
+
+Classify it as:
+
+Essential
+
+Important
+
+Optional
+
+Luxury
+
+Investment
+
+Waste
+
+If the user is overspending,
+
+recommend reducing:
+
+Luxury first
+
+Optional second
+
+Important third
+
+Essential last
+
+Never recommend reducing necessities before luxuries.
+
+──────────────────────────────────────
+
+FINANCIAL HEALTH SCORES
+
+Continuously calculate:
+
+Overall Financial Health Score
+
+Savings Score
+
+Budget Discipline Score
+
+Cash Flow Score
+
+Overspending Risk Score
+
+Lifestyle Inflation Score
+
+Impulse Spending Score
+
+Category Efficiency Score
+
+Budget Accuracy Score
+
+Goal Achievement Score
+
+Show score changes over time.
+
+Explain every increase and decrease.
+
+──────────────────────────────────────
+
+TREND ANALYSIS
+
+Compare against:
+
+Yesterday
+
+Last 7 days
+
+Last 30 days
+
+Last salary cycle
+
+Same weekday
+
+Same month
+
+Historical average
+
+Category average
+
+Personal average
+
+Always detect:
+
+Increasing trends
+
+Decreasing trends
+
+New habits
+
+Broken habits
+
+Financial improvements
+
+Financial deterioration
+
+──────────────────────────────────────
+
+DAILY REPORT
+
+Generate automatically every day:
+
+Today's spending
+
+Today's allowance
+
+Remaining allowance
+
+Largest purchase
+
+Best financial decision
+
+Worst financial decision
+
+Money saved today
+
+Money wasted today
+
+Daily financial score
+
+Tomorrow recommendation
+
+Risk level
+
+Motivational summary
+
+──────────────────────────────────────
+
+WEEKLY REPORT
+
+Generate automatically every week:
+
+Weekly spending
+
+Weekly savings
+
+Budget adherence
+
+Category rankings
+
+Top increases
+
+Top decreases
+
+Best improvement
+
+Biggest concern
+
+Cash flow review
+
+Next week's strategy
+
+──────────────────────────────────────
+
+MONTHLY REPORT
+
+Generate automatically every month:
+
+Income
+
+Expenses
+
+Savings
+
+Net Cash Flow
+
+Budget Accuracy
+
+Financial Health
+
+Category Performance
+
+Unexpected Expenses
+
+Recurring Costs
+
+Optimization Opportunities
+
+Behavior Changes
+
+Annual Projection
+
+Goal Progress
+
+Professional Financial Summary
+
+Action Plan for Next Month
+
+──────────────────────────────────────
+
+COMMUNICATION STYLE
+
+Professional
+
+Friendly
+
+Supportive
+
+Highly intelligent
+
+Highly analytical
+
+Never robotic.
+
+Never generic.
+
+Never repetitive.
+
+Always personalized.
+
+Always data-driven.
+
+Always explain your reasoning.
+
+Always quantify impact whenever possible.
+
+Always estimate future outcomes.
+
+Always focus on improving the user's financial life.
+
+Your ultimate goal is simple:
+
+Help the user make smarter financial decisions every single day, protect their money, maximize savings, minimize waste, and become financially stronger over time—without waiting to be asked.
+
+──────────────────────────────────────
+
+السياق الحالي (بيانات المستخدم الحقيقية):
+
+الراتب الشهري: ${context.settings?.salary || 0} ريال
+تاريخ نزول الراتب: ${context.settings?.salaryDate || 'غير محدد'}
+هدف الادخار: ${context.settings?.savingsGoal || 0} ريال
+إجمالي المصروفات هذا الشهر: ${context.totalMonth?.toFixed(2) || 0} ريال
+المتبقي من الراتب: ${context.remaining?.toFixed(2) || 0} ريال
+عدد المصروفات هذا الشهر: ${context.monthExp?.length || 0}
+
+تفاصيل المصروفات حسب التصنيف:
+${context.catSummary || 'لا توجد بيانات'}
+
+التحليلات المتقدمة:
+- متوسط الإنفاق اليومي: ${context.forecast?.dailyAvg?.toFixed(2) || 0} ريال
+- التوقع للشهر القادم: ${context.forecast?.forecast?.toFixed(2) || 0} ريال
+- سرعة الإنفاق: ${context.spendingVelocity?.velocity?.toFixed(2) || 0} ريال/يوم
+- تسارع الإنفاق: ${(context.spendingVelocity?.acceleration * 100)?.toFixed(1) || 0}%
+
+ميزانية السفر: ${context.travelSummary || 'غير مفعّلة'}
+الميزانية المؤقتة: ${context.tempSummary || 'غير مفعّلة'}
+الأيام المتبقية لنزول الراتب: ${context.daysUntilSalary !== null ? context.daysUntilSalary + ' يوم' : 'غير محدد'}
+
+درجة الصحة المالية: ${context.healthScore?.score || 0}/100
+مخاطر الإنفاق: ${context.healthScore?.details?.riskLevel || 'غير معروف'}
+
+طلب المستخدم: ${query}
+
+قدم رداً شاملاً ومفيداً بناءً على جميع البيانات المتاحة، مع الالتزام الكامل بجميع قواعد المستشار المالي المتقدم المذكورة أعلاه.
+
+أجب باللغة العربية الفصحى، بأسلوب مهني ودود.
+
+إذا طلب المستخدم تنفيذ إجراء فعلي (إضافة/حذف/تعديل)، أرفق كتلة json-actions في نهاية الرد.
+
+التاريخ الحالي: ${Utils.today()} (${Utils.getDayName()})`;
+
+                try {
+                    return await this.generate(advisorPrompt);
+                } catch (e) {
+                    // Fallback إذا فشل Gemini
+                    return this.generateFallbackResponse(query, context);
+                }
             },
 
-            async askQuestion(question, expenses, settings) {
-                const totalExpenses = Budget.getTotal(expenses);
-                const remaining = (parseFloat(settings.salary) || 0) - totalExpenses;
-                const catMap = Budget.getByCategory(expenses);
-                let catStr = '';
-                for (const [cat, spent] of Object.entries(catMap)) { catStr += '- ' + cat + ': ' + spent.toFixed(2) + ' ريال\n'; }
-                const forecast = Budget.forecastExpenses(30);
-                const prompt = 'أنت مستشار مالي خبير. أجب على السؤال التالي بناءً على البيانات والتحليلات المتقدمة:\nالراتب: ' + settings.salary + ' ريال\nالمصروفات الكلية: ' + totalExpenses.toFixed(2) + ' ريال\nالمتبقي: ' + remaining.toFixed(2) + ' ريال\nالمصروفات حسب التصنيف:\n' + catStr + '\nمتوسط الإنفاق اليومي: ' + forecast.dailyAvg.toFixed(2) + ' ريال\nالتوقع للشهر القادم: ' + forecast.forecast.toFixed(2) + ' ريال\n\nالسؤال: ' + question + '\n\nأجب بذكاء، مع مراعاة السياق الكامل للبيانات، وقدم نصائح عملية قابلة للتنفيذ.\nأجب باللغة العربية.';
-                return await this.generate(prompt);
+            // رد احتياطي إذا فشل Gemini
+            generateFallbackResponse(query, context) {
+                const monthTotal = context.totalMonth || 0;
+                const remaining = context.remaining || 0;
+                const dailyBudget = Budget.getDailyBudget();
+                const health = Budget.getFinancialHealthScore();
+                
+                let response = `📊 تحليل مالي فوري\n\n`;
+                response += `💰 إجمالي المصروفات: ${Utils.formatCurrency(monthTotal)}\n`;
+                response += `📈 المتبقي: ${Utils.formatCurrency(remaining)}\n`;
+                response += `📋 ميزانية اليوم: ${Utils.formatCurrency(dailyBudget)}\n`;
+                response += `🏥 درجة الصحة المالية: ${health.score}/100\n\n`;
+                
+                if (remaining < 0) {
+                    response += `⚠️ تحذير: تجاوزت الراتب الشهري بمبلغ ${Utils.formatCurrency(Math.abs(remaining))}.\n`;
+                    response += `💡 تحتاج إلى تقليل الإنفاق بشكل كبير حتى نهاية الشهر.\n`;
+                } else if (remaining < dailyBudget * 10) {
+                    response += `⚠️ تنبيه: المتبقي من الراتب قليل (${Utils.formatCurrency(remaining)}).\n`;
+                    response += `💡 كن حذراً في إنفاقك للأيام القادمة.\n`;
+                } else {
+                    response += `✅ أداء مالي جيد. استمر في هذا المستوى.\n`;
+                }
+                
+                response += `\n💡 نصيحة اليوم:\n`;
+                if (health.score < 50) {
+                    response += `ركز على تقليل الإنفاق الكمالي وزيادة الادخار.\n`;
+                } else if (health.score >= 70) {
+                    response += `ممتاز! استمر في الحفاظ على هذا الأداء المالي.\n`;
+                } else {
+                    response += `حاول توفير 10% من دخلك الشهري للادخار.\n`;
+                }
+                
+                return response;
             },
 
             async answerFinancialQuery(query, expenses, settings) {
@@ -992,24 +1922,123 @@
                 const monthTotal = Budget.getTotal(monthExpenses);
                 const remaining = Budget.getRemaining(monthExpenses);
                 const dailyBudget = Budget.getDailyBudget();
+                const health = Budget.getFinancialHealthScore();
                 const q = query.toLowerCase();
+                
                 if (q.includes('كم مصروفي اليوم') || q.includes('مصروفات اليوم') || q.includes('كم أنفقت اليوم')) {
-                    if (todayTotal === 0) { return 'مصروفات اليوم (' + Utils.formatDate(today) + ')\n\nلا توجد مصروفات مسجلة لهذا اليوم. مجموع مصروفاتك اليوم = 0 ريال.'; } else { return 'مصروفات اليوم (' + Utils.formatDate(today) + ')\n\nالمجموع الكلي: ' + Utils.formatCurrency(todayTotal) + '\nعدد المصروفات: ' + todayExpenses.length + '\n\nالتفاصيل:\n' + todayExpenses.map(e => e.description || e.category + ': ' + Utils.formatCurrency(e.amount)).join('\n') + '\n\nالمتبقي من ميزانية اليوم: ' + Utils.formatCurrency(dailyBudget - todayTotal); }
+                    if (todayTotal === 0) { 
+                        return `📊 مصروفات اليوم (${Utils.formatDate(today)})\n\n✅ لا توجد مصروفات مسجلة لهذا اليوم.\n💰 مجموع مصروفاتك اليوم = 0 ريال.\n📋 ميزانية اليوم المتاحة: ${Utils.formatCurrency(dailyBudget)}`;
+                    } else { 
+                        return `📊 مصروفات اليوم (${Utils.formatDate(today)})\n\n💰 المجموع الكلي: ${Utils.formatCurrency(todayTotal)}\n📋 عدد المصروفات: ${todayExpenses.length}\n📈 المتبقي من ميزانية اليوم: ${Utils.formatCurrency(dailyBudget - todayTotal)}\n\n📋 التفاصيل:\n${todayExpenses.map(e => `  • ${e.description || e.category}: ${Utils.formatCurrency(e.amount)}`).join('\n')}`;
+                    }
                 }
+                
                 if (q.includes('كم مصروفي هذا الشهر') || q.includes('مصروفات الشهر')) {
-                    return 'مصروفات هذا الشهر\n\nالمجموع الكلي: ' + Utils.formatCurrency(monthTotal) + '\nعدد المصروفات: ' + monthExpenses.length + '\nالمتبقي من الراتب: ' + Utils.formatCurrency(remaining) + '\nميزانية اليوم المتبقية: ' + Utils.formatCurrency(dailyBudget) + '\n\nالتفاصيل حسب التصنيف:\n' + Object.entries(Budget.getByCategory(monthExpenses)).map(([cat, amt]) => cat + ': ' + Utils.formatCurrency(amt)).join('\n');
+                    return `📊 مصروفات هذا الشهر\n\n💰 المجموع الكلي: ${Utils.formatCurrency(monthTotal)}\n📋 عدد المصروفات: ${monthExpenses.length}\n📈 المتبقي من الراتب: ${Utils.formatCurrency(remaining)}\n📋 ميزانية اليوم المتبقية: ${Utils.formatCurrency(dailyBudget)}\n\n📊 التفاصيل حسب التصنيف:\n${Object.entries(Budget.getByCategory(monthExpenses)).map(([cat, amt]) => `  • ${cat}: ${Utils.formatCurrency(amt)}`).join('\n')}`;
                 }
+                
                 if (q.includes('كم المتبقي') || q.includes('المتبقي من الراتب')) {
-                    return 'المتبقي من الراتب هذا الشهر\n\nالراتب الشهري: ' + Utils.formatCurrency(settings.salary || 0) + '\nالمصروفات: ' + Utils.formatCurrency(monthTotal) + '\nالمتبقي: ' + Utils.formatCurrency(remaining) + '\nهدف الادخار: ' + Utils.formatCurrency(settings.savingsGoal || 0) + '\n\n' + (remaining >= (settings.savingsGoal || 0) ? 'أنت على المسار الصحيح لتحقيق هدف الادخار.' : 'أنت بحاجة لتقليل المصروفات لتحقيق هدف الادخار.');
+                    return `📊 المتبقي من الراتب هذا الشهر\n\n💰 الراتب الشهري: ${Utils.formatCurrency(settings.salary || 0)}\n📉 المصروفات: ${Utils.formatCurrency(monthTotal)}\n📈 المتبقي: ${Utils.formatCurrency(remaining)}\n🎯 هدف الادخار: ${Utils.formatCurrency(settings.savingsGoal || 0)}\n🏥 درجة الصحة المالية: ${health.score}/100\n\n${remaining >= (settings.savingsGoal || 0) ? '✅ أنت على المسار الصحيح لتحقيق هدف الادخار.' : '⚠️ أنت بحاجة لتقليل المصروفات لتحقيق هدف الادخار.'}`;
                 }
+                
+                if (q.includes('صحتي المالية') || q.includes('درجة الصحة')) {
+                    return `📊 تقرير الصحة المالية\n\n🏥 درجة الصحة المالية: ${health.score}/100\n\n📊 تفاصيل:\n  • نسبة الادخار: ${health.details.savingsRate}%\n  • الالتزام بالميزانية: ${health.details.budgetAdherence}%\n  • كفاءة الإنفاق: ${health.details.spendingEfficiency}%\n  • مستوى المخاطر: ${health.details.riskLevel}\n\n💡 ${health.score >= 70 ? '✅ أداء ممتاز! استمر في هذا المستوى.' : health.score >= 50 ? '⚠️ أداء متوسط، يمكن التحسين.' : '🔴 أداء منخفض، تحتاج إلى تحسين عاجل.'}`;
+                }
+                
                 return null;
             },
 
-            async thinkAndDecide(query, context) {
-                const directAnswer = await this.answerFinancialQuery(query, context.expenses || [], context.settings || {});
-                if (directAnswer) { return directAnswer; }
-                const prompt = 'أنت مساعد مالي ذكي مدمج داخل تطبيق إدارة الميزانية الشخصية.\n\nمهمتك:\nمساعدة المستخدم على فهم دخله، مصروفاته، ميزانيته، أنماط الإنفاق، وفرص تحسين إدارة المال.\n\nأنت لا تقوم بتصميم واجهة المستخدم، ولا تشرح طريقة عملك، ولا تعرض خطوات التحليل الداخلية. أنت فقط تقدم نتائج مالية واضحة مبنية على البيانات المتاحة.\n\nقواعد أساسية للرد\n\n1. لا تعرض التفكير الداخلي أو خطوات التحليل.\nممنوع استخدام عبارات مثل: تحليل الطلب، الإجراء المطلوب، البيانات المطلوبة، سأقوم بتحليل، سأقوم بفحص، طريقة تفكيري، بناءً على التحليل الداخلي.\nابدأ بالنتيجة مباشرة.\n\n2. لا تخترع أي معلومات.\nاستخدم فقط البيانات المقدمة لك.\nإذا لم توجد بيانات كافية، اطلب البيانات الناقصة بشكل مختصر.\nلا تفترض مصروفات أو دخل غير موجود.\n\n3. اجعل الرد مناسبًا للمستخدم النهائي.\nأسلوب الرد: واضح، مختصر، احترافي، ودود، يشبه مستشارًا ماليًا شخصيًا.\n\n4. لا تستخدم مقدمات طويلة.\nلا تبدأ بعبارات مثل: بالتأكيد، يسعدني مساعدتك، سأقوم الآن، دعني أحلل.\nابدأ مباشرة بالمعلومة المهمة.\n\nتنسيق الرد\n\nمهم جدًا:\n\nلا تستخدم Markdown.\nممنوع استخدام: **، ##، *، `، >، ---\nلا تستخدم أي رموز تنسيق تظهر للمستخدم.\nلا تضف رموز زخرفية أو إيموجي.\nاستخدم نصًا نظيفًا فقط.\n\nمثال صحيح:\n\nملخص المصروفات الشهرية\n\nإجمالي المصروفات: 1,042 ريال\n\nتوزيع المصروفات:\n\nأخرى: 529 ريال (50.77%)\nالكهرباء: 390 ريال (37.43%)\nالمطاعم: 63 ريال (6.05%)\nالإنترنت: 60 ريال (5.76%)\n\nالملاحظات:\n\nأعلى فئة إنفاق هي أخرى.\nيفضل مراجعة المصروفات الموجودة ضمن هذه الفئة لمعرفة إمكانية تقليلها.\n\nأسلوب التحليل المالي\n\nعند سؤال المستخدم عن المصروفات:\nاعرض: إجمالي المصروفات، توزيع المصروفات حسب الفئات، أكبر الفئات إنفاقًا، ملاحظات عملية.\n\nعند سؤال المستخدم عن الدخل:\nاعرض: إجمالي الدخل، مقارنة الدخل بالمصروفات، نسبة الادخار إن وجدت، اقتراحات للتحسين.\n\nعند سؤال المستخدم: "أين ذهب مالي؟"\nأجب بتلخيص واضح لأكثر أماكن الإنفاق.\n\nعند سؤال المستخدم: "كيف أوفر؟"\nقدم: 3 إلى 5 نصائح عملية، مبنية على بيانات المستخدم، بدون نصائح عامة غير مرتبطة بالبيانات.\n\nقواعد الأرقام\n\nاستخدم العملة الموجودة في البيانات.\nنسق الأرقام بفواصل الآلاف.\nمثال: 1042 ريال تصبح: 1,042 ريال\nقرب النسب إلى منزلتين عشريتين.\nمثال: 50.77%\n\nقواعد المقارنة\n\nعند مقارنة الأشهر:\nاعرض: الشهر السابق: المبلغ، الشهر الحالي: المبلغ، التغير: زيادة أو انخفاض مع النسبة.\nلا تكتفِ بعرض الأرقام، أضف تفسيرًا مختصرًا.\n\nقواعد النصائح\n\nالنصائح يجب أن تكون: عملية، قصيرة، مرتبطة بالبيانات.\n\nمثال:\nبدل: "حاول تقليل مصاريفك"\nاستخدم: "مصروفات المطاعم تمثل 25% من إنفاقك هذا الشهر، تقليل عدد الطلبات الأسبوعية قد يساعد على خفض المصروفات."\n\nقواعد الطول\n\nالردود العادية: أقل من 150 كلمة.\nالتحليلات التفصيلية: أقل من 300 كلمة.\nلا تكرر نفس المعلومات.\nلا تشرح ما قمت به، فقط أعط النتيجة.\n\nفصل البيانات عن العرض\n\nلا تنشئ تصاميم أو جداول واجهة.\nلا تستخدم Markdown.\nأعد محتوى نظيفًا يمكن للتطبيق عرضه مباشرة.\n\nالهدف النهائي\n\nاجعل المستخدم يفهم وضعه المالي بسرعة، ويعرف أين ينفق أمواله، وما الخطوة العملية التالية لتحسين ميزانيته.\n\nالسياق الحالي:\n' + JSON.stringify(context, null, 2) + '\n\nطلب المستخدم: ' + query + '\n\nقدم ردًا مباشرًا وواضحًا بناءً على البيانات المقدمة، مع الالتزام الكامل بجميع القواعد المذكورة أعلاه.\n\nإذا طلب المستخدم تنفيذ إجراء فعلي مثل إضافة أو حذف مصروف، أو تعديل ميزانية، أرفق كتلة json-actions في نهاية الرد بالشكل التالي:\n```json-actions\n{"actions":[{"type":"...", "...": "..."}]}\n```\n\nأنواع الإجراءات المتاحة:\n- add_expense: {amount, description, category, date, merchant, notes}\n- delete_expense: {id}\n- set_salary: {amount}\n- set_salary_date: {date}\n- set_savings_goal: {amount}\n- set_category_budget: {category, amount}\n- add_category: {name, budget}\n- set_daily_budget: {amount}\n- set_weekly_budget: {amount}\n- set_monthly_budget: {amount}\n- rebalance_budget: {priorities: {"تصنيف1": وزن, "تصنيف2": وزن, ...}}\n- add_travel_expense: {amount, description, category, date}\n- delete_travel_expense: {id}\n- set_travel_budget: {tripName, totalBudget, category, amount}\n- add_temp_expense: {amount, description, category, date}\n- delete_temp_expense: {id}\n- set_temp_budget: {totalBudget, category, amount}\n\nأرفق كتلة json-actions فقط عندما يطلب المستخدم فعلاً تنفيذ إجراء.\nالتاريخ اليوم إذا لم يُحدد المستخدم تاريخاً هو ' + Utils.today() + '.';
-                return await this.generate(prompt);
+            async runAnalytics(expenses, settings) {
+                const totalExpenses = Budget.getTotal(expenses);
+                const remaining = (parseFloat(settings.salary) || 0) - totalExpenses;
+                const catMap = Budget.getByCategory(expenses);
+                const catBudgets = settings.categoryBudgets || {};
+                const health = Budget.getFinancialHealthScore();
+                const velocity = Budget.getSpendingVelocity();
+                let catSummary = '';
+                for (const [cat, spent] of Object.entries(catMap)) { const budget = catBudgets[cat] || 0; const pct = budget > 0 ? ((spent / budget) * 100).toFixed(0) : 0;
+                    catSummary += '- ' + cat + ': صرف ' + spent.toFixed(2) + ' ريال، الميزانية ' + budget.toFixed(2) + ' ريال (' + pct + '%)\n'; }
+                const forecast = Budget.forecastExpenses(30);
+                const patterns = Budget.analyzeSpendingPatterns();
+                const prompt = `أنت مستشار مالي خبير. بناءً على البيانات التالية، قدم تحليلاً شاملاً ومتقدماً:
+
+البيانات المالية:
+- الراتب الشهري: ${settings.salary} ريال
+- إجمالي المصروفات هذا الشهر: ${totalExpenses.toFixed(2)} ريال
+- المتبقي: ${remaining.toFixed(2)} ريال
+- هدف الادخار: ${settings.savingsGoal || 0} ريال
+- درجة الصحة المالية: ${health.score}/100 (${health.details.riskLevel})
+
+تفاصيل المصروفات حسب التصنيف:
+${catSummary}
+
+التحليلات المتقدمة:
+- متوسط الإنفاق اليومي: ${forecast.dailyAvg.toFixed(2)} ريال
+- التوقع للشهر القادم: ${forecast.forecast.toFixed(2)} ريال
+- سرعة الإنفاق: ${velocity.velocity.toFixed(2)} ريال/يوم
+- تسارع الإنفاق: ${(velocity.acceleration * 100).toFixed(1)}%
+- أعلى 3 تصنيفات إنفاق: ${patterns.biggestSpenders.map(s => s.category + ' (' + s.percentage.toFixed(0) + '%)').join(', ')}
+
+المطلوب:
+1. تحليل عميق للأنماط المالية
+2. اقتراحات ذكية لتقليل المصروفات
+3. تحذيرات فورية للتجاوزات
+4. خطة ادخار مقترحة للشهر القادم
+5. توقع مالي شامل
+6. توصيات لتحسين الصحة المالية
+
+كن مختصراً ومفيداً، أجب باللغة العربية الفصحى بأسلوب مستشار مالي محترف.`;
+
+                try {
+                    return await this.generate(prompt);
+                } catch (e) {
+                    return `📊 تحليل مالي شامل\n\n` +
+                        `💰 إجمالي المصروفات: ${Utils.formatCurrency(totalExpenses)}\n` +
+                        `📈 المتبقي: ${Utils.formatCurrency(remaining)}\n` +
+                        `🏥 درجة الصحة المالية: ${health.score}/100\n\n` +
+                        `💡 توصيات:\n` +
+                        `${patterns.recommendations.length > 0 ? patterns.recommendations.map(r => `  • ${r}`).join('\n') : '  • استمر في أدائك المالي الجيد.'}`;
+                }
+            },
+
+            async askQuestion(question, expenses, settings) {
+                const totalExpenses = Budget.getTotal(expenses);
+                const remaining = (parseFloat(settings.salary) || 0) - totalExpenses;
+                const catMap = Budget.getByCategory(expenses);
+                const health = Budget.getFinancialHealthScore();
+                let catStr = '';
+                for (const [cat, spent] of Object.entries(catMap)) { catStr += '- ' + cat + ': ' + spent.toFixed(2) + ' ريال\n'; }
+                const forecast = Budget.forecastExpenses(30);
+                const prompt = `أنت مستشار مالي خبير. أجب على السؤال التالي بناءً على البيانات والتحليلات المتقدمة:
+
+البيانات المالية:
+- الراتب: ${settings.salary} ريال
+- المصروفات الكلية: ${totalExpenses.toFixed(2)} ريال
+- المتبقي: ${remaining.toFixed(2)} ريال
+- درجة الصحة المالية: ${health.score}/100
+
+المصروفات حسب التصنيف:
+${catStr}
+
+التحليلات:
+- متوسط الإنفاق اليومي: ${forecast.dailyAvg.toFixed(2)} ريال
+- التوقع للشهر القادم: ${forecast.forecast.toFixed(2)} ريال
+
+السؤال: ${question}
+
+أجب بذكاء واحترافية، مع مراعاة السياق الكامل للبيانات، وقدم نصائح عملية قابلة للتنفيذ.
+أجب باللغة العربية الفصحى بأسلوب مستشار مالي محترف.`;
+
+                try {
+                    return await this.generate(prompt);
+                } catch (e) {
+                    return `📊 إجابة على سؤالك\n\n` +
+                        `السؤال: ${question}\n\n` +
+                        `بناءً على بياناتك المالية:\n` +
+                        `💰 المتبقي من الراتب: ${Utils.formatCurrency(remaining)}\n` +
+                        `🏥 درجة الصحة المالية: ${health.score}/100\n\n` +
+                        `💡 نصيحة: ${remaining > 0 ? 'يمكنك الاستمرار في إنفاقك الحالي بحذر.' : 'تحتاج إلى تقليل الإنفاق بشكل عاجل.'}`;
+                }
             }
         };
 
@@ -1220,7 +2249,9 @@
         // UI
         // ============================================================
         const UI = {
+            chatMessages: null,
             init() {
+                this.chatMessages = Utils.id('chatMessages');
                 this.setupTheme();
                 this.setupNavigation();
                 this.setupSidebar();
@@ -1244,6 +2275,22 @@
                 this.updateCategoryFilters();
                 WorldTime.init().then(() => { this.setupDate();
                     this.renderDashboard(); });
+                
+                // توليد تقرير يومي تلقائي عند بدء التشغيل
+                setTimeout(() => {
+                    const report = FinancialAdvisor.generateDailyReport();
+                    if (this.chatMessages) {
+                        this.addChatMessage(report, 'financial-advisor');
+                    }
+                }, 2000);
+            },
+            addChatMessage(text, role) {
+                if (!this.chatMessages) return;
+                const div = document.createElement('div');
+                div.className = 'chat-message ' + role;
+                div.innerHTML = text.replace(/\n/g, '<br>') + '<div class="message-time">' + new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' }) + '</div>';
+                this.chatMessages.appendChild(div);
+                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
             },
             setupTheme() {
                 const toggle = Utils.id('themeToggle');
@@ -1262,7 +2309,7 @@
             setupNavigation() {
                 const links = Utils.qsa('.nav-link');
                 const pages = { dashboard: Utils.id('page-dashboard'), expenses: Utils.id('page-expenses'), reports: Utils.id('page-reports'), analytics: Utils.id('page-analytics'), settings: Utils.id('page-settings'), travel: Utils.id('page-travel'), temp: Utils.id('page-temp'), chat: Utils.id('page-chat') };
-                const titles = { dashboard: 'الرئيسية', expenses: 'المصروفات', reports: 'التقارير', analytics: 'التحليلات', settings: 'الإعدادات', travel: 'ميزانية السفر', temp: 'ميزانية مؤقتة', chat: 'المساعد' };
+                const titles = { dashboard: 'الرئيسية', expenses: 'المصروفات', reports: 'التقارير', analytics: 'التحليلات', settings: 'الإعدادات', travel: 'ميزانية السفر', temp: 'ميزانية مؤقتة', chat: 'المستشار المالي' };
                 links.forEach(link => {
                     Utils.on(link, 'click', (e) => {
                         e.preventDefault();
@@ -1314,7 +2361,8 @@
                 const title = Utils.id('detailModalTitle');
                 title.textContent = 'تفاصيل المصروف: ' + (expense.description || expense.category);
                 Utils.id('deleteDetailBtn').dataset.id = expense.id;
-                content.innerHTML = '<div class="expense-detail-grid"><div class="detail-item"><span class="label">المبلغ</span><span class="value">' + Utils.formatCurrency(expense.amount) + '</span></div><div class="detail-item"><span class="label">التاريخ</span><span class="value">' + Utils.formatDateFull(expense.date) + '</span></div><div class="detail-item"><span class="label">التصنيف</span><span class="value">' + (expense.category || 'أخرى') + '</span></div><div class="detail-item"><span class="label">التصنيف الفرعي</span><span class="value">' + (expense.subCategory || '—') + '</span></div><div class="detail-item"><span class="label">التاجر</span><span class="value">' + (expense.merchant || '—') + '</span></div><div class="detail-item"><span class="label">طريقة الدفع</span><span class="value">' + (expense.paymentMethod || '—') + '</span></div><div class="detail-divider"></div><div class="detail-item" style="grid-column:1/-1;"><span class="label">الوصف</span><span class="value">' + (expense.description || '—') + '</span></div><div class="detail-item" style="grid-column:1/-1;"><span class="label">ملاحظات</span><span class="value">' + (expense.notes || '—') + '</span></div><div class="detail-item" style="grid-column:1/-1;"><span class="label">تاريخ الإضافة</span><span class="value">' + new Date(expense.createdAt).toLocaleString('ar-SA') + '</span></div><div class="detail-item" style="grid-column:1/-1;"><span class="label">المعرف</span><span class="value" style="font-size:0.7rem;color:var(--text-muted);">' + expense.id + '</span></div></div>';
+                const purchaseTypeLabels = { 'Essential': 'أساسي', 'Important': 'مهم', 'Optional': 'اختياري', 'Luxury': 'كمالي', 'Investment': 'استثمار' };
+                content.innerHTML = '<div class="expense-detail-grid"><div class="detail-item"><span class="label">المبلغ</span><span class="value">' + Utils.formatCurrency(expense.amount) + '</span></div><div class="detail-item"><span class="label">التاريخ</span><span class="value">' + Utils.formatDateFull(expense.date) + '</span></div><div class="detail-item"><span class="label">التصنيف</span><span class="value">' + (expense.category || 'أخرى') + '</span></div><div class="detail-item"><span class="label">نوع الشراء</span><span class="value">' + (purchaseTypeLabels[expense.purchaseType] || expense.purchaseType || 'غير مصنف') + '</span></div><div class="detail-item"><span class="label">التصنيف الفرعي</span><span class="value">' + (expense.subCategory || '—') + '</span></div><div class="detail-item"><span class="label">التاجر</span><span class="value">' + (expense.merchant || '—') + '</span></div><div class="detail-item"><span class="label">طريقة الدفع</span><span class="value">' + (expense.paymentMethod || '—') + '</span></div><div class="detail-divider"></div><div class="detail-item" style="grid-column:1/-1;"><span class="label">الوصف</span><span class="value">' + (expense.description || '—') + '</span></div><div class="detail-item" style="grid-column:1/-1;"><span class="label">ملاحظات</span><span class="value">' + (expense.notes || '—') + '</span></div></div>';
                 modal.classList.add('open');
                 currentExpenseId = expense.id;
             },
@@ -1696,11 +2744,13 @@
                 const messagesContainer = Utils.id('chatMessages');
                 const input = Utils.id('chatInput');
                 const sendBtn = Utils.id('chatSendBtn');
-                const addMessage = (text, role) => { const div = document.createElement('div');
+                const addMessage = (text, role) => { 
+                    const div = document.createElement('div');
                     div.className = 'chat-message ' + role;
-                    div.innerHTML = text + '<div class="message-time">' + new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' }) + '</div>';
+                    div.innerHTML = text.replace(/\n/g, '<br>') + '<div class="message-time">' + new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' }) + '</div>';
                     messagesContainer.appendChild(div);
-                    messagesContainer.scrollTop = messagesContainer.scrollHeight; };
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight; 
+                };
                 let typingIndicator = null;
                 const showTyping = () => { if (typingIndicator) return;
                     typingIndicator = document.createElement('div');
@@ -1710,12 +2760,11 @@
                     messagesContainer.scrollTop = messagesContainer.scrollHeight; };
                 const hideTyping = () => { if (typingIndicator) { typingIndicator.remove();
                         typingIndicator = null; } };
-                let chatHistory = [];
+                
                 const sendMessage = async () => {
                     const text = input.value.trim();
                     if (!text) return;
                     addMessage(text, 'user');
-                    chatHistory.push({ role: 'user', content: text });
                     input.value = '';
                     input.style.height = 'auto';
                     showTyping();
@@ -1729,39 +2778,77 @@
                         const catBudgets = settings.categoryBudgets || {};
                         const forecast = Budget.forecastExpenses(30);
                         const patterns = Budget.analyzeSpendingPatterns();
+                        const health = Budget.getFinancialHealthScore();
+                        const velocity = Budget.getSpendingVelocity();
+                        
                         let catSummary = '';
-                        for (const [cat, spent] of Object.entries(catMap)) { const budget = catBudgets[cat] || 0; const pct = budget > 0 ? ((spent / budget) * 100).toFixed(0) : 0;
-                            catSummary += '- ' + cat + ': صرف ' + spent.toFixed(2) + ' ريال، الميزانية ' + budget.toFixed(2) + ' ريال (' + pct + '%)\n'; }
+                        for (const [cat, spent] of Object.entries(catMap)) { 
+                            const budget = catBudgets[cat] || 0; 
+                            const pct = budget > 0 ? ((spent / budget) * 100).toFixed(0) : 0;
+                            catSummary += '- ' + cat + ': صرف ' + spent.toFixed(2) + ' ريال، الميزانية ' + budget.toFixed(2) + ' ريال (' + pct + '%)\n'; 
+                        }
+                        
                         const realNow = WorldTime.now();
                         const realDateStr = realNow.toISOString().split('T')[0];
                         const realDayName = realNow.toLocaleDateString('ar-SA', { weekday: 'long' });
                         const daysUntilSalary = Budget.getDaysUntilSalary();
                         const nextSalaryDate = Budget.getNextSalaryDate();
+                        
                         const travelBudget = Storage.getTravelBudget();
                         const travelExpenses = Storage.getTravelExpenses();
                         const travelSpent = Budget.getTravelTotal();
                         const travelRemaining = Budget.getTravelRemaining();
                         let travelSummary = 'ميزانية السفر غير مفعّلة حالياً.';
-                        if (travelBudget.enabled || travelExpenses.length > 0) { travelSummary = 'الرحلة: ' + (travelBudget.tripName || '(بدون اسم)') + ' | الميزانية الكلية: ' + (travelBudget.totalBudget || 0).toFixed(2) + ' ريال | المصروف: ' + travelSpent.toFixed(2) + ' ريال | المتبقي: ' + travelRemaining.toFixed(2) + ' ريال'; }
+                        if (travelBudget.enabled || travelExpenses.length > 0) { 
+                            travelSummary = 'الرحلة: ' + (travelBudget.tripName || '(بدون اسم)') + ' | الميزانية الكلية: ' + (travelBudget.totalBudget || 0).toFixed(2) + ' ريال | المصروف: ' + travelSpent.toFixed(2) + ' ريال | المتبقي: ' + travelRemaining.toFixed(2) + ' ريال'; 
+                        }
+                        
                         const tempBudget = Storage.getTempBudget();
                         const tempExpenses = Storage.getTempExpenses();
                         const tempSpent = Budget.getTempTotal();
                         const tempRemaining = Budget.getTempRemaining();
                         const tempSummary = 'الميزانية الكلية: ' + (tempBudget.totalBudget || 0).toFixed(2) + ' ريال | المصروف: ' + tempSpent.toFixed(2) + ' ريال | المتبقي: ' + tempRemaining.toFixed(2) + ' ريال';
-                        const context = { settings, monthExp, totalMonth, remaining, catSummary, forecast, patterns, travelSummary, tempSummary, daysUntilSalary, expenses: expenses, todayExpenses: Budget.getTodayExpenses(), todayTotal: Budget.getTotal(Budget.getTodayExpenses()), realDate: realDateStr, realDayName, nextSalaryDate: nextSalaryDate ? nextSalaryDate.toISOString().split('T')[0] : null };
+                        
+                        const context = { 
+                            settings, 
+                            monthExp, 
+                            totalMonth, 
+                            remaining, 
+                            catSummary, 
+                            forecast, 
+                            patterns, 
+                            travelSummary, 
+                            tempSummary, 
+                            daysUntilSalary, 
+                            expenses: expenses, 
+                            todayExpenses: Budget.getTodayExpenses(), 
+                            todayTotal: Budget.getTotal(Budget.getTodayExpenses()), 
+                            realDate: realDateStr, 
+                            realDayName, 
+                            nextSalaryDate: nextSalaryDate ? nextSalaryDate.toISOString().split('T')[0] : null,
+                            healthScore: health,
+                            spendingVelocity: velocity
+                        };
+                        
                         const rawResponse = await Gemini.thinkAndDecide(text, context);
                         const { cleanText, actions } = Commands.extract(rawResponse);
                         hideTyping();
-                        if (actions.length === 0) { addMessage(cleanText || rawResponse, 'assistant');
-                            chatHistory.push({ role: 'assistant', content: cleanText || rawResponse }); } else {
-                            addMessage(cleanText || rawResponse, 'assistant');
-                            chatHistory.push({ role: 'assistant', content: cleanText || rawResponse });
+                        
+                        if (actions.length === 0) { 
+                            addMessage(cleanText || rawResponse, 'financial-advisor'); 
+                        } else {
+                            addMessage(cleanText || rawResponse, 'financial-advisor');
                             const log = Commands.execute(actions);
-                            if (log.length > 0) { addMessage(log.join('<br>'), 'system'); } }
-                    } catch (err) { hideTyping();
-                        addMessage('❌ ' + err.message, 'assistant');
-                        chatHistory.push({ role: 'assistant', content: 'خطأ: ' + err.message }); }
+                            if (log.length > 0) { 
+                                addMessage('📋 تنفيذ الإجراءات:\n' + log.join('\n'), 'system'); 
+                            }
+                        }
+                    } catch (err) { 
+                        hideTyping();
+                        addMessage('❌ عذراً، حدث خطأ: ' + err.message + '\n\n💡 حاول مرة أخرى أو استخدم الإدخال اليدوي.', 'assistant');
+                    }
                 };
+                
                 Utils.on(sendBtn, 'click', sendMessage);
                 Utils.on(input, 'keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault();
                         sendMessage(); } });
@@ -1779,6 +2866,8 @@
                 const monthlyBudget = Budget.getMonthlyBudget();
                 const settings = Storage.getSettings();
                 const patterns = Budget.analyzeSpendingPatterns();
+                const health = Budget.getFinancialHealthScore();
+                
                 const cards = [
                     { icon: 'fa-wallet', label: 'الرصيد الحالي', value: Utils.formatCurrency(remaining), cls: remaining >= 0 ? 'accent' : 'negative' },
                     { icon: 'fa-money-bill-wave', label: 'الراتب الشهري', value: Utils.formatCurrency(settings.salary || 0), cls: 'accent' },
@@ -1787,10 +2876,14 @@
                     { icon: 'fa-calendar-day', label: 'ميزانية اليوم', value: Utils.formatCurrency(dailyBudget), cls: 'accent' },
                     { icon: 'fa-calendar-week', label: 'ميزانية الأسبوع', value: Utils.formatCurrency(weeklyBudget), cls: 'accent' },
                     { icon: 'fa-calendar-alt', label: 'ميزانية الشهر', value: Utils.formatCurrency(monthlyBudget), cls: 'accent' },
-                    { icon: 'fa-piggy-bank', label: 'هدف الادخار', value: Utils.formatCurrency(settings.savingsGoal || 0), cls: 'accent' }
+                    { icon: 'fa-piggy-bank', label: 'هدف الادخار', value: Utils.formatCurrency(settings.savingsGoal || 0), cls: 'accent' },
+                    { icon: 'fa-heartbeat', label: 'الصحة المالية', value: health.score + '/100', cls: health.score >= 70 ? 'positive' : health.score >= 50 ? 'accent' : 'negative' }
                 ];
+                
                 if (patterns.recommendations.length > 0) { cards.push({ icon: 'fa-lightbulb', label: 'توصيات ذكية', value: patterns.recommendations[0].length > 25 ? patterns.recommendations[0].substring(0, 25) + '...' : patterns.recommendations[0], cls: 'accent' }); }
+                
                 const daysLeft = Budget.getDaysUntilSalary(); if (daysLeft !== null) { cards.push({ icon: 'fa-hourglass-half', label: 'الأيام المتبقية لنزول الراتب القادم', value: daysLeft === 0 ? 'اليوم!' : daysLeft + ' يوم', cls: daysLeft <= 3 ? 'positive' : 'accent' }); }
+                
                 cardsContainer.innerHTML = cards.map(c => '<div class="dash-card ' + c.cls + '" data-card="' + c.label + '"><div class="card-icon"><i class="fas ' + c.icon + '"></i></div><div class="card-label">' + c.label + '</div><div class="card-value">' + c.value + '</div></div>').join('');
 
                 // عرض جميع العمليات الشرائية عند النقر على بطاقة إجمالي المصروفات
@@ -1806,12 +2899,14 @@
                         msg += 'عدد العمليات: ' + monthExpenses.length + '\n';
                         msg += 'إجمالي المبلغ: ' + Utils.formatCurrency(Budget.getTotal(monthExpenses)) + '\n';
                         msg += '━'.repeat(30) + '\n\n';
+                        const purchaseTypeLabels = { 'Essential': 'أساسي', 'Important': 'مهم', 'Optional': 'اختياري', 'Luxury': 'كمالي', 'Investment': 'استثمار' };
                         monthExpenses.forEach((e, i) => {
                             msg += (i + 1) + '. ' + (e.description || e.category) + '\n';
                             msg += '   المبلغ: ' + Utils.formatCurrency(e.amount) + '\n';
                             msg += '   التاريخ: ' + Utils.formatDateFull(e.date) + '\n';
                             if (e.merchant) msg += '   التاجر: ' + e.merchant + '\n';
                             if (e.category) msg += '   التصنيف: ' + e.category + '\n';
+                            if (e.purchaseType) msg += '   النوع: ' + (purchaseTypeLabels[e.purchaseType] || e.purchaseType) + '\n';
                             msg += '\n';
                         });
                         msg += '━'.repeat(30) + '\n';
@@ -1822,7 +2917,8 @@
 
                 const catMap = Budget.getByCategory(monthExp);
                 const catEntries = Object.entries(catMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
-                summaryContainer.innerHTML = '<div class="summary-item glass"><div class="label">أعلى تصنيف صرف</div><div class="value">' + (catEntries.length > 0 ? catEntries[0][0] + ' (' + Utils.formatCurrency(catEntries[0][1]) + ')' : '—') + '</div></div><div class="summary-item glass"><div class="label">عدد المصروفات هذا الشهر</div><div class="value">' + monthExp.length + '</div></div><div class="summary-item glass"><div class="label">متوسط المصروف اليومي</div><div class="value">' + (monthExp.length > 0 ? Utils.formatCurrency(totalMonth / monthExp.length) : Utils.formatCurrency(0)) + '</div></div><div class="summary-item glass"><div class="label">التوصيات الذكية</div><div class="value" style="font-size:0.85rem;">' + (patterns.recommendations.length > 0 ? patterns.recommendations[0] : 'لا توجد توصيات') + '</div></div>';
+                summaryContainer.innerHTML = '<div class="summary-item glass"><div class="label">أعلى تصنيف صرف</div><div class="value">' + (catEntries.length > 0 ? catEntries[0][0] + ' (' + Utils.formatCurrency(catEntries[0][1]) + ')' : '—') + '</div></div><div class="summary-item glass"><div class="label">عدد المصروفات هذا الشهر</div><div class="value">' + monthExp.length + '</div></div><div class="summary-item glass"><div class="label">متوسط المصروف اليومي</div><div class="value">' + (monthExp.length > 0 ? Utils.formatCurrency(totalMonth / monthExp.length) : Utils.formatCurrency(0)) + '</div></div><div class="summary-item glass"><div class="label">الصحة المالية</div><div class="value" style="font-size:0.85rem;">' + health.score + '/100 - ' + health.details.riskLevel + '</div></div>';
+                
                 const extraContainer = Utils.id('dashboardExtraCards'); if (extraContainer) {
                     const extraCards = [];
                     const travelBudget = Storage.getTravelBudget(); if (travelBudget.enabled && (travelBudget.totalBudget > 0 || Storage.getTravelExpenses().length > 0)) { const travelRemaining = Budget.getTravelRemaining();
@@ -1887,7 +2983,8 @@
                     if (query) { expenses = expenses.filter(e => e.description.toLowerCase().includes(query) || (e.merchant && e.merchant.toLowerCase().includes(query))); }
                     if (catFilter !== 'all') { expenses = expenses.filter(e => e.category === catFilter); }
                     if (expenses.length === 0) { list.innerHTML = '<div class="empty-state glass"><i class="fas fa-receipt"></i><p>لا توجد مصروفات</p></div>'; return; }
-                    list.innerHTML = expenses.map(e => '<div class="expense-item glass" data-id="' + e.id + '"><div class="expense-info"><div class="desc">' + e.description + '</div><div class="meta"><span><i class="fas fa-tag"></i> ' + e.category + '</span>' + (e.merchant ? '<span><i class="fas fa-store"></i> ' + e.merchant + '</span>' : '') + '<span><i class="fas fa-calendar"></i> ' + Utils.formatDate(e.date) + '</span>' + (e.paymentMethod ? '<span><i class="fas fa-credit-card"></i> ' + e.paymentMethod + '</span>' : '') + '</div></div><div class="expense-amount">' + Utils.formatCurrency(e.amount) + '</div><div class="expense-actions"><button class="detail-btn" data-id="' + e.id + '" style="color:var(--accent);"><i class="fas fa-info-circle"></i></button><button class="delete-btn" data-id="' + e.id + '"><i class="fas fa-trash"></i></button></div></div>').join('');
+                    const purchaseTypeLabels = { 'Essential': 'أساسي', 'Important': 'مهم', 'Optional': 'اختياري', 'Luxury': 'كمالي', 'Investment': 'استثمار' };
+                    list.innerHTML = expenses.map(e => '<div class="expense-item glass" data-id="' + e.id + '"><div class="expense-info"><div class="desc">' + e.description + '</div><div class="meta"><span><i class="fas fa-tag"></i> ' + e.category + '</span>' + (e.merchant ? '<span><i class="fas fa-store"></i> ' + e.merchant + '</span>' : '') + '<span><i class="fas fa-calendar"></i> ' + Utils.formatDate(e.date) + '</span>' + (e.paymentMethod ? '<span><i class="fas fa-credit-card"></i> ' + e.paymentMethod + '</span>' : '') + (e.purchaseType ? '<span><i class="fas fa-tag"></i> ' + (purchaseTypeLabels[e.purchaseType] || e.purchaseType) + '</span>' : '') + '</div></div><div class="expense-amount">' + Utils.formatCurrency(e.amount) + '</div><div class="expense-actions"><button class="detail-btn" data-id="' + e.id + '" style="color:var(--accent);"><i class="fas fa-info-circle"></i></button><button class="delete-btn" data-id="' + e.id + '"><i class="fas fa-trash"></i></button></div></div>').join('');
                     Utils.qsa('.detail-btn').forEach(btn => { Utils.on(btn, 'click', (event) => { event.stopPropagation(); const id = btn.dataset.id; const expense = Budget.getExpense(id); if (expense) { UI.showExpenseDetail(expense); } }); });
                     Utils.qsa('.expense-item').forEach(item => { Utils.on(item, 'click', (event) => { if (event.target.closest('button')) return; const id = item.dataset.id; const expense = Budget.getExpense(id); if (expense) { UI.showExpenseDetail(expense); } }); });
                     Utils.qsa('.delete-btn').forEach(btn => { Utils.on(btn, 'click', (event) => { event.stopPropagation(); if (confirm('هل أنت متأكد من حذف هذا المصروف؟')) { Budget.deleteExpense(btn.dataset.id);
