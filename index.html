@@ -2570,7 +2570,12 @@
                     new Date(now.getFullYear(), now.getMonth() + 1, 1); return next.toLocaleDateString('ar-SA', { month: 'long' }); },
             getDaysInNextMonth: () => { const now = typeof WorldTime !== 'undefined' ? WorldTime.now() : new Date(); const next =
                     new Date(now.getFullYear(), now.getMonth() + 1, 1); return new Date(next.getFullYear(), next.getMonth() + 1,
-                        0).getDate(); }
+                        0).getDate(); },
+            isValidDateStr: (d) => {
+                if (typeof d !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(d)) return false;
+                const dt = new Date(d + 'T00:00:00');
+                return !isNaN(dt.getTime());
+            }
         };
 
         // ============================================================
@@ -5328,6 +5333,24 @@
                     parseResult.innerHTML = '<div class="parse-review">جاري التحليل بواسطة الذكاء الاصطناعي...</div>';
                     try {
                         const result = await Gemini.parseExpense(text);
+
+                        // ===== تحقق وتنظيف البيانات القادمة من الذكاء الاصطناعي قبل أي استخدام =====
+                        const cleanAmount = Number(result.amount);
+                        if (!Number.isFinite(cleanAmount) || cleanAmount <= 0) {
+                            parseResult.innerHTML =
+                                '<div class="parse-review" style="color:var(--danger);">تعذّر استخراج مبلغ صحيح من النص. الرجاء إدخال المصروف يدوياً.</div>';
+                            return;
+                        }
+                        result.amount = cleanAmount;
+
+                        if (!Utils.isValidDateStr(result.date)) {
+                            result.date = Utils.today();
+                        }
+
+                        if (!Utils.defaultCategories().includes(result.category)) {
+                            result.category = 'أخرى';
+                        }
+
                         parsedData = result;
                         const displayCat = result.category || 'أخرى';
                         parseResult.innerHTML = `<div class="parse-review">
@@ -5353,20 +5376,34 @@
                             parseResult.innerHTML = '';
                         });
                         Utils.on(Utils.id('saveParseBtn'), 'click', () => {
+                            // ===== تحقق أمان إضافي مباشرة قبل الحفظ =====
+                            const finalAmount = Number(result.amount);
+                            if (!Number.isFinite(finalAmount) || finalAmount <= 0) {
+                                alert('المبلغ غير صالح، الرجاء إدخال المصروف يدوياً.');
+                                return;
+                            }
+                            const finalDate = Utils.isValidDateStr(result.date) ? result.date : Utils.today();
+
                             const expenseData = {
-                                amount: result.amount,
+                                amount: finalAmount,
                                 description: result.description || text,
-                                category: result.category || 'أخرى',
-                                date: result.date || Utils.today(),
+                                category: Utils.defaultCategories().includes(result.category) ? result.category : 'أخرى',
+                                date: finalDate,
                                 merchant: result.merchant || '',
                                 subCategory: '',
                                 paymentMethod: '',
                                 notes: ''
                             };
-                            Budget.addExpense(expenseData);
-                            this.closeModal(modalId);
-                            this.renderAll();
-                            alert('تم حفظ المصروف بنجاح!');
+
+                            try {
+                                Budget.addExpense(expenseData);
+                                this.closeModal(modalId);
+                                this.renderAll();
+                                alert('تم حفظ المصروف بنجاح!');
+                            } catch (saveErr) {
+                                console.error('فشل حفظ المصروف عبر الذكاء الاصطناعي:', saveErr);
+                                alert('حدث خطأ أثناء حفظ المصروف، الرجاء المحاولة مجدداً أو استخدام الإدخال اليدوي.');
+                            }
                         });
                         saveBtn.style.display = 'none';
                     } catch (err) {
