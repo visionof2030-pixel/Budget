@@ -1431,6 +1431,28 @@
             font-weight: 600;
             margin-top: 2px;
         }
+
+        /* ===== الأنماط الجديدة للبنود التلقائية ===== */
+        .budget-item-card.auto-created {
+            border-right: 3px solid var(--text-muted);
+            opacity: 0.85;
+        }
+        .budget-item-card.auto-created .item-name .auto-badge {
+            font-size: 0.65rem;
+            background: var(--bg-glass);
+            padding: 2px 8px;
+            border-radius: 10px;
+            color: var(--text-muted);
+            margin-right: 6px;
+        }
+        .budget-item-card.auto-created .item-amounts .estimated-badge {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            background: var(--bg-glass);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
         @media(max-width:992px) {
             .main-content {
                 padding: 0 16px 20px
@@ -2606,7 +2628,7 @@
         };
 
         // ============================================================
-        // 4. FINANCIAL ENGINE v3.1 (FIXED - Single Source of Truth)
+        // 4. FINANCIAL ENGINE v4.0 (مع الإنشاء التلقائي والتنظيف)
         // ============================================================
         const FinancialEngine = {
             // ---- Core Validation ----
@@ -2769,6 +2791,7 @@
                         reserved: reserved, paid: paid, difference: null } };
             },
 
+            // ===== BUDGET ITEMS CRUD =====
             addBudgetItem(data) {
                 const items = this.getBudgetItems();
                 const item = {
@@ -2782,6 +2805,7 @@
                     icon: data.icon || 'fa-circle',
                     color: data.color || '#2E7DB5',
                     notes: data.notes || '',
+                    isAutoCreated: data.isAutoCreated || false,
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString()
                 };
@@ -2797,6 +2821,8 @@
                 if (index === -1) return null;
                 const item = items[index];
                 Object.assign(item, data);
+                // إذا عدّل المستخدم البند يدوياً، نزيل علامة التلقائي
+                item.isAutoCreated = false;
                 item.updatedAt = new Date().toISOString();
                 items[index] = item;
                 Storage.setBudgetItems(items);
@@ -2811,27 +2837,83 @@
                 this.refreshAll();
             },
 
+            // ===== 🔥 التعديل الرئيسي: الإنشاء التلقائي للبنود =====
             syncBudgetItemsSpent() {
-                const items = this.getBudgetItems();
+                let items = this.getBudgetItems();
                 const monthExp = this.getMonthExpenses();
-                // Reset spent to 0 before recalculating
-                items.forEach(item => {
-                    item.spent = 0;
-                });
-                // Calculate spent per category from expenses
+
+                // 1. إعادة تعيين spent
+                items.forEach(item => { item.spent = 0; });
+
+                // 2. حساب المصروفات حسب التصنيف للشهر الحالي
                 const catMap = {};
                 monthExp.forEach(e => {
                     const cat = e.category || 'أخرى';
                     catMap[cat] = (catMap[cat] || 0) + (parseFloat(e.amount) || 0);
                 });
+
+                // 3. الحصول على التصنيفات الموجودة حالياً في بنود الميزانية
+                const existingCategories = new Set(items.map(i => i.category));
+
+                // 4. إنشاء بنود جديدة للتصنيفات المفقودة (مع ميزانية تقديرية)
+                for (const [cat, spentAmount] of Object.entries(catMap)) {
+                    if (!existingCategories.has(cat)) {
+                        // الميزانية التقديرية = المصروف الحالي + 20% (لتجنب التجاوز الفوري)
+                        const estimatedBudget = Math.ceil(spentAmount * 1.2) || 10; // حد أدنى 10 ريال
+
+                        const newItem = {
+                            id: Utils.generateId(),
+                            name: cat,
+                            category: cat,
+                            budget: estimatedBudget,
+                            spent: spentAmount,
+                            isReserved: false,
+                            priority: 'Low',
+                            icon: 'fa-robot',
+                            color: '#94A3B8',
+                            notes: 'تم إنشاؤه تلقائياً من المصروفات (تقديري)',
+                            isAutoCreated: true,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        };
+                        items.push(newItem);
+                        existingCategories.add(cat);
+                    }
+                }
+
+                // 5. تحديث spent للبنود الموجودة (بما فيها القديمة والجديدة)
                 items.forEach(item => {
                     item.spent = catMap[item.category] || 0;
                 });
+
                 Storage.setBudgetItems(items);
             },
 
+            // ===== 🧹 التنظيف التلقائي: حذف البنود التلقائية غير المستخدمة =====
+            cleanupAutoCreatedItems() {
+                let items = this.getBudgetItems();
+                const twoMonthsAgo = new Date(WorldTime.now());
+                twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+
+                const kept = items.filter(item => {
+                    // احتفظ بالبنود التي ليست تلقائية، أو التي تم استخدامها خلال شهرين
+                    if (!item.isAutoCreated) return true;
+                    // إذا كان لديه spent > 0 في أي وقت (نحتفظ به)
+                    if (item.spent > 0) return true;
+                    // إذا كان تاريخ الإنشاء منذ أقل من شهرين (يعطي فرصة)
+                    const createdDate = new Date(item.createdAt);
+                    if (createdDate > twoMonthsAgo) return true;
+                    // غير ذلك: احذفه
+                    return false;
+                });
+
+                if (kept.length !== items.length) {
+                    Storage.setBudgetItems(kept);
+                    console.log(`🧹 تم حذف ${items.length - kept.length} بنداً تلقائياً غير مستخدم.`);
+                }
+            },
+
             // ===== BUDGET OVERRIDE SYSTEM =====
-            // Find surplus from categories that have extra budget
             findSurplusCategories(excludeCategory) {
                 const items = this.getBudgetItems();
                 const result = [];
@@ -2847,12 +2929,10 @@
                         });
                     }
                 });
-                // Sort by surplus descending
                 result.sort((a, b) => b.surplus - a.surplus);
                 return result;
             },
 
-            // Transfer amount from sourceCategory to targetCategory
             transferBudget(sourceCategory, targetCategory, amount) {
                 const items = this.getBudgetItems();
                 const source = items.find(i => i.category === sourceCategory);
@@ -2860,18 +2940,17 @@
                 if (!source || !target) return false;
                 const availableSurplus = source.budget - source.spent;
                 if (availableSurplus < amount) return false;
-                // Adjust budgets
                 source.budget = source.budget - amount;
                 target.budget = target.budget + amount;
-                // Update timestamps
                 source.updatedAt = new Date().toISOString();
                 target.updatedAt = new Date().toISOString();
+                // إذا كان الهدف تلقائياً، نزيل العلامة لأن المستخدم تفاعل معه
+                target.isAutoCreated = false;
                 Storage.setBudgetItems(items);
                 this.refreshAll();
                 return true;
             },
 
-            // Check if a category is over budget
             isCategoryOverBudget(category) {
                 const items = this.getBudgetItems();
                 const item = items.find(i => i.category === category);
@@ -2890,12 +2969,15 @@
                     spent: item.spent,
                     remaining: remaining,
                     isOver: remaining < 0,
-                    isReserved: item.isReserved || false
+                    isReserved: item.isReserved || false,
+                    isAutoCreated: item.isAutoCreated || false
                 };
             },
 
             refreshAll() {
                 this.syncBudgetItemsSpent();
+                // نقوم بالتنظيف كل مرة يتم فيها التحديث (يمكن تفعيله بشكل دوري)
+                this.cleanupAutoCreatedItems();
                 if (typeof UI !== 'undefined') {
                     UI.refreshContext();
                     UI.renderAll();
@@ -2926,6 +3008,7 @@
                         icon: 'fa-circle',
                         color: '#2E7DB5',
                         notes: '',
+                        isAutoCreated: false,
                         createdAt: new Date().toISOString(),
                         updatedAt: new Date().toISOString()
                     };
@@ -2962,6 +3045,7 @@
                         icon: 'fa-circle',
                         color: '#2E7DB5',
                         notes: '',
+                        isAutoCreated: false,
                         createdAt: new Date().toISOString(),
                         updatedAt: new Date().toISOString()
                     };
@@ -2983,6 +3067,7 @@
                         icon: 'fa-circle',
                         color: '#2E7DB5',
                         notes: '',
+                        isAutoCreated: false,
                         createdAt: new Date().toISOString(),
                         updatedAt: new Date().toISOString()
                     });
@@ -3549,7 +3634,8 @@
                 items.forEach(item => {
                     categoriesWithReserved[item.category] = {
                         budget: item.budget || 0,
-                        isReserved: item.isReserved || false
+                        isReserved: item.isReserved || false,
+                        isAutoCreated: item.isAutoCreated || false
                     };
                 });
 
@@ -3589,10 +3675,8 @@
         // 6. EXPENSE PARSER - ENHANCED SMART CLASSIFIER
         // ============================================================
         const ExpenseParser = {
-            // دالة تصنيف متقدمة باستخدام الكلمات المفتاحية
             classifyWithKeywords(text) {
                 const fullText = (text || '').toLowerCase();
-                // قوائم الكلمات المفتاحية الموسعة (تم إضافة الكثير)
                 const foodKeywords = [
                     'ليز', 'شيبس', 'بطاطس', 'بريجلز', 'دوريتوس', 'تاكو', 'تشيتوس', 'بسكويت', 'كيك', 'حلويات', 'شوكولاتة',
                     'سناكس', 'مكسرات', 'تمر', 'عسل', 'خضار', 'فواكه', 'لحم', 'دجاج', 'سمك', 'بيض', 'حليب', 'جبن', 'زبادي',
@@ -3646,7 +3730,6 @@
                     'كفالة', 'بنك', 'مصرف', 'أقساط', 'التزام'
                 ];
 
-                // فحص التصنيف حسب الأولوية (بعض التصنيفات تتعارض)
                 if (rentKeywords.some(k => fullText.includes(k))) return { category: 'الإيجار' };
                 if (installmentsKeywords.some(k => fullText.includes(k))) return { category: 'الأقساط' };
                 if (fuelKeywords.some(k => fullText.includes(k))) return { category: 'البنزين' };
@@ -3659,7 +3742,6 @@
                 if (personalCareKeywords.some(k => fullText.includes(k))) return { category: 'العناية الشخصية' };
                 if (homeSuppliesKeywords.some(k => fullText.includes(k))) return { category: 'مستلزمات المنزل' };
                 if (foodKeywords.some(k => fullText.includes(k))) return { category: 'المواد الغذائية' };
-                // إذا لم يجد شيئاً
                 return { category: 'أخرى' };
             },
 
@@ -3722,7 +3804,6 @@
                                 .today() });
                     }
                 }
-                // تصنيف كل معاملة باستخدام الكلمات المفتاحية
                 result.transactions = result.transactions.map(t => {
                     const fullText = (t.description || '') + ' ' + (t.merchant || '');
                     const classified = ExpenseParser.classifyWithKeywords(fullText);
@@ -3802,9 +3883,7 @@
                 }
             },
 
-            // تحليل المصروف باستخدام Gemini أولاً، ثم الاحتياطي بالمحلل النصي
             async parseExpense(text) {
-                // المحاولة الأولى: استخدام Gemini
                 try {
                     const categories = Utils.defaultCategories();
                     const prompt = `أنت مساعد مالي ذكي. استخرج من النص التالي المعلومات المطلوبة بدقة:
@@ -3823,9 +3902,7 @@
                     if (jsonMatch) {
                         const data = JSON.parse(jsonMatch[0]);
                         if (data.amount && data.description) {
-                            // التأكد من أن التصنيف ضمن القائمة
                             if (!categories.includes(data.category)) {
-                                // تصنيف احتياطي عبر الكلمات المفتاحية
                                 const fallback = ExpenseParser.classifyWithKeywords(text);
                                 data.category = fallback.category || 'أخرى';
                             }
@@ -3835,7 +3912,6 @@
                     throw new Error('لم يستطع Gemini استخراج البيانات بشكل صحيح');
                 } catch (e) {
                     console.warn('فشل Gemini في التحليل، استخدام المحلل النصي الاحتياطي:', e.message);
-                    // الحل الاحتياطي: استخدام ExpenseParser المحسن
                     const result = ExpenseParser.parse(text);
                     if (result.transactions.length > 0) {
                         const t = result.transactions[0];
@@ -3926,7 +4002,8 @@
                     const status2 = item.isReserved ? '🔒 محجوز' : '🔓 غير محجوز';
                     const spent = item.spent || 0;
                     const remaining = item.budget - spent;
-                    str += `${item.name} (${item.category}): ميزانية ${Utils.formatCurrency(item.budget)}, صرف ${Utils.formatCurrency(spent)}, متبقي ${Utils.formatCurrency(remaining)}, ${status2}\n`;
+                    const autoTag = item.isAutoCreated ? ' 🤖 (تلقائي)' : '';
+                    str += `${item.name}${autoTag} (${item.category}): ميزانية ${Utils.formatCurrency(item.budget)}, صرف ${Utils.formatCurrency(spent)}, متبقي ${Utils.formatCurrency(remaining)}, ${status2}\n`;
                 });
 
                 str += `\n--- عادات الإنفاق ---\n`;
@@ -4820,7 +4897,6 @@
                 exp.push(entry);
                 this.saveExpenses(exp);
                 
-                // Check if category is over budget and trigger override
                 const category = entry.category;
                 if (FinancialEngine.isCategoryOverBudget(category)) {
                     setTimeout(() => {
@@ -4928,7 +5004,7 @@
         };
 
         // ============================================================
-        // 11. UI (updated with Budget Override)
+        // 11. UI (updated with Budget Override + Auto-Created styling)
         // ============================================================
         const UI = {
             chatMessages: null,
@@ -4938,6 +5014,8 @@
 
             init() {
                 migrateToBudgetItems();
+                // أول تنظيف للبنود التلقائية عند بدء التشغيل
+                FinancialEngine.cleanupAutoCreatedItems();
                 FinancialEngine.syncBudgetItemsSpent();
 
                 this.chatMessages = Utils.id('chatMessages');
@@ -5504,6 +5582,7 @@
                             icon: 'fa-circle',
                             color: '#2E7DB5',
                             notes: '',
+                            isAutoCreated: false,
                             createdAt: new Date().toISOString(),
                             updatedAt: new Date().toISOString()
                         });
@@ -5730,7 +5809,6 @@
                 const status = FinancialEngine.getCategoryStatus(category);
                 if (!status || !status.isOver) return;
                 
-                // Find surplus categories
                 const surplus = FinancialEngine.findSurplusCategories(category);
                 if (surplus.length === 0) {
                     this.addChatMessage(`⚠️ لقد تجاوزت ميزانية "${category}" بمقدار ${Utils.formatCurrency(Math.abs(status.remaining))}، ولا توجد فئات أخرى بها فائض لتغطية النقص.`, 'assistant');
@@ -5768,16 +5846,13 @@
                     </div>`;
                 }).join('');
 
-                // Select first option by default
                 const firstOption = optionsDiv.querySelector('.override-option');
                 if (firstOption) firstOption.classList.add('selected');
 
-                // Click to select
                 optionsDiv.querySelectorAll('.override-option').forEach(opt => {
                     Utils.on(opt, 'click', () => {
                         optionsDiv.querySelectorAll('.override-option').forEach(o => o.classList.remove('selected'));
                         opt.classList.add('selected');
-                        // Update summary
                         const amount = parseFloat(opt.dataset.amount);
                         const source = opt.dataset.category;
                         summaryDiv.innerHTML = `
@@ -5789,7 +5864,6 @@
                     });
                 });
 
-                // Trigger first selection
                 if (firstOption) firstOption.click();
 
                 this.openModal('budgetOverrideModal');
@@ -6238,6 +6312,7 @@
                 }
             },
 
+            // ===== 🔥 عرض البنود مع تمييز التلقائي =====
             renderBudgetItems() {
                 const list = Utils.id('budgetItemsList');
                 const items = FinancialEngine.getBudgetItems();
@@ -6252,9 +6327,14 @@
                     const remaining = item.budget - spent;
                     const isReserved = item.isReserved ? '🔒 محجوز' : '🔓 غير محجوز';
                     const isOver = remaining < 0;
-                    return `<div class="budget-item-card glass" data-id="${item.id}" style="${isOver ? 'border-right: 3px solid var(--danger);' : ''}">
+                    const isAuto = item.isAutoCreated || false;
+                    const autoClass = isAuto ? 'auto-created' : '';
+                    const autoBadge = isAuto ? '<span class="auto-badge">🤖 تلقائي</span>' : '';
+                    const estimatedBadge = isAuto ? '<span class="estimated-badge">تقديري</span>' : '';
+
+                    return `<div class="budget-item-card glass ${autoClass}" data-id="${item.id}" style="${isOver ? 'border-right: 3px solid var(--danger);' : ''}">
                         <div class="item-info">
-                            <div class="item-name">${item.name} <span style="font-size:0.7rem; color:var(--text-muted);">(${item.category})</span></div>
+                            <div class="item-name">${item.name} ${autoBadge} <span style="font-size:0.7rem; color:var(--text-muted);">(${item.category})</span></div>
                             <div class="item-meta">
                                 <span>الأولوية: ${item.priority}</span>
                                 <span>${isReserved}</span>
@@ -6263,7 +6343,7 @@
                             </div>
                         </div>
                         <div class="item-amounts">
-                            <span style="color:var(--accent);">الميزانية: ${Utils.formatCurrency(item.budget)}</span>
+                            <span style="color:${isAuto ? 'var(--text-muted)' : 'var(--accent)'};">الميزانية: ${Utils.formatCurrency(item.budget)} ${estimatedBadge}</span>
                             <span style="color:var(--danger);">صرف: ${Utils.formatCurrency(spent)}</span>
                             <span style="color:${remaining >= 0 ? 'var(--success)' : 'var(--danger)'};">متبقي: ${Utils.formatCurrency(remaining)}</span>
                         </div>
@@ -6561,7 +6641,6 @@
                 const applyManualBtn = Utils.id('applyManualDateBtn');
                 const presetGrid = Utils.id('salaryPresetGrid');
 
-                // Preset data
                 const presets = [
                     { label: 'الراتب', date: 27 },
                     { label: 'التقاعد', date: 1 },
@@ -6571,15 +6650,13 @@
                     { label: 'حساب المواطن', date: 10 },
                     { label: 'الدعم السكني', date: 24 },
                     { label: 'التأهيل الشامل', date: 26 },
-                    { label: 'دعم ريف', date: 'range' } // special
+                    { label: 'دعم ريف', date: 'range' }
                 ];
 
-                // Render preset buttons
                 presetGrid.innerHTML = presets.map((p, idx) => {
                     let dateDisplay = p.date === 'range' ? 'من 1 إلى 10' : p.date + ' من كل شهر ميلادي';
                     let extraAttr = p.date === 'range' ? 'data-range="true"' : `data-day="${p.date}"`;
                     let selectedClass = '';
-                    // Check if this preset matches current salary date
                     const settings = Storage.getSettings();
                     if (settings.salaryDate) {
                         const day = new Date(settings.salaryDate).getDate();
@@ -6595,7 +6672,6 @@
                     </button>`;
                 }).join('');
 
-                // Load current settings
                 const loadIncome = () => {
                     const s = Storage.getSettings();
                     salaryInput.value = s.salary || '';
@@ -6607,16 +6683,13 @@
                 };
                 loadIncome();
 
-                // Preset click handler
                 Utils.qsa('.salary-preset-btn').forEach(btn => {
                     Utils.on(btn, 'click', () => {
-                        // Remove selected from all
                         Utils.qsa('.salary-preset-btn').forEach(b => b.classList.remove('selected'));
                         btn.classList.add('selected');
                         let dateObj = new Date(WorldTime.now());
                         const isRange = btn.dataset.range === 'true';
                         if (isRange) {
-                            // For Rief: we need a dropdown or just default to 1
                             const day = prompt('أدخل يوم صرف دعم ريف (من 1 إلى 10):', '1');
                             if (day === null) return;
                             const d = parseInt(day);
@@ -6630,16 +6703,13 @@
                             dateObj.setDate(day);
                         }
                         const dateStr = dateObj.toISOString().split('T')[0];
-                        // Update settings
                         const settings = Storage.getSettings();
                         settings.salaryDate = dateStr;
                         Storage.setSettings(settings);
                         FinancialEngine.refreshAll();
                         this.updateIncomeInfo(dateStr);
                         this.renderAll();
-                        // Update manual input
                         manualDateInput.value = dateStr;
-                        // Highlight preset
                         Utils.qsa('.salary-preset-btn').forEach(b => b.classList.remove('selected'));
                         btn.classList.add('selected');
                         this.selectedPreset = btn.dataset.presetIndex;
@@ -6647,7 +6717,6 @@
                     });
                 });
 
-                // Apply manual date
                 Utils.on(applyManualBtn, 'click', () => {
                     const date = manualDateInput.value;
                     if (!date) { alert('الرجاء اختيار تاريخ'); return; }
@@ -6662,7 +6731,6 @@
                     alert('تم تحديث تاريخ الصرف إلى ' + Utils.formatDate(date));
                 });
 
-                // Submit income form
                 Utils.on(form, 'submit', (e) => {
                     e.preventDefault();
                     const salary = parseFloat(salaryInput.value) || 0;
@@ -6678,13 +6746,11 @@
             },
 
             renderIncomePage() {
-                // Just update info
                 const settings = Storage.getSettings();
                 Utils.id('incomeSalary').value = settings.salary || '';
                 Utils.id('incomeSavingsGoal').value = settings.savingsGoal || '';
                 Utils.id('incomeManualDate').value = settings.salaryDate || '';
                 this.updateIncomeInfo(settings.salaryDate);
-                // Highlight preset
                 if (settings.salaryDate) {
                     const day = new Date(settings.salaryDate).getDate();
                     Utils.qsa('.salary-preset-btn').forEach(btn => {
@@ -6708,7 +6774,6 @@
                     daysEl.textContent = '—';
                     return;
                 }
-                // Find preset label
                 const day = new Date(dateStr).getDate();
                 const presets = [
                     { label: 'الراتب', date: 27 },
@@ -6724,7 +6789,6 @@
                 let found = presets.find(p => p.date === day || (p.date === 'range' && day >= 1 && day <= 10));
                 labelEl.textContent = found ? found.label : 'إدخال يدوي';
 
-                // Calculate next salary date
                 const now = WorldTime.now();
                 const base = new Date(dateStr);
                 if (isNaN(base.getTime())) {
