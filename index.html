@@ -2502,10 +2502,36 @@
                 'الطعام والمطاعم', 'التسوق والهدايا', 'التأشيرة والتأمين', 'الطوارئ', 'أخرى'
             ],
             tempCategories: () => ['كشتة', 'قطة', 'واجب', 'فزعة', 'صدقة', 'أخرى'],
-            cleanNumber: (str) => { if (!str) return 0; const cleaned = String(str).replace(/,/g, '').replace(/\s/g, '');
-                const num = parseFloat(cleaned); return isNaN(num) ? 0 : num; },
-            extractAllNumbers: (text) => { const cleaned = text.replace(/,/g, ''); const matches = cleaned.match(/\d+\.?\d*/g); if (
-                    !matches) return []; return matches.map(m => parseFloat(m)).filter(n => !isNaN(n) && n > 0); },
+            cleanNumber: (str) => {
+                if (!str) return 0;
+                // Convert Arabic numerals to English numerals
+                const arabicToEnglish = {
+                    '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
+                    '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
+                };
+                let cleaned = String(str).replace(/,/g, '').replace(/\s/g, '');
+                // Replace Arabic numerals with English ones
+                for (const [arabic, english] of Object.entries(arabicToEnglish)) {
+                    cleaned = cleaned.replace(new RegExp(arabic, 'g'), english);
+                }
+                const num = parseFloat(cleaned);
+                return isNaN(num) ? 0 : num;
+            },
+            extractAllNumbers: (text) => {
+                if (!text) return [];
+                // Convert Arabic numerals to English
+                const arabicToEnglish = {
+                    '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
+                    '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
+                };
+                let cleaned = text;
+                for (const [arabic, english] of Object.entries(arabicToEnglish)) {
+                    cleaned = cleaned.replace(new RegExp(arabic, 'g'), english);
+                }
+                const matches = cleaned.match(/\d+\.?\d*/g);
+                if (!matches) return [];
+                return matches.map(m => parseFloat(m)).filter(n => !isNaN(n) && n > 0);
+            },
             getDayName: () => { const now = typeof WorldTime !== 'undefined' ? WorldTime.now() : new Date(); return now
                     .toLocaleDateString('ar-SA', { weekday: 'long' }); },
             getMonthName: () => { const now = typeof WorldTime !== 'undefined' ? WorldTime.now() : new Date(); return now
