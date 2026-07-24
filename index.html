@@ -4,17 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>AI Budget Manager - المستشار المالي الذكي</title>
-
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Markazi+Text:wght@500;600;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-
-    <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-
     <style>
-        /* ===== styles (same as original, keep unchanged) ===== */
+        /* ===== نفس الأنماط السابقة (تم الاحتفاظ بها) ===== */
         :root {
             --bg-primary: #EFF5F9;
             --bg-secondary: #FFFFFF;
@@ -1685,7 +1680,6 @@
                 padding: 4px 8px
             }
         }
-        /* budget items styles */
         .budget-item-card {
             background: var(--bg-card);
             border: 1px solid var(--bg-glass-border);
@@ -1752,7 +1746,6 @@
         .budget-item-card .item-actions .delete-item-btn:hover {
             color: var(--danger);
         }
-        /* Coach specific styles */
         .coach-value-large {
             font-family: var(--font-mono);
             font-variant-numeric: tabular-nums;
@@ -1791,8 +1784,6 @@
             font-size: 0.8rem;
             margin-right: 8px;
         }
-
-        /* Next Month Plan specific styles */
         .plan-step {
             display: flex;
             gap: 16px;
@@ -1900,8 +1891,6 @@
         .scenario-result .scenario-impact.negative {
             color: var(--danger);
         }
-
-        /* ---------- New Income & Savings Page Styles ---------- */
         .income-section {
             background: var(--bg-card);
             border: 1px solid var(--bg-glass-border);
@@ -2014,8 +2003,6 @@
         .salary-info-box .info-row .value {
             font-weight: 600;
         }
-
-        /* ---------- Budget Override Modal ---------- */
         .budget-override-modal .modal-content {
             max-width: 500px;
             border-right: 4px solid var(--warning);
@@ -2495,8 +2482,11 @@
                     new Date(now.getFullYear(), now.getMonth(), 1); const end = new Date(now.getFullYear(), now.getMonth() +
                     1, 0); return { start: start.toISOString().split('T')[0], end: end.toISOString().split('T')[0] }; },
             generateId: () => Date.now().toString(36) + Math.random().toString(36).substr(2, 6),
-            defaultCategories: () => ['المواد الغذائية', 'البنزين', 'الكهرباء', 'الماء', 'الإنترنت', 'الإيجار', 'الأقساط', 'المطاعم',
-                'المقاهي', 'الصحة', 'الترفيه', 'التسوق', 'التعليم', 'السيارة', 'مصروف شخصي', 'أخرى'
+            defaultCategories: () => [
+                'المواد الغذائية', 'البنزين', 'الكهرباء', 'الماء', 'الإنترنت',
+                'الإيجار', 'الأقساط', 'المطاعم', 'المقاهي', 'الصحة',
+                'الترفيه', 'التسوق', 'التعليم', 'السيارة',
+                'مصروف شخصي', 'العناية الشخصية', 'مستلزمات المنزل', 'أخرى'
             ],
             travelCategories: () => ['تذاكر الطيران', 'الفنادق والسكن', 'المواصلات الداخلية', 'الإنترنت والاتصالات', 'الفعاليات والأنشطة',
                 'الطعام والمطاعم', 'التسوق والهدايا', 'التأشيرة والتأمين', 'الطوارئ', 'أخرى'
@@ -2504,13 +2494,11 @@
             tempCategories: () => ['كشتة', 'قطة', 'واجب', 'فزعة', 'صدقة', 'أخرى'],
             cleanNumber: (str) => {
                 if (!str) return 0;
-                // Convert Arabic numerals to English numerals
                 const arabicToEnglish = {
                     '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
                     '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
                 };
                 let cleaned = String(str).replace(/,/g, '').replace(/\s/g, '');
-                // Replace Arabic numerals with English ones
                 for (const [arabic, english] of Object.entries(arabicToEnglish)) {
                     cleaned = cleaned.replace(new RegExp(arabic, 'g'), english);
                 }
@@ -2519,7 +2507,6 @@
             },
             extractAllNumbers: (text) => {
                 if (!text) return [];
-                // Convert Arabic numerals to English
                 const arabicToEnglish = {
                     '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
                     '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
@@ -3602,6 +3589,80 @@
         // 6. EXPENSE PARSER - ENHANCED SMART CLASSIFIER
         // ============================================================
         const ExpenseParser = {
+            // دالة تصنيف متقدمة باستخدام الكلمات المفتاحية
+            classifyWithKeywords(text) {
+                const fullText = (text || '').toLowerCase();
+                // قوائم الكلمات المفتاحية الموسعة (تم إضافة الكثير)
+                const foodKeywords = [
+                    'ليز', 'شيبس', 'بطاطس', 'بريجلز', 'دوريتوس', 'تاكو', 'تشيتوس', 'بسكويت', 'كيك', 'حلويات', 'شوكولاتة',
+                    'سناكس', 'مكسرات', 'تمر', 'عسل', 'خضار', 'فواكه', 'لحم', 'دجاج', 'سمك', 'بيض', 'حليب', 'جبن', 'زبادي',
+                    'خبز', 'رز', 'زيت', 'سكر', 'طحين', 'مكرونة', 'بقوليات', 'بهارات', 'توابل', 'معلبات', 'عصائر', 'مياه',
+                    'مشروبات غازية', 'بيبسي', 'كوكاكولا', 'سفن اب', 'ريد بول', 'مويه', 'ماء', 'شاي', 'قهوة', 'نسكافيه',
+                    'كابتشينو', 'موكا', 'لاتيه', 'اسبريسو', 'عصير', 'تمر', 'عسل'
+                ];
+                const restaurantKeywords = [
+                    'مطعم', 'وجبة', 'فطور', 'عشاء', 'غداء', 'سناك', 'برجر', 'شاورما', 'بيتزا', 'باستا', 'مشاوي', 'مندي',
+                    'كبسة', 'برياني', 'مقلوبة', 'صينية', 'ماكدونالدز', 'هرفي', 'كودو', 'بيتزا هت', 'دومينوز', 'كنتاكي',
+                    'هارديز', 'ون تو ثري', 'تاون', 'كافيه', 'مقهى', 'كوفي'
+                ];
+                const personalCareKeywords = [
+                    'شامبو', 'صابون', 'مزيل عرق', 'معجون أسنان', 'فرشاة أسنان', 'كريم', 'عطر', 'مستحضرات تجميل',
+                    'مزيل شعر', 'مرطب', 'لوشن', 'مكياج', 'أحمر شفاه', 'طلاء أظافر', 'جل استحمام', 'بخاخ'
+                ];
+                const homeSuppliesKeywords = [
+                    'منظف', 'مناديل', 'ورق حمام', 'معطر جو', 'ملمع أثاث', 'اسفنج', 'قطعة قماش', 'صابون غسيل',
+                    'منظف أرضيات', 'مبيض', 'كلور', 'جلو', 'ريموت', 'جهاز تحكم', 'شاحن', 'بطارية', 'لمبة',
+                    'مصباح', 'سلك', 'محول', 'مفتاح كهرباء', 'فيش', 'طقم أدوات', 'مفك', 'مسامير', 'غراء', 'شريط لاصق',
+                    'علاقة ملابس', 'شماعة', 'سلة مهملات', 'فرشاة تنظيف', 'مكنسة', 'ممسحة', 'دلو'
+                ];
+                const entertainmentKeywords = [
+                    'ترفيه', 'سينما', 'مسرح', 'حفلة', 'فعالية', 'مهرجان', 'مدينة ألعاب', 'بولينج', 'بلياردو',
+                    'ألعاب', 'فيديو', 'بلاي ستيشن', 'نتفلكس', 'شاهد', 'أمازون برايم', 'سبوتيفاي', 'أنغامي', 'تكت'
+                ];
+                const shoppingKeywords = [
+                    'تسوق', 'ملابس', 'أحذية', 'شنط', 'إلكترونيات', 'جوال', 'لابتوب', 'تابلت', 'سماعة', 'ساعة',
+                    'هدايا', 'إكسسوارات', 'أثاث', 'ديكور', 'تحف', 'سجاد', 'ستائر', 'أجهزة كهربائية'
+                ];
+                const educationKeywords = [
+                    'تعليم', 'مدرسة', 'جامعة', 'كلية', 'دورة', 'تدريب', 'كتاب', 'قرطاسية', 'مكتبة', 'معلم',
+                    'منهج', 'دراسة', 'اختبار', 'رسوم دراسية'
+                ];
+                const healthKeywords = [
+                    'صحي', 'صحة', 'مستشفى', 'عيادة', 'طبيب', 'دواء', 'صيدلية', 'كشف', 'علاج', 'أسنان', 'عيون',
+                    'جراحة', 'فحص', 'مختبر', 'أشعة', 'تطعيم', 'لقاح', 'إسعاف', 'طوارئ', 'نظارات', 'عدسات'
+                ];
+                const fuelKeywords = [
+                    'بنزين', 'بترول', 'ديزل', 'وقود', 'محطة وقود', 'بترومين', 'الدريس', 'تعبئة', 'تموين'
+                ];
+                const billsKeywords = [
+                    'كهرباء', 'ماء', 'إنترنت', 'جوال', 'فواتير', 'فاتورة', 'سداد', 'خدمات', 'صيانة', 'نت',
+                    'واي فاي', 'آيس', 'موبايلي', 'زين', 'سوا', 'جوي', 'سكاي', 'ألياف', 'بصري', 'كهرب', 'مياه'
+                ];
+                const rentKeywords = [
+                    'إيجار', 'سكن', 'شقة', 'منزل', 'فيلا', 'دفعة', 'عقار', 'مكتب', 'محل', 'سكني', 'استئجار'
+                ];
+                const installmentsKeywords = [
+                    'قسط', 'قرض', 'دين', 'سداد', 'تمويل', 'مرابحة', 'تقسيط', 'سيارة', 'عقار', 'رهن', 'ضمان',
+                    'كفالة', 'بنك', 'مصرف', 'أقساط', 'التزام'
+                ];
+
+                // فحص التصنيف حسب الأولوية (بعض التصنيفات تتعارض)
+                if (rentKeywords.some(k => fullText.includes(k))) return { category: 'الإيجار' };
+                if (installmentsKeywords.some(k => fullText.includes(k))) return { category: 'الأقساط' };
+                if (fuelKeywords.some(k => fullText.includes(k))) return { category: 'البنزين' };
+                if (billsKeywords.some(k => fullText.includes(k))) return { category: 'الكهرباء' };
+                if (educationKeywords.some(k => fullText.includes(k))) return { category: 'التعليم' };
+                if (healthKeywords.some(k => fullText.includes(k))) return { category: 'الصحة' };
+                if (restaurantKeywords.some(k => fullText.includes(k))) return { category: 'المطاعم' };
+                if (entertainmentKeywords.some(k => fullText.includes(k))) return { category: 'الترفيه' };
+                if (shoppingKeywords.some(k => fullText.includes(k))) return { category: 'التسوق' };
+                if (personalCareKeywords.some(k => fullText.includes(k))) return { category: 'العناية الشخصية' };
+                if (homeSuppliesKeywords.some(k => fullText.includes(k))) return { category: 'مستلزمات المنزل' };
+                if (foodKeywords.some(k => fullText.includes(k))) return { category: 'المواد الغذائية' };
+                // إذا لم يجد شيئاً
+                return { category: 'أخرى' };
+            },
+
             parse(text) {
                 const lines = text.split(/[\n\r]+/).filter(l => l.trim());
                 const result = { transactions: [], merchant: null, date: null };
@@ -3661,71 +3722,15 @@
                                 .today() });
                     }
                 }
-                // ===== ENHANCED SMART CLASSIFIER =====
-                const categories = Utils.defaultCategories();
+                // تصنيف كل معاملة باستخدام الكلمات المفتاحية
                 result.transactions = result.transactions.map(t => {
-                    const desc = (t.description || '').toLowerCase();
-                    const merchant = (t.merchant || '').toLowerCase();
-                    const fullText = desc + ' ' + merchant;
-
-                    // ---- NEW: Detailed pattern matching ----
-                    // Car & Vehicle
-                    if (/(زيت مكينة|زيت محرك|مكينة|سيارة|بنزين|بترول|ديزل|زيت قير|فرامل|بطارية|كفرات|إطارات|صيانة سيارة|تغيير زيت|فحص دوري|تشحيم|ورشة|ميكانيكي|كهربائي سيارة|تلميع سيارة|غسيل سيارة|موتر|جمس|لكزس|تويوتا|نيسان|هوندا|مرسيدس|بي ام دبليو|فورد|شفروليه|هيونداي|كيا|مازدا)/i.test(fullText)) {
-                        return { ...t, category: 'السيارة' };
-                    }
-                    // Restaurants & Food Outlets
-                    if (/(مطعم|وجبة|وجبات|فطور|عشاء|غداء|سناك|برجر|شاورما|بيتزا|باستا|مشاوي|مندي|كبسة|برياني|مقلوبة|صينية|مأكولات|أكل|اكل|طعام|ماكدونالدز|هرفي|كودو|البرجر|الشاورما|بيتزا هت|دومينوز|كنتاكي|كنتاكي|هارديز|ون تو ثري|تاون|جلسة|كافيه|مقهى|كوفي|قهوة|شاي|نسكافيه|كابتشينو|لاتيه|موكا|اسبريسو|قهوة سعودية|شاهي|نعناع)/i.test(fullText)) {
-                        return { ...t, category: 'المطاعم' };
-                    }
-                    // Groceries & Supermarkets
-                    if (/(بقالة|سوبرماركت|تموين|مواد غذائية|خضار|فواكه|لحم|دجاج|سمك|بيض|حليب|جبن|زبادي|خبز|رز|سكر|زيت|طحين|شعيرية|مكرونة|بقوليات|توابل|بهارات|معلبات|عصائر|مياه|تمر|عسل|بنده|كارفور|تميم|دانوب|أسواق|نوري|المزرعة|العثيم|الدانوب|السدحان|أسواق المزرعة|لولو|هيبر|سبينس|السويلم)/i.test(fullText)) {
-                        return { ...t, category: 'المواد الغذائية' };
-                    }
-                    // Beverages & Drinks (if not caught by food)
-                    if (/(بيبسي|كوكاكولا|سفن اب|مشروب غازي|مشروب|عصير|شاي|قهوة|نسكافيه|كابتشينو|موكا|لاتيه|اسبريسو|عصير برتقال|عصير تفاح|مياه غازية|مياه معدنية|ريد بول|ستاربكس|دانكن|بارنيز|كافيه|مقهى)/i.test(fullText)) {
-                        return { ...t, category: 'المواد الغذائية' };
-                    }
-                    // Bills & Utilities
-                    if (/(كهرباء|ماء|إنترنت|جوال|فواتير|فاتورة|سداد|خدمات|صيانة|نت|واي فاي|آيس|موبايلي|زين|سوا|جوي|سكاي|ألياف|بصري|كهرب|مياه|الصرف الصحي)/i.test(fullText)) {
-                        return { ...t, category: 'الكهرباء' };
-                    }
-                    // Rent & Housing
-                    if (/(إيجار|سكن|شقة|منزل|فيلا|دفعة|عقار|مكتب|محل|سكني|استئجار|الإيجار|البيت|المنزل)/i.test(fullText)) {
-                        return { ...t, category: 'الإيجار' };
-                    }
-                    // Education
-                    if (/(تعليم|مدرسة|جامعة|كلية|دورة|منصة|تدريب|كتاب|قرطاسية|مكتبة|معلم|منهج|دراسة|اختبار|رسوم دراسية|رسوم جامعة|أكاديمية|معرفة|تعلم|مقرر)/i.test(fullText)) {
-                        return { ...t, category: 'التعليم' };
-                    }
-                    // Health
-                    if (/(صحي|صحة|مستشفى|عيادة|طبيب|دواء|صيدلية|كشف|علاج|أسنان|عيون|جراحة|فحص|مختبر|أشعة|تطعيم|لقاح|إسعاف|طوارئ|مستوصف|مركز صحي|رعاية|تأمين صحي)/i.test(fullText)) {
-                        return { ...t, category: 'الصحة' };
-                    }
-                    // Entertainment
-                    if (/(ترفيه|سينما|مسرح|حفلة|فعالية|مهرجان|مدينة ألعاب|بولينج|بلياردو|ألعاب|فيديو|بلاي ستيشن|نتفلكس|شاهد|أمازون برايم|يوتيوب بريميوم|سبوتيفاي|أنغامي|تكت|تذاكر|فعاليات|مؤتمر|معرض|متعة|تسلية)/i.test(fullText)) {
-                        return { ...t, category: 'الترفيه' };
-                    }
-                    // Shopping (clothing, electronics, etc.)
-                    if (/(تسوق|ملابس|أحذية|شنط|مكياج|عطور|إلكترونيات|جوال|لابتوب|تابلت|سماعة|ساعة|هدايا|مجوهرات|إكسسوارات|أثاث|منزل|مطبخ|حمام|ديكور|تحف|سجاد|ستائر|أجهزة|كهربائيات|تلفزيون|ثلاجة|غسالة|مكيف|فرن|ميكروويف|خلاط|مفرمة|غسالة صحون|نشافة|مكنسة)/i.test(fullText)) {
-                        return { ...t, category: 'التسوق' };
-                    }
-                    // Installments & Loans
-                    if (/(قسط|قرض|دين|سداد|تمويل|مرابحة|تقسيط|سيارة|عقار|رهن|ضمان|كفالة|بنك|مصرف|أقساط|التزام|التزامات)/i.test(fullText)) {
-                        return { ...t, category: 'الأقساط' };
-                    }
-                    // Fuel (if not caught by car)
-                    if (/(بنزين|بترول|ديزل|وقود|محطة وقود|بترومين|الدريس|الوقود|تعبئة|تموين)/i.test(fullText)) {
-                        return { ...t, category: 'البنزين' };
-                    }
-                    // Coffee shops (if not caught by restaurants)
-                    if (/(كافيه|مقهى|كوفي|قهوة|شاي|نسكافيه|كابتشينو|لاتيه|موكا|اسبريسو|ستاربكس|دانكن|بارنيز|كافيه|مقهى)/i.test(fullText)) {
-                        return { ...t, category: 'المقاهي' };
-                    }
-                    // Default fallback
-                    return { ...t, category: 'أخرى' };
+                    const fullText = (t.description || '') + ' ' + (t.merchant || '');
+                    const classified = ExpenseParser.classifyWithKeywords(fullText);
+                    return { ...t, category: classified.category };
                 });
                 return result;
             },
+
             parseReceipt(text) {
                 const result = this.parse(text);
                 if (result.transactions.length > 1) {
@@ -3742,7 +3747,7 @@
         };
 
         // ============================================================
-        // 7. GEMINI (unchanged)
+        // 7. GEMINI (محسّن مع استغلال المفاتيح الـ12 وتحليل النص)
         // ============================================================
         const Gemini = {
             getKeys() { return Storage.getGeminiKeys(); },
@@ -3794,6 +3799,55 @@
                 } catch (e) {
                     this.rotateKey();
                     throw new Error(e.message || 'فشل الاتصال بـ Gemini');
+                }
+            },
+
+            // تحليل المصروف باستخدام Gemini أولاً، ثم الاحتياطي بالمحلل النصي
+            async parseExpense(text) {
+                // المحاولة الأولى: استخدام Gemini
+                try {
+                    const categories = Utils.defaultCategories();
+                    const prompt = `أنت مساعد مالي ذكي. استخرج من النص التالي المعلومات المطلوبة بدقة:
+                    النص: "${text}"
+                    أخرج النتيجة بتنسيق JSON صالح فقط، بدون أي نص إضافي، بالهيكل التالي:
+                    {
+                        "amount": رقم (المبلغ بالريال),
+                        "description": "نص وصف المصروف",
+                        "category": "أحد التصنيفات التالية: ${categories.join('، ')}",
+                        "merchant": "اسم التاجر إن وُجد وإلا خالي",
+                        "date": "تاريخ المصروف بصيغة YYYY-MM-DD، إن لم يُذكر استخدم اليوم"
+                    }
+                    تأكد من أن التصنيف يناسب المصروف بشكل دقيق.`;
+                    const response = await this.sendRequest(prompt);
+                    const jsonMatch = response.match(/\{[\s\S]*\}/);
+                    if (jsonMatch) {
+                        const data = JSON.parse(jsonMatch[0]);
+                        if (data.amount && data.description) {
+                            // التأكد من أن التصنيف ضمن القائمة
+                            if (!categories.includes(data.category)) {
+                                // تصنيف احتياطي عبر الكلمات المفتاحية
+                                const fallback = ExpenseParser.classifyWithKeywords(text);
+                                data.category = fallback.category || 'أخرى';
+                            }
+                            return data;
+                        }
+                    }
+                    throw new Error('لم يستطع Gemini استخراج البيانات بشكل صحيح');
+                } catch (e) {
+                    console.warn('فشل Gemini في التحليل، استخدام المحلل النصي الاحتياطي:', e.message);
+                    // الحل الاحتياطي: استخدام ExpenseParser المحسن
+                    const result = ExpenseParser.parse(text);
+                    if (result.transactions.length > 0) {
+                        const t = result.transactions[0];
+                        return {
+                            amount: t.amount,
+                            description: t.description,
+                            category: t.category || 'أخرى',
+                            merchant: t.merchant || '',
+                            date: t.date || Utils.today()
+                        };
+                    }
+                    throw new Error('تعذر استخراج المصروف من النص حتى باستخدام المحلل الاحتياطي');
                 }
             },
 
@@ -4411,20 +4465,6 @@
                 }
 
                 return response;
-            },
-
-            async parseExpense(text) {
-                const result = ExpenseParser.parse(text);
-                if (result.transactions.length === 0) {
-                    throw new Error('لم أستطع استخراج مصروف من النص. حاول كتابة المبلغ والوصف بشكل أوضح.');
-                }
-                if (result.transactions.length === 1) {
-                    return result.transactions[0];
-                }
-                const total = result.transactions.reduce((s, t) => s + t.amount, 0);
-                const desc = result.transactions.map(t => t.description).join(' + ');
-                return { amount: total, description: desc || 'مصروفات متعددة', category: result.transactions[0]
-                        ?.category || 'أخرى', merchant: result.merchant || '', date: result.date || Utils.today() };
             },
 
             async runAdvancedAnalytics(expenses, settings) {
@@ -5185,21 +5225,22 @@
                     const text = aiInput.value.trim();
                     if (!text) { parseResult.innerHTML =
                             '<div class="parse-review" style="color:var(--danger);">الرجاء إدخال نص</div>'; return; }
-                    parseResult.innerHTML = '<div class="parse-review">جاري التحليل...</div>';
+                    parseResult.innerHTML = '<div class="parse-review">جاري التحليل بواسطة الذكاء الاصطناعي...</div>';
                     try {
                         const result = await Gemini.parseExpense(text);
                         parsedData = result;
                         const displayCat = result.category || 'أخرى';
-                        parseResult.innerHTML = '<div class="parse-review"><div class="row"><span class="label">المبلغ الإجمالي</span><span class="value">' +
-                            result.amount.toFixed(2) + ' ريال</span></div><div class="row"><span class="label">التصنيف</span><span class="value">' +
-                            displayCat +
-                            '</span></div><div class="row"><span class="label">التاجر</span><span class="value">' +
-                            (result.merchant || '—') +
-                            '</span></div><div class="row"><span class="label">التاريخ</span><span class="value">' +
-                            Utils.formatDate(result.date) +
-                            '</span></div><div class="row"><span class="label">الوصف</span><span class="value">' +
-                            (result.description || text) +
-                            '</span></div><div class="actions"><button class="btn-secondary" id="editParseBtn">تعديل</button><button class="btn-primary" id="saveParseBtn">حفظ</button></div></div>';
+                        parseResult.innerHTML = `<div class="parse-review">
+                            <div class="row"><span class="label">المبلغ الإجمالي</span><span class="value">${result.amount.toFixed(2)} ريال</span></div>
+                            <div class="row"><span class="label">التصنيف المقترح</span><span class="value" style="color:var(--accent);">${displayCat}</span></div>
+                            <div class="row"><span class="label">التاجر</span><span class="value">${result.merchant || '—'}</span></div>
+                            <div class="row"><span class="label">التاريخ</span><span class="value">${Utils.formatDate(result.date)}</span></div>
+                            <div class="row"><span class="label">الوصف</span><span class="value">${result.description || text}</span></div>
+                            <div class="actions">
+                                <button class="btn-secondary" id="editParseBtn">تعديل</button>
+                                <button class="btn-primary" id="saveParseBtn">حفظ</button>
+                            </div>
+                        </div>`;
                         Utils.on(Utils.id('editParseBtn'), 'click', () => {
                             const tab = Utils.qs('.method-tab[data-method="manual"]');
                             tab.click();
@@ -5228,9 +5269,10 @@
                             alert('تم حفظ المصروف بنجاح!');
                         });
                         saveBtn.style.display = 'none';
-                    } catch (err) { parseResult.innerHTML =
-                            '<div class="parse-review" style="color:var(--danger);">' + err.message +
-                        '</div>'; }
+                    } catch (err) {
+                        parseResult.innerHTML =
+                            `<div class="parse-review" style="color:var(--danger);">${err.message}</div>`;
+                    }
                 });
 
                 Utils.on(saveBtn, 'click', () => {
@@ -5248,9 +5290,11 @@
                 });
             },
 
-            populateCategorySelect(select, selected) { const cats = Utils.defaultCategories();
+            populateCategorySelect(select, selected) { 
+                const cats = Utils.defaultCategories();
                 select.innerHTML = cats.map(c => '<option value="' + c + '" ' + (c === selected ? 'selected' : '') +
-                    '>' + c + '</option>').join(''); },
+                    '>' + c + '</option>').join(''); 
+            },
 
             quickExpenseTarget: null,
 
