@@ -1900,6 +1900,191 @@
         .scenario-result .scenario-impact.negative {
             color: var(--danger);
         }
+
+        /* ---------- New Income & Savings Page Styles ---------- */
+        .income-section {
+            background: var(--bg-card);
+            border: 1px solid var(--bg-glass-border);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+        .income-section h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .income-section h3 i {
+            color: var(--accent);
+        }
+        .income-section .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .income-section .form-row .form-group {
+            margin-bottom: 0;
+        }
+        .salary-preset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 12px 0;
+        }
+        .salary-preset-btn {
+            background: var(--bg-glass);
+            border: 1px solid var(--bg-glass-border);
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+            text-align: right;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: var(--font);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-height: 60px;
+            justify-content: center;
+        }
+        .salary-preset-btn:hover {
+            background: var(--accent-light);
+            color: #fff;
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+        .salary-preset-btn .preset-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .salary-preset-btn .preset-date {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+        .salary-preset-btn.selected {
+            background: var(--accent-gradient);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 2px 12px rgba(18, 60, 87, 0.25);
+        }
+        .salary-preset-btn.selected .preset-date {
+            color: rgba(255,255,255,0.8);
+        }
+        .salary-manual-input {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px dashed var(--bg-glass-border);
+        }
+        .salary-manual-input .form-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .salary-manual-input .form-group label {
+            min-width: 100px;
+            font-weight: 600;
+        }
+        .salary-manual-input .form-group input {
+            flex: 1;
+            min-width: 120px;
+        }
+        .salary-info-box {
+            background: var(--bg-glass);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            margin: 12px 0;
+            border-right: 3px solid var(--accent);
+        }
+        .salary-info-box .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 0.9rem;
+        }
+        .salary-info-box .info-row .label {
+            color: var(--text-muted);
+        }
+        .salary-info-box .info-row .value {
+            font-weight: 600;
+        }
+
+        /* ---------- Budget Override Modal ---------- */
+        .budget-override-modal .modal-content {
+            max-width: 500px;
+            border-right: 4px solid var(--warning);
+        }
+        .budget-override-modal .modal-header h2 {
+            color: var(--warning);
+        }
+        .budget-override-modal .modal-header h2 i {
+            color: var(--warning);
+        }
+        .override-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: var(--bg-glass);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--bg-glass-border);
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+        .override-option:hover {
+            background: var(--bg-card);
+            border-color: var(--accent-light);
+        }
+        .override-option.selected {
+            border-color: var(--accent);
+            background: var(--bg-card);
+            box-shadow: 0 0 0 2px var(--accent-light);
+        }
+        .override-option .option-label {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .override-option .option-amount {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .override-option .option-from {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .override-summary {
+            background: var(--bg-glass);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            margin: 8px 0;
+            border-right: 3px solid var(--accent);
+        }
+        .override-summary .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 0.9rem;
+        }
+        .override-summary .summary-row .label {
+            color: var(--text-muted);
+        }
+        .override-summary .summary-row .value {
+            font-weight: 600;
+        }
+        .override-summary .summary-row .value.positive {
+            color: var(--success);
+        }
+        .override-summary .summary-row .value.negative {
+            color: var(--danger);
+        }
     </style>
 </head>
 <body>
@@ -1918,6 +2103,7 @@
                 <a href="#" class="nav-link" data-page="coach"><i class="fas fa-robot"></i><span>المدرب المالي</span></a>
                 <a href="#" class="nav-link" data-page="reports"><i class="fas fa-chart-pie"></i><span>التقارير</span></a>
                 <a href="#" class="nav-link" data-page="analytics"><i class="fas fa-robot"></i><span>التحليلات</span></a>
+                <a href="#" class="nav-link" data-page="income"><i class="fas fa-coins"></i><span>الدخل والأهداف</span></a>
                 <a href="#" class="nav-link" data-page="settings"><i class="fas fa-cog"></i><span>الإعدادات</span></a>
                 <a href="#" class="nav-link" data-page="travel"><i class="fas fa-plane"></i><span>ميزانية السفر</span></a>
                 <a href="#" class="nav-link" data-page="temp"><i class="fas fa-umbrella-beach"></i><span>ميزانية مؤقتة</span></a>
@@ -1960,7 +2146,6 @@
                     <div id="expensesList" class="expenses-list"></div>
                 </section>
 
-                <!-- Budget Items Page -->
                 <section id="page-budget" class="page">
                     <div class="expenses-toolbar">
                         <button id="addBudgetItemBtn" class="btn-primary"><i class="fas fa-plus"></i> إضافة بند</button>
@@ -1968,21 +2153,16 @@
                     <div id="budgetItemsList" class="expenses-list"></div>
                 </section>
 
-                <!-- Coach Page -->
                 <section id="page-coach" class="page">
                     <div class="coach-tabs">
                         <button class="coach-tab active" data-tab="current">الخطة الحالية</button>
                         <button class="coach-tab" data-tab="next">خطة الشهر القادم</button>
                     </div>
-
-                    <!-- Current Plan -->
                     <div id="coach-current" class="coach-panel active">
                         <div id="coachCurrentContent">
                             <div class="analytics-placeholder glass"><i class="fas fa-spinner fa-spin fa-3x"></i><p>جاري تحليل الخطة الحالية...</p></div>
                         </div>
                     </div>
-
-                    <!-- Next Month Plan -->
                     <div id="coach-next" class="coach-panel">
                         <div id="coachNextContent">
                             <div class="analytics-placeholder glass"><i class="fas fa-spinner fa-spin fa-3x"></i><p>جاري بناء خطة الشهر القادم...</p></div>
@@ -2019,13 +2199,54 @@
                     </div>
                 </section>
 
+                <section id="page-income" class="page">
+                    <div class="settings-container glass" style="max-width:100%;">
+                        <h2><i class="fas fa-coins"></i> الدخل والأهداف الادخارية</h2>
+                        <p class="form-hint">حدد الراتب الشهري وموعد صرفه، وكذلك هدف الادخار الشهري.</p>
+
+                        <div class="income-section">
+                            <h3><i class="fas fa-money-bill-wave"></i> الراتب الشهري</h3>
+                            <form id="incomeForm" class="settings-form">
+                                <div class="form-group">
+                                    <label for="incomeSalary">الراتب الشهري (ريال)</label>
+                                    <input type="number" id="incomeSalary" class="form-input" min="0" step="0.01" placeholder="مثال: 15000" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="incomeSavingsGoal">هدف الادخار الشهري (ريال)</label>
+                                    <input type="number" id="incomeSavingsGoal" class="form-input" min="0" step="0.01" placeholder="مثال: 3000" />
+                                </div>
+                                <button type="submit" class="btn-primary"><i class="fas fa-save"></i> حفظ الدخل والأهداف</button>
+                            </form>
+                        </div>
+
+                        <div class="income-section">
+                            <h3><i class="fas fa-calendar-alt"></i> مواعيد صرف الرواتب والدعم</h3>
+                            <p class="form-hint">اختر نوع المعاش أو الدعم لتحديد موعد الصرف تلقائياً، أو أدخل التاريخ يدوياً.</p>
+
+                            <div class="salary-preset-grid" id="salaryPresetGrid"></div>
+
+                            <div class="salary-manual-input">
+                                <div class="form-group">
+                                    <label for="incomeManualDate">📅 إدخال موعد الراتب يدوياً</label>
+                                    <input type="date" id="incomeManualDate" class="form-input" />
+                                    <button id="applyManualDateBtn" class="btn-primary btn-sm"><i class="fas fa-check"></i> تطبيق</button>
+                                </div>
+                            </div>
+
+                            <div class="salary-info-box" id="salaryInfoBox">
+                                <div class="info-row"><span class="label">📌 نوع الصرف المحدد</span><span class="value" id="selectedPresetLabel">—</span></div>
+                                <div class="info-row"><span class="label">📅 تاريخ الصرف التالي</span><span class="value" id="nextSalaryDateDisplay">—</span></div>
+                                <div class="info-row"><span class="label">⏳ الأيام المتبقية حتى الصرف</span><span class="value" id="daysUntilSalaryDisplay">—</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 <section id="page-settings" class="page">
                     <div class="settings-container glass">
                         <h2>الإعدادات العامة</h2>
                         <form id="settingsForm" class="settings-form">
-                            <div class="form-group"><label for="settingsSalary">الراتب الشهري (ريال)</label><input type="number" id="settingsSalary" class="form-input" min="0" step="0.01" /></div>
-                            <div class="form-group"><label for="settingsSalaryDate">تاريخ نزول الراتب</label><input type="date" id="settingsSalaryDate" class="form-input" /></div>
-                            <div class="form-group"><label for="settingsSavingsGoal">هدف الادخار الشهري (ريال)</label><input type="number" id="settingsSavingsGoal" class="form-input" min="0" step="0.01" /></div>
+                            <div class="form-group"><label for="settingsSalaryDate">تاريخ نزول الراتب (مرجع سابق)</label><input type="date" id="settingsSalaryDate" class="form-input" /></div>
                             <button type="submit" class="btn-primary">حفظ الإعدادات</button>
                         </form>
                         <hr style="margin: 24px 0; border-color: var(--bg-glass-border);" />
@@ -2144,7 +2365,6 @@
         </div>
     </div>
 
-    <!-- Budget Item Modal -->
     <div id="budgetItemModal" class="modal">
         <div class="modal-content glass">
             <div class="modal-header"><h2 id="budgetItemModalTitle">إضافة بند ميزانية</h2><button class="modal-close" id="closeBudgetItemModal">&times;</button></div>
@@ -2169,7 +2389,6 @@
         </div>
     </div>
 
-    <!-- Gemini Modal -->
     <div id="geminiModal" class="modal">
         <div class="modal-content glass">
             <div class="modal-header"><h2>⚙️ إعدادات Gemini AI</h2><button class="modal-close" id="closeGeminiModal">&times;</button></div>
@@ -2221,6 +2440,25 @@
                     <div id="setupCategoriesContainer" class="category-budgets-grid"></div>
                     <button type="submit" class="btn-primary btn-large">ابدأ الآن</button>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget Override Modal -->
+    <div id="budgetOverrideModal" class="modal budget-override-modal">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <h2><i class="fas fa-balance-scale"></i> إعادة توزيع الميزانية</h2>
+                <button class="modal-close" id="closeOverrideModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="overrideMessage" style="font-size:0.95rem; color:var(--text-secondary); margin-bottom:12px;"></p>
+                <div id="overrideOptions" style="margin-bottom:12px;"></div>
+                <div id="overrideSummary" class="override-summary"></div>
+                <div class="modal-actions">
+                    <button class="btn-secondary" id="cancelOverrideBtn">إلغاء</button>
+                    <button class="btn-primary" id="confirmOverrideBtn">تأكيد النقل</button>
+                </div>
             </div>
         </div>
     </div>
@@ -2337,7 +2575,6 @@
             setGeminiModel(model) { this.set('gemini_model', model); },
             getGeminiKeyIndex() { return this.get('gemini_key_index', 0); },
             setGeminiKeyIndex(idx) { this.set('gemini_key_index', idx); },
-            // Budget Items
             getBudgetItems() { return this.get('budget_items', []); },
             setBudgetItems(items) { this.set('budget_items', items); },
             getTravelBudget() { const def = { enabled: false, tripName: '', totalBudget: 0, categoryBudgets: {} }; return this
@@ -2349,10 +2586,8 @@
             setTempBudget(v) { this.set('temp_budget', v); },
             getTempExpenses() { return this.get('temp_expenses', []); },
             setTempExpenses(exp) { this.set('temp_expenses', exp); },
-            // Migration flag
             isMigrated() { return this.get('migrated_v2', false); },
             setMigrated() { this.set('migrated_v2', true); },
-            // First launch
             isFirstLaunch() { return !localStorage.getItem('ai_budget_launched'); },
             markLaunched() { localStorage.setItem('ai_budget_launched', 'true'); }
         };
@@ -2410,7 +2645,7 @@
                 return expenses.filter(e => e.category === category).reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
             },
 
-            // ---- Core Calculations (with validation) ----
+            // ---- Core Calculations ----
             
             calculateReservedMoney() {
                 const items = this.getBudgetItems();
@@ -2422,53 +2657,32 @@
                 return this.getTotal(this.getMonthExpenses());
             },
 
-            /**
-             * ** القاعدة الأولى والرابعة **
-             * حساب الميزانية المتاحة للصرف
-             * إذا لم يوجد راتب -> null
-             * إذا وجد راتب -> الراتب - المحجوز - المصروفات
-             */
             calculateAvailableBudget() {
                 const salary = this._getValidatedSalary();
                 if (salary === null) return null;
-                
                 const reserved = this.calculateReservedMoney();
                 const paid = this.calculatePaidExpenses();
                 return salary - reserved - paid;
             },
 
-            /**
-             * ** القاعدة الخامسة **
-             * حساب عدد الأيام المتبقية حتى نزول الراتب
-             */
             getRemainingDaysUntilSalary() {
                 const settings = Storage.getSettings();
                 if (!settings.salaryDate) return null;
-                
                 const base = new Date(settings.salaryDate);
                 if (isNaN(base.getTime())) return null;
-                
                 const day = base.getDate();
                 const now = WorldTime.now();
                 const today0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                
                 let candidate = new Date(now.getFullYear(), now.getMonth(), day);
                 if (candidate < today0) {
                     candidate = new Date(now.getFullYear(), now.getMonth() + 1, day);
                 }
-                
                 return Math.round((candidate - today0) / 86400000);
             },
 
-            /**
-             * ** القاعدة الخامسة **
-             * حساب ميزانية اليوم
-             * تعتمد على الأيام المتبقية حتى نزول الراتب
-             */
             calculateDailyBudget() {
                 const available = this.calculateAvailableBudget();
                 if (available === null) return null;
-                
                 const daysUntilSalary = this.getRemainingDaysUntilSalary();
                 if (daysUntilSalary === null || daysUntilSalary <= 0) {
                     const now = WorldTime.now();
@@ -2476,50 +2690,29 @@
                     const remainingDays = daysInMonth - now.getDate() + 1;
                     return remainingDays > 0 ? available / remainingDays : 0;
                 }
-                
                 return available / daysUntilSalary;
             },
 
-            /**
-             * ** القاعدة السادسة - FIXED **
-             * حساب ميزانية الأسبوع
-             * إذا كانت الأيام المتبقية >= 7 -> Daily × 7
-             * وإلا -> Available Budget (المبلغ المتبقي بالكامل)
-             * ولا يجوز أن تكون > Available Budget
-             */
             calculateWeeklyBudget() {
                 const available = this.calculateAvailableBudget();
                 if (available === null) return null;
-                
                 const daysUntilSalary = this.getRemainingDaysUntilSalary();
                 if (daysUntilSalary === null || daysUntilSalary <= 0) {
                     return available;
                 }
-                
-                // القاعدة الذهبية: لا يمكن أن تتجاوز ميزانية الأسبوع المبلغ المتاح
                 if (daysUntilSalary < 7) {
                     return available;
                 }
-                
                 const daily = this.calculateDailyBudget();
                 if (daily === null) return null;
-                
                 const weekly = daily * 7;
-                // التأكد من أن ميزانية الأسبوع لا تتجاوز المبلغ المتاح
                 return Math.min(weekly, available);
             },
 
-            /**
-             * ** القاعدة السابعة **
-             * حساب ميزانية الشهر
-             */
             calculateMonthlyBudget() {
                 return this.calculateAvailableBudget();
             },
 
-            /**
-             * الحصول على عدد الأيام المتبقية (للأغراض العرضية)
-             */
             getRemainingDays() {
                 const daysUntilSalary = this.getRemainingDaysUntilSalary();
                 if (daysUntilSalary !== null && daysUntilSalary > 0) return daysUntilSalary;
@@ -2528,9 +2721,6 @@
                 return daysInMonth - now.getDate() + 1;
             },
 
-            /**
-             * الحصول على عنوان مناسب لميزانية الأسبوع
-             */
             getWeeklyBudgetLabel() {
                 const daysUntilSalary = this.getRemainingDaysUntilSalary();
                 if (daysUntilSalary === null || daysUntilSalary < 7) {
@@ -2539,88 +2729,33 @@
                 return 'ميزانية الأسبوع';
             },
 
-            /**
-             * ** القاعدة الثامنة والتاسعة والعاشرة **
-             * تحليل الحالة المالية للمستخدم
-             */
             getFinancialStatus() {
                 const salary = this._getValidatedSalary();
                 const reserved = this.calculateReservedMoney();
                 const paid = this.calculatePaidExpenses();
                 const available = this.calculateAvailableBudget();
-                
                 if (salary === null) {
-                    return {
-                        status: 'no_income',
-                        message: 'أدخل الراتب أولاً',
-                        icon: 'fa-edit',
-                        available: null,
-                        reserved: reserved,
-                        paid: paid,
-                        salary: 0,
-                        details: {
-                            salary: 0,
-                            reserved: reserved,
-                            paid: paid,
-                            difference: null
-                        }
-                    };
+                    return { status: 'no_income', message: 'أدخل الراتب أولاً', icon: 'fa-edit', available: null,
+                        reserved: reserved, paid: paid, salary: 0, details: { salary: 0, reserved: reserved,
+                            paid: paid, difference: null } };
                 }
-                
                 if (reserved > salary) {
-                    return {
-                        status: 'commitments_exceed_income',
-                        message: `⚠️ إجمالي الالتزامات (${Utils.formatCurrency(reserved)}) أكبر من الراتب (${Utils.formatCurrency(salary)})`,
-                        icon: 'fa-exclamation-triangle',
-                        available: available,
-                        reserved: reserved,
-                        paid: paid,
-                        salary: salary,
-                        details: {
-                            salary: salary,
-                            reserved: reserved,
-                            paid: paid,
-                            difference: reserved - salary
-                        }
-                    };
+                    return { status: 'commitments_exceed_income', message: `⚠️ إجمالي الالتزامات (${Utils.formatCurrency(reserved)}) أكبر من الراتب (${Utils.formatCurrency(salary)})`,
+                        icon: 'fa-exclamation-triangle', available: available, reserved: reserved, paid: paid,
+                        salary: salary, details: { salary: salary, reserved: reserved, paid: paid,
+                            difference: reserved - salary } };
                 }
-                
                 if (available < 0) {
-                    return {
-                        status: 'overspent',
-                        message: `⚠️ لقد تجاوزت ميزانيتك الحالية بمقدار ${Utils.formatCurrency(Math.abs(available))}`,
-                        icon: 'fa-exclamation-circle',
-                        available: available,
-                        reserved: reserved,
-                        paid: paid,
-                        salary: salary,
-                        details: {
-                            salary: salary,
-                            reserved: reserved,
-                            paid: paid,
-                            difference: Math.abs(available)
-                        }
-                    };
+                    return { status: 'overspent', message: `⚠️ لقد تجاوزت ميزانيتك الحالية بمقدار ${Utils.formatCurrency(Math.abs(available))}`,
+                        icon: 'fa-exclamation-circle', available: available, reserved: reserved, paid: paid,
+                        salary: salary, details: { salary: salary, reserved: reserved, paid: paid,
+                            difference: Math.abs(available) } };
                 }
-                
-                return {
-                    status: 'healthy',
-                    message: null,
-                    icon: 'fa-check-circle',
-                    available: available,
-                    reserved: reserved,
-                    paid: paid,
-                    salary: salary,
-                    details: {
-                        salary: salary,
-                        reserved: reserved,
-                        paid: paid,
-                        difference: null
-                    }
-                };
+                return { status: 'healthy', message: null, icon: 'fa-check-circle', available: available,
+                    reserved: reserved, paid: paid, salary: salary, details: { salary: salary,
+                        reserved: reserved, paid: paid, difference: null } };
             },
 
-            // ---- Budget Items CRUD ----
             addBudgetItem(data) {
                 const items = this.getBudgetItems();
                 const item = {
@@ -2666,11 +2801,84 @@
             syncBudgetItemsSpent() {
                 const items = this.getBudgetItems();
                 const monthExp = this.getMonthExpenses();
+                // Reset spent to 0 before recalculating
                 items.forEach(item => {
-                    const spent = this.getCategoryTotal(monthExp, item.category);
-                    item.spent = spent;
+                    item.spent = 0;
+                });
+                // Calculate spent per category from expenses
+                const catMap = {};
+                monthExp.forEach(e => {
+                    const cat = e.category || 'أخرى';
+                    catMap[cat] = (catMap[cat] || 0) + (parseFloat(e.amount) || 0);
+                });
+                items.forEach(item => {
+                    item.spent = catMap[item.category] || 0;
                 });
                 Storage.setBudgetItems(items);
+            },
+
+            // ===== BUDGET OVERRIDE SYSTEM =====
+            // Find surplus from categories that have extra budget
+            findSurplusCategories(excludeCategory) {
+                const items = this.getBudgetItems();
+                const result = [];
+                items.forEach(item => {
+                    if (item.category === excludeCategory) return;
+                    const remaining = item.budget - item.spent;
+                    if (remaining > 0 && item.budget > 0) {
+                        result.push({
+                            category: item.category,
+                            surplus: remaining,
+                            budget: item.budget,
+                            spent: item.spent
+                        });
+                    }
+                });
+                // Sort by surplus descending
+                result.sort((a, b) => b.surplus - a.surplus);
+                return result;
+            },
+
+            // Transfer amount from sourceCategory to targetCategory
+            transferBudget(sourceCategory, targetCategory, amount) {
+                const items = this.getBudgetItems();
+                const source = items.find(i => i.category === sourceCategory);
+                const target = items.find(i => i.category === targetCategory);
+                if (!source || !target) return false;
+                const availableSurplus = source.budget - source.spent;
+                if (availableSurplus < amount) return false;
+                // Adjust budgets
+                source.budget = source.budget - amount;
+                target.budget = target.budget + amount;
+                // Update timestamps
+                source.updatedAt = new Date().toISOString();
+                target.updatedAt = new Date().toISOString();
+                Storage.setBudgetItems(items);
+                this.refreshAll();
+                return true;
+            },
+
+            // Check if a category is over budget
+            isCategoryOverBudget(category) {
+                const items = this.getBudgetItems();
+                const item = items.find(i => i.category === category);
+                if (!item) return false;
+                return item.spent > item.budget && item.budget > 0;
+            },
+
+            getCategoryStatus(category) {
+                const items = this.getBudgetItems();
+                const item = items.find(i => i.category === category);
+                if (!item) return null;
+                const remaining = item.budget - item.spent;
+                return {
+                    category: category,
+                    budget: item.budget,
+                    spent: item.spent,
+                    remaining: remaining,
+                    isOver: remaining < 0,
+                    isReserved: item.isReserved || false
+                };
             },
 
             refreshAll() {
@@ -2775,7 +2983,7 @@
         }
 
         // ============================================================
-        // 5. INCOME, COMMITMENT, INDICATOR, etc.
+        // 5. INCOME, COMMITMENT, INDICATOR, etc. (unchanged)
         // ============================================================
 
         const IncomeAnalysisEngine = {
@@ -2830,9 +3038,6 @@
             }
         };
 
-        // ============================================================
-        // 6. UPDATED INDICATOR ENGINE (using new FinancialEngine)
-        // ============================================================
         const IndicatorEngine = {
             calculate(income, commitments, expenses, settings) {
                 const available = FinancialEngine.calculateAvailableBudget();
@@ -2845,7 +3050,6 @@
                 const salary = FinancialEngine.getSalary();
                 const daysUntilSalary = FinancialEngine.getRemainingDaysUntilSalary();
                 const remainingDays = FinancialEngine.getRemainingDays();
-                
                 const savingsGoal = parseFloat(settings.savingsGoal) || 0;
                 const savingsRate = salary > 0 ? ((available || 0) / salary) * 100 : 0;
                 const debtRatio = salary > 0 ? (commitments.loans / salary) * 100 : 0;
@@ -2941,7 +3145,6 @@
             }
         };
 
-        // Behavior Profiling Engine
         const BehaviorProfilingEngine = {
             analyze(expenses, indicators) {
                 const result = {
@@ -2967,11 +3170,9 @@
                     const date = new Date(e.date);
                     const hour = date.getHours();
                     const day = date.getDay();
-                    // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
                     const dayNames = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
                     const dayName = dayNames[day];
                     result.spendingByDay[dayName] = (result.spendingByDay[dayName] || 0) + e.amount;
-                    
                     if (hour >= 22 || hour < 6) result.nightSpending += e.amount;
                     else if (hour >= 6 && hour < 12) result.morningSpending += e.amount;
                     if (day === 5 || day === 6) result.weekendSpending += e.amount;
@@ -2986,12 +3187,9 @@
                 }
                 result.topMerchants = Object.entries(result.topMerchants).sort((a, b) => b[1] - a[1]).slice(0, 5);
                 result.topCategories = Object.entries(result.topCategories).sort((a, b) => b[1] - a[1]).slice(0, 5);
-                
-                // Sort spending by day
                 const sortedDays = Object.entries(result.spendingByDay).sort((a, b) => b[1] - a[1]);
                 result.highestSpendingDays = sortedDays.slice(0, 3).map(d => d[0]);
                 result.lowestSpendingDays = sortedDays.slice(-3).map(d => d[0]);
-                
                 const savingsRate = indicators.savingsRate || 0;
                 const stress = indicators.financialStressIndex || 0;
                 const lifestyle = indicators.lifestyleRatio || 0;
@@ -3010,7 +3208,6 @@
             }
         };
 
-        // FinancialPlanEngine
         const FinancialPlanEngine = {
             build(income, indicators, commitments, behavior, settings) {
                 const salary = income.totalIncome;
@@ -3073,9 +3270,6 @@
             }
         };
 
-        // ============================================================
-        // 7. UPDATED FORECAST ENGINE
-        // ============================================================
         const ForecastEngine = {
             forecast(indicators, plan, expenses) {
                 const available = indicators.availableBudget;
@@ -3126,7 +3320,6 @@
             }
         };
 
-        // ScenarioEngine
         const ScenarioEngine = {
             simulate(scenarioName, params, context) {
                 const { indicators, plan, forecast } = context;
@@ -3175,15 +3368,11 @@
             }
         };
 
-        // ============================================================
-        // 8. UPDATED RECOMMENDATION ENGINE
-        // ============================================================
         const RecommendationEngine = {
             generate(indicators, commitments, behavior, plan, forecast) {
                 const recs = [];
                 const available = indicators.availableBudget;
                 const salary = indicators.salary || 0;
-                
                 if (salary <= 0) {
                     recs.push({
                         action: 'أدخل راتبك الشهري',
@@ -3196,7 +3385,6 @@
                     });
                     return recs;
                 }
-
                 if (available !== null && available < 0) {
                     recs.push({
                         action: 'خفض الإنفاق لتجاوز العجز',
@@ -3208,7 +3396,6 @@
                         category: 'عام'
                     });
                 }
-
                 if (indicators.savingsRate < 10 && available !== null && available > 0) {
                     recs.push({
                         action: 'زيادة الادخار الشهري',
@@ -3295,7 +3482,6 @@
             }
         };
 
-        // PriorityEngine
         const PriorityEngine = {
             assign(commitments, indicators) {
                 const priorities = {};
@@ -3318,9 +3504,6 @@
             }
         };
 
-        // ============================================================
-        // 9. UPDATED FINANCIAL CONTEXT BUILDER
-        // ============================================================
         const FinancialContextBuilder = {
             build() {
                 const expenses = FinancialEngine.getMonthExpenses();
@@ -3390,7 +3573,7 @@
         };
 
         // ============================================================
-        // 10. EXPENSE PARSER
+        // 6. EXPENSE PARSER - ENHANCED SMART CLASSIFIER
         // ============================================================
         const ExpenseParser = {
             parse(text) {
@@ -3452,29 +3635,68 @@
                                 .today() });
                     }
                 }
+                // ===== ENHANCED SMART CLASSIFIER =====
                 const categories = Utils.defaultCategories();
                 result.transactions = result.transactions.map(t => {
-                    let category = 'أخرى';
                     const desc = (t.description || '').toLowerCase();
-                    for (const cat of categories) {
-                        if (desc.includes(cat) || t.merchant?.toLowerCase().includes(cat)) { category = cat; break; }
+                    const merchant = (t.merchant || '').toLowerCase();
+                    const fullText = desc + ' ' + merchant;
+
+                    // ---- NEW: Detailed pattern matching ----
+                    // Car & Vehicle
+                    if (/(زيت مكينة|زيت محرك|مكينة|سيارة|بنزين|بترول|ديزل|زيت قير|فرامل|بطارية|كفرات|إطارات|صيانة سيارة|تغيير زيت|فحص دوري|تشحيم|ورشة|ميكانيكي|كهربائي سيارة|تلميع سيارة|غسيل سيارة|موتر|جمس|لكزس|تويوتا|نيسان|هوندا|مرسيدس|بي ام دبليو|فورد|شفروليه|هيونداي|كيا|مازدا)/i.test(fullText)) {
+                        return { ...t, category: 'السيارة' };
                     }
-                    if (category === 'أخرى') {
-                        if (desc.includes('قهوة') || desc.includes('كافيه')) category = 'المقاهي';
-                        else if (desc.includes('مطعم') || desc.includes('وجبة')) category = 'المطاعم';
-                        else if (desc.includes('بنزين') || desc.includes('بترول')) category = 'البنزين';
-                        else if (desc.includes('كهرباء')) category = 'الكهرباء';
-                        else if (desc.includes('ماء')) category = 'الماء';
-                        else if (desc.includes('نت') || desc.includes('إنترنت')) category = 'الإنترنت';
-                        else if (desc.includes('إيجار')) category = 'الإيجار';
-                        else if (desc.includes('قسط')) category = 'الأقساط';
-                        else if (desc.includes('صحي') || desc.includes('دواء')) category = 'الصحة';
-                        else if (desc.includes('ترفيه')) category = 'الترفيه';
-                        else if (desc.includes('تسوق')) category = 'التسوق';
-                        else if (desc.includes('تعليم') || desc.includes('دورة')) category = 'التعليم';
-                        else if (desc.includes('سيارة') || desc.includes('صيانة')) category = 'السيارة';
+                    // Restaurants & Food Outlets
+                    if (/(مطعم|وجبة|وجبات|فطور|عشاء|غداء|سناك|برجر|شاورما|بيتزا|باستا|مشاوي|مندي|كبسة|برياني|مقلوبة|صينية|مأكولات|أكل|اكل|طعام|ماكدونالدز|هرفي|كودو|البرجر|الشاورما|بيتزا هت|دومينوز|كنتاكي|كنتاكي|هارديز|ون تو ثري|تاون|جلسة|كافيه|مقهى|كوفي|قهوة|شاي|نسكافيه|كابتشينو|لاتيه|موكا|اسبريسو|قهوة سعودية|شاهي|نعناع)/i.test(fullText)) {
+                        return { ...t, category: 'المطاعم' };
                     }
-                    return { ...t, category };
+                    // Groceries & Supermarkets
+                    if (/(بقالة|سوبرماركت|تموين|مواد غذائية|خضار|فواكه|لحم|دجاج|سمك|بيض|حليب|جبن|زبادي|خبز|رز|سكر|زيت|طحين|شعيرية|مكرونة|بقوليات|توابل|بهارات|معلبات|عصائر|مياه|تمر|عسل|بنده|كارفور|تميم|دانوب|أسواق|نوري|المزرعة|العثيم|الدانوب|السدحان|أسواق المزرعة|لولو|هيبر|سبينس|السويلم)/i.test(fullText)) {
+                        return { ...t, category: 'المواد الغذائية' };
+                    }
+                    // Beverages & Drinks (if not caught by food)
+                    if (/(بيبسي|كوكاكولا|سفن اب|مشروب غازي|مشروب|عصير|شاي|قهوة|نسكافيه|كابتشينو|موكا|لاتيه|اسبريسو|عصير برتقال|عصير تفاح|مياه غازية|مياه معدنية|ريد بول|ستاربكس|دانكن|بارنيز|كافيه|مقهى)/i.test(fullText)) {
+                        return { ...t, category: 'المواد الغذائية' };
+                    }
+                    // Bills & Utilities
+                    if (/(كهرباء|ماء|إنترنت|جوال|فواتير|فاتورة|سداد|خدمات|صيانة|نت|واي فاي|آيس|موبايلي|زين|سوا|جوي|سكاي|ألياف|بصري|كهرب|مياه|الصرف الصحي)/i.test(fullText)) {
+                        return { ...t, category: 'الكهرباء' };
+                    }
+                    // Rent & Housing
+                    if (/(إيجار|سكن|شقة|منزل|فيلا|دفعة|عقار|مكتب|محل|سكني|استئجار|الإيجار|البيت|المنزل)/i.test(fullText)) {
+                        return { ...t, category: 'الإيجار' };
+                    }
+                    // Education
+                    if (/(تعليم|مدرسة|جامعة|كلية|دورة|منصة|تدريب|كتاب|قرطاسية|مكتبة|معلم|منهج|دراسة|اختبار|رسوم دراسية|رسوم جامعة|أكاديمية|معرفة|تعلم|مقرر)/i.test(fullText)) {
+                        return { ...t, category: 'التعليم' };
+                    }
+                    // Health
+                    if (/(صحي|صحة|مستشفى|عيادة|طبيب|دواء|صيدلية|كشف|علاج|أسنان|عيون|جراحة|فحص|مختبر|أشعة|تطعيم|لقاح|إسعاف|طوارئ|مستوصف|مركز صحي|رعاية|تأمين صحي)/i.test(fullText)) {
+                        return { ...t, category: 'الصحة' };
+                    }
+                    // Entertainment
+                    if (/(ترفيه|سينما|مسرح|حفلة|فعالية|مهرجان|مدينة ألعاب|بولينج|بلياردو|ألعاب|فيديو|بلاي ستيشن|نتفلكس|شاهد|أمازون برايم|يوتيوب بريميوم|سبوتيفاي|أنغامي|تكت|تذاكر|فعاليات|مؤتمر|معرض|متعة|تسلية)/i.test(fullText)) {
+                        return { ...t, category: 'الترفيه' };
+                    }
+                    // Shopping (clothing, electronics, etc.)
+                    if (/(تسوق|ملابس|أحذية|شنط|مكياج|عطور|إلكترونيات|جوال|لابتوب|تابلت|سماعة|ساعة|هدايا|مجوهرات|إكسسوارات|أثاث|منزل|مطبخ|حمام|ديكور|تحف|سجاد|ستائر|أجهزة|كهربائيات|تلفزيون|ثلاجة|غسالة|مكيف|فرن|ميكروويف|خلاط|مفرمة|غسالة صحون|نشافة|مكنسة)/i.test(fullText)) {
+                        return { ...t, category: 'التسوق' };
+                    }
+                    // Installments & Loans
+                    if (/(قسط|قرض|دين|سداد|تمويل|مرابحة|تقسيط|سيارة|عقار|رهن|ضمان|كفالة|بنك|مصرف|أقساط|التزام|التزامات)/i.test(fullText)) {
+                        return { ...t, category: 'الأقساط' };
+                    }
+                    // Fuel (if not caught by car)
+                    if (/(بنزين|بترول|ديزل|وقود|محطة وقود|بترومين|الدريس|الوقود|تعبئة|تموين)/i.test(fullText)) {
+                        return { ...t, category: 'البنزين' };
+                    }
+                    // Coffee shops (if not caught by restaurants)
+                    if (/(كافيه|مقهى|كوفي|قهوة|شاي|نسكافيه|كابتشينو|لاتيه|موكا|اسبريسو|ستاربكس|دانكن|بارنيز|كافيه|مقهى)/i.test(fullText)) {
+                        return { ...t, category: 'المقاهي' };
+                    }
+                    // Default fallback
+                    return { ...t, category: 'أخرى' };
                 });
                 return result;
             },
@@ -3494,7 +3716,7 @@
         };
 
         // ============================================================
-        // 11. GEMINI (updated context + coach + next month plan)
+        // 7. GEMINI (unchanged)
         // ============================================================
         const Gemini = {
             getKeys() { return Storage.getGeminiKeys(); },
@@ -3551,7 +3773,6 @@
 
             buildContextString: function(context) {
                 if (!context) return 'لا توجد بيانات مالية متوفرة.';
-                
                 const f = context.indicators || {};
                 const income = context.income || {};
                 const plan = context.plan || {};
@@ -3574,7 +3795,6 @@
                 const daysUntilSalary = FinancialEngine.getRemainingDaysUntilSalary();
                 const savingsGoal = FinancialEngine.getSavingsGoal();
 
-                // Calculate average spending over last 6 months by category
                 const catMap6Months = {};
                 last6Months.forEach(e => {
                     const cat = e.category || 'أخرى';
@@ -3587,7 +3807,6 @@
                 }
 
                 let str = '--- البيانات المالية الحقيقية ---\n';
-                
                 if (status.status === 'no_income') {
                     str += '⚠️ لم يتم إدخال دخل بعد. يرجى إدخال الراتب الشهري لتفعيل جميع الحسابات المالية.\n\n';
                     return str;
@@ -3674,7 +3893,6 @@
                     }
                 }
 
-                // Add info about next month
                 const nextMonthName = Utils.getNextMonthName();
                 const daysInNextMonth = Utils.getDaysInNextMonth();
                 str += `\n--- معلومات الشهر القادم ---\n`;
@@ -3686,11 +3904,7 @@
 
             async generateCoachPlan(context, isNextMonth) {
                 const contextStr = this.buildContextString(context);
-                
                 if (isNextMonth) {
-                    // ============================================================
-                    // خطة الشهر القادم - محرك بناء الخطة من الصفر
-                    // ============================================================
                     const prompt = `أنت مدرب مالي شخصي خبير. قم ببناء خطة مالية كاملة للشهر القادم من الصفر.
 
                     ${contextStr}
@@ -3788,28 +4002,14 @@
                         return this.generateFallbackNextMonthPlan(context);
                     }
                 } else {
-                    // ============================================================
-                    // الخطة الحالية - تبقى كما هي
-                    // ============================================================
-                    const prompt = `أنت مدرب مالي شخصي خبير. قم ببناء خطة مالية ${isNextMonth ? 'للشهر القادم' : 'حالية'} بناءً على البيانات التالية.
+                    const prompt = `أنت مدرب مالي شخصي خبير. قم ببناء خطة مالية حالية بناءً على البيانات التالية.
 
                     ${contextStr}
 
-                    ${isNextMonth ? `
-                    **تعليمات خطة الشهر القادم:**
-                    - هذه خطة مستقبلية بالكامل (محاكاة).
-                    - استخدم الراتب المتوقع وتاريخ نزول الراتب القادم.
-                    - استخدم الالتزامات القادمة والفواتير والاشتراكات والأقساط.
-                    - استخدم الأموال المحجوزة وأهداف الادخار.
-                    - استخدم متوسط الصرف خلال آخر 3 أشهر والسلوك المالي.
-                    - ضع في اعتبارك المواسم (رمضان، العيد، المدارس...).
-                    - احسب الالتزامات التي تنتهي أو تبدأ الشهر القادم.
-                    ` : `
                     **تعليمات الخطة الحالية:**
                     - هذه خطة للشهر الحالي بناءً على البيانات الفعلية.
                     - استخدم الميزانية المتاحة والمصروفات الفعلية.
                     - قدم توصيات فورية قابلة للتنفيذ.
-                    `}
 
                     أجب باللغة العربية الفصحى بتنسيق JSON صالح فقط، بدون أي نص إضافي، باستخدام الهيكل التالي:
 
@@ -3934,7 +4134,6 @@
                 const daysInNextMonth = Utils.getDaysInNextMonth();
                 const monthName = Utils.getNextMonthName();
 
-                // Calculate net living budget
                 const fixed = commitments.fixed || 0;
                 const bills = commitments.bills || 0;
                 const loans = commitments.loans || 0;
@@ -3942,12 +4141,10 @@
                 const netLivingBudget = salary - totalCommitments - savingsGoal - reserved;
                 const dailyBudget = daysInNextMonth > 0 ? netLivingBudget / daysInNextMonth : 0;
 
-                // Weekly budget based on spending habits
                 const highestDays = behavior.highestSpendingDays || ['الخميس', 'الجمعة'];
                 const isWeekendHigh = highestDays.includes('الجمعة') || highestDays.includes('السبت');
                 const weeklyBudget = isWeekendHigh ? dailyBudget * 8 : dailyBudget * 7;
 
-                // Smart distribution based on user history
                 const catMap = {};
                 const last6Months = context.last6Months || [];
                 last6Months.forEach(e => {
@@ -3974,7 +4171,6 @@
                     });
                 });
 
-                // Add emergency fund
                 const emergencyAmount = Math.round(remainingBudget * 0.08);
                 distribution.push({
                     category: 'الطوارئ',
@@ -3982,18 +4178,15 @@
                     reason: 'صندوق طوارئ للاستخدامات غير المتوقعة'
                 });
 
-                // Savings plan
                 const weeklySavings = savingsGoal / 4;
                 const dailySavings = savingsGoal / daysInNextMonth;
 
-                // Reduction plan
                 const reductionPlan = [
                     { category: 'المطاعم', reduction: 20, reason: 'أكبر تصنيف يمكن تقليله حسب تاريخك' },
                     { category: 'المقاهي', reduction: 15, reason: 'ثاني أكبر تصنيف للترفيه' },
                     { category: 'الترفيه', reduction: 10, reason: 'يمكن تقليله أسبوعياً' }
                 ];
 
-                // Timeline
                 const timeline = [
                     { week: 1, actions: ['تحديد ميزانية الأسبوع وعدم تجاوزها', 'مراجعة جميع الاشتراكات وإلغاء غير الضرورية', 'تخصيص مبلغ الادخار الأسبوعي'] },
                     { week: 2, actions: ['التقيد بميزانية اليوم', 'تقييم الأسبوع الأول وتعديل الخطة', 'تخفيض المشتريات غير الضرورية'] },
@@ -4001,7 +4194,6 @@
                     { week: 4, actions: ['تقييم الخطة الشهرية', 'تحديد أهداف الشهر القادم', 'تحويل الادخار المتبقي لحساب التوفير'] }
                 ];
 
-                // Priorities
                 const priorities = [
                     'الادخار الشهري',
                     'سداد الالتزامات الثابتة',
@@ -4009,14 +4201,12 @@
                     'بناء صندوق الطوارئ'
                 ];
 
-                // Scenarios
                 const scenarios = [
                     { title: 'إذا التزمت بالخطة', impact: `ستحقق هدف الادخار (${Utils.formatCurrency(savingsGoal)}) مع بقاء ${Utils.formatCurrency(netLivingBudget * 0.05)} احتياطي`, type: 'positive' },
                     { title: 'إذا تجاوزت الميزانية اليومية', impact: `سينتهي الشهر بعجز قدره ${Utils.formatCurrency(dailyBudget * 5)}`, type: 'negative' },
                     { title: 'إذا خفضت المطاعم 20%', impact: `ستوفر ${Utils.formatCurrency((distribution.find(d => d.category === 'المطاعم')?.amount || 0) * 0.2)} إضافية`, type: 'positive' }
                 ];
 
-                // Report
                 const report = `بعد تحليل آخر 6 أشهر، تبين أن أكبر سبب لاستنزاف ميزانيتك هو ${topCats[0]?.[0] || 'التصنيفات غير المحددة'}. الخطة المقترحة للشهر القادم (${monthName}) تركز على تحسين توزيع الميزانية وتقليل المصروفات الكمالية. إذا التزمت بالخطة، ستتمكن من تحقيق هدف الادخار بالكامل مع بناء احتياطي للطوارئ.`;
 
                 return {
@@ -4095,6 +4285,7 @@
                 - set_daily_budget (amount)
                 - set_weekly_budget (amount)
                 - set_monthly_budget (amount)
+                - transfer_budget (sourceCategory, targetCategory, amount)  // NEW
 
                 ${query.includes('حل') || query.includes('ساعدني') || query.includes('وش أسوي') ? '**هام:** المستخدم يطلب حلاً، استخدم هيكل الحلول.' : 'قدم إجابة مباشرة ومفيدة.'}
 
@@ -4295,7 +4486,7 @@
         };
 
         // ============================================================
-        // 12. COMMAND EXECUTOR
+        // 8. COMMAND EXECUTOR (updated with transfer_budget)
         // ============================================================
         const Commands = {
             extract(text) {
@@ -4383,6 +4574,19 @@
                                 log.push('📊 تم تحديث ميزانية الشهر إلى ' + Utils.formatCurrency(a.amount));
                                 break;
                             }
+                            case 'transfer_budget': {
+                                const success = FinancialEngine.transferBudget(
+                                    a.sourceCategory,
+                                    a.targetCategory,
+                                    parseFloat(a.amount) || 0
+                                );
+                                if (success) {
+                                    log.push(`🔄 تم نقل ${Utils.formatCurrency(a.amount)} من "${a.sourceCategory}" إلى "${a.targetCategory}"`);
+                                } else {
+                                    log.push(`⚠️ فشل نقل المبلغ. تأكد من وجود فائض كافٍ في "${a.sourceCategory}"`);
+                                }
+                                break;
+                            }
                             case 'add_travel_expense': { const e = Budget.addTravelExpense({ amount: a.amount,
                                     description: a.description || 'مصروف سفر', category: a.category || 'أخرى',
                                     date: a.date || Utils.today(), notes: a.notes || '' });
@@ -4407,7 +4611,7 @@
         };
 
         // ============================================================
-        // 13. CHARTS
+        // 9. CHARTS (unchanged)
         // ============================================================
         const Charts = {
             drawBar(ctx, labels, data, colors, label) {
@@ -4520,7 +4724,7 @@
         }
 
         // ============================================================
-        // 14. BUDGET (CRUD - using FinancialEngine)
+        // 10. BUDGET (CRUD - using FinancialEngine)
         // ============================================================
         const Budget = {
             getExpenses() { return Storage.getExpenses(); },
@@ -4549,6 +4753,15 @@
                 };
                 exp.push(entry);
                 this.saveExpenses(exp);
+                
+                // Check if category is over budget and trigger override
+                const category = entry.category;
+                if (FinancialEngine.isCategoryOverBudget(category)) {
+                    setTimeout(() => {
+                        UI.showBudgetOverride(category);
+                    }, 300);
+                }
+                
                 return entry;
             },
             deleteExpense(id) { let exp = this.getExpenses();
@@ -4571,7 +4784,6 @@
                 expenses.forEach(e => { const m = e.date.substring(0, 7);
                     map[m] = (map[m] || 0) + (parseFloat(e.amount) || 0); }); return map; },
             
-            // Updated methods using FinancialEngine
             calculateReservedMoney() { return FinancialEngine.calculateReservedMoney(); },
             calculateAvailableBudget() { return FinancialEngine.calculateAvailableBudget(); },
             getRemaining() {
@@ -4650,11 +4862,13 @@
         };
 
         // ============================================================
-        // 15. UI (updated with new pages and fixed modals)
+        // 11. UI (updated with Budget Override)
         // ============================================================
         const UI = {
             chatMessages: null,
             financialContext: null,
+            selectedPreset: null,
+            overrideData: null,
 
             init() {
                 migrateToBudgetItems();
@@ -4679,6 +4893,8 @@
                 this.setupBudgetItems();
                 this.setupResetApp();
                 this.setupCoach();
+                this.setupIncomePage();
+                this.setupBudgetOverride();
                 this.renderAll();
                 WorldTime.init().then(() => { this.setupDate();
                     this.renderAll(); });
@@ -4693,7 +4909,7 @@
                         const status = ctx.financialStatus || {};
                         
                         if (status.status === 'no_income') {
-                            welcome += `📊 يرجى إدخال راتبك الشهري من خلال صفحة الإعدادات لتفعيل جميع الحسابات المالية.`;
+                            welcome += `📊 يرجى إدخال راتبك الشهري من خلال صفحة "الدخل والأهداف" لتفعيل جميع الحسابات المالية.`;
                         } else if (health >= 70) {
                             welcome += `✅ وضعك المالي ممتاز (${health}/100). المتبقي ${remaining !== null ? Utils.formatCurrency(remaining) : '—'}. استمر!`;
                         } else if (health >= 50) {
@@ -4731,6 +4947,7 @@
                 this.renderTravel();
                 this.renderTemp();
                 this.renderCoach(ctx);
+                this.renderIncomePage();
                 this.updateCategoryFilters();
             },
 
@@ -4748,7 +4965,6 @@
                 this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
             },
 
-            // --- Helpers for modals ---
             openModal(id) {
                 const modal = Utils.id(id);
                 if (modal) modal.classList.add('open');
@@ -4800,11 +5016,12 @@
                 const links = Utils.qsa('.nav-link');
                 const pages = { dashboard: Utils.id('page-dashboard'), expenses: Utils.id('page-expenses'),
                     budget: Utils.id('page-budget'), coach: Utils.id('page-coach'), reports: Utils.id('page-reports'), 
-                    analytics: Utils.id('page-analytics'), settings: Utils.id('page-settings'), 
-                    travel: Utils.id('page-travel'), temp: Utils.id('page-temp'), chat: Utils.id('page-chat') };
+                    analytics: Utils.id('page-analytics'), income: Utils.id('page-income'),
+                    settings: Utils.id('page-settings'), travel: Utils.id('page-travel'), temp: Utils.id('page-temp'),
+                    chat: Utils.id('page-chat') };
                 const titles = { dashboard: 'الرئيسية', expenses: 'المصروفات', budget: 'الميزانية',
-                    coach: 'المدرب المالي', reports: 'التقارير', analytics: 'التحليلات', settings: 'الإعدادات', 
-                    travel: 'ميزانية السفر', temp: 'ميزانية مؤقتة', chat: 'المستشار المالي' };
+                    coach: 'المدرب المالي', reports: 'التقارير', analytics: 'التحليلات', income: 'الدخل والأهداف',
+                    settings: 'الإعدادات', travel: 'ميزانية السفر', temp: 'ميزانية مؤقتة', chat: 'المستشار المالي' };
                 links.forEach(link => {
                     Utils.on(link, 'click', (e) => {
                         e.preventDefault();
@@ -4822,6 +5039,7 @@
                         if (page === 'expenses') { this.renderExpenses();
                             this.updateCategoryFilters(); }
                         if (page === 'budget') this.renderBudgetItems();
+                        if (page === 'income') this.renderIncomePage();
                         if (page === 'travel') this.renderTravel();
                         if (page === 'temp') this.renderTemp();
                         if (page === 'chat') { setTimeout(() => Utils.id('chatInput').focus(), 200); }
@@ -5102,24 +5320,20 @@
 
             setupSettings() {
                 const form = Utils.id('settingsForm');
-                const salaryInput = Utils.id('settingsSalary');
                 const dateInput = Utils.id('settingsSalaryDate');
-                const goalInput = Utils.id('settingsSavingsGoal');
 
                 const loadSettings = () => {
                     const s = Storage.getSettings();
-                    salaryInput.value = s.salary || '';
                     dateInput.value = s.salaryDate || Utils.today();
-                    goalInput.value = s.savingsGoal || '';
                 };
                 loadSettings();
 
                 Utils.on(form, 'submit', (e) => {
                     e.preventDefault();
                     const settings = {
-                        salary: parseFloat(salaryInput.value) || 0,
+                        salary: Storage.getSettings().salary || 0,
                         salaryDate: dateInput.value || Utils.today(),
-                        savingsGoal: parseFloat(goalInput.value) || 0
+                        savingsGoal: Storage.getSettings().savingsGoal || 0
                     };
                     Storage.setSettings(settings);
                     FinancialEngine.refreshAll();
@@ -5398,7 +5612,6 @@
                 }
             },
 
-            // ===== COACH SETUP =====
             setupCoach() {
                 const tabs = Utils.qsa('.coach-tab');
                 tabs.forEach(tab => {
@@ -5414,25 +5627,118 @@
                 });
             },
 
+            // ===== BUDGET OVERRIDE SYSTEM =====
+            setupBudgetOverride() {
+                const modalId = 'budgetOverrideModal';
+                this.setupModalClose(modalId, 'closeOverrideModal', 'cancelOverrideBtn');
+                
+                const confirmBtn = Utils.id('confirmOverrideBtn');
+                Utils.on(confirmBtn, 'click', () => {
+                    if (!this.overrideData) return;
+                    const selected = document.querySelector('.override-option.selected');
+                    if (!selected) {
+                        alert('الرجاء اختيار فئة لنقل الفائض منها');
+                        return;
+                    }
+                    const sourceCategory = selected.dataset.category;
+                    const amount = parseFloat(selected.dataset.amount);
+                    const targetCategory = this.overrideData.targetCategory;
+                    
+                    const success = FinancialEngine.transferBudget(sourceCategory, targetCategory, amount);
+                    if (success) {
+                        this.closeModal(modalId);
+                        this.renderAll();
+                        this.addChatMessage(`✅ تم نقل ${Utils.formatCurrency(amount)} من "${sourceCategory}" إلى "${targetCategory}" بنجاح.`, 'system');
+                    } else {
+                        alert('فشل نقل المبلغ. تأكد من وجود فائض كافٍ في الفئة المصدر.');
+                    }
+                    this.overrideData = null;
+                });
+            },
+
+            showBudgetOverride(category) {
+                const status = FinancialEngine.getCategoryStatus(category);
+                if (!status || !status.isOver) return;
+                
+                // Find surplus categories
+                const surplus = FinancialEngine.findSurplusCategories(category);
+                if (surplus.length === 0) {
+                    this.addChatMessage(`⚠️ لقد تجاوزت ميزانية "${category}" بمقدار ${Utils.formatCurrency(Math.abs(status.remaining))}، ولا توجد فئات أخرى بها فائض لتغطية النقص.`, 'assistant');
+                    return;
+                }
+
+                const deficit = Math.abs(status.remaining);
+                this.overrideData = {
+                    targetCategory: category,
+                    deficit: deficit,
+                    surplus: surplus
+                };
+
+                const modal = Utils.id('budgetOverrideModal');
+                const message = Utils.id('overrideMessage');
+                const optionsDiv = Utils.id('overrideOptions');
+                const summaryDiv = Utils.id('overrideSummary');
+
+                message.innerHTML = `
+                    <strong>⚠️ تجاوز الميزانية</strong><br>
+                    لقد تجاوزت ميزانية "<strong>${category}</strong>" بمقدار <strong>${Utils.formatCurrency(deficit)}</strong>.
+                    <br>المتبقي الحالي: <strong style="color:var(--danger);">${Utils.formatCurrency(status.remaining)}</strong>
+                    <br><br>اختر فئة لنقل الفائض منها لتغطية النقص:
+                `;
+
+                optionsDiv.innerHTML = surplus.map(s => {
+                    const canCover = s.surplus >= deficit;
+                    const amount = canCover ? deficit : s.surplus;
+                    return `<div class="override-option" data-category="${s.category}" data-amount="${amount}">
+                        <div>
+                            <div class="option-label">📌 ${s.category}</div>
+                            <div class="option-from">الميزانية: ${Utils.formatCurrency(s.budget)} | الصرف: ${Utils.formatCurrency(s.spent)}</div>
+                        </div>
+                        <div class="option-amount">${Utils.formatCurrency(amount)} ${canCover ? '✅' : '⚠️ جزئي'}</div>
+                    </div>`;
+                }).join('');
+
+                // Select first option by default
+                const firstOption = optionsDiv.querySelector('.override-option');
+                if (firstOption) firstOption.classList.add('selected');
+
+                // Click to select
+                optionsDiv.querySelectorAll('.override-option').forEach(opt => {
+                    Utils.on(opt, 'click', () => {
+                        optionsDiv.querySelectorAll('.override-option').forEach(o => o.classList.remove('selected'));
+                        opt.classList.add('selected');
+                        // Update summary
+                        const amount = parseFloat(opt.dataset.amount);
+                        const source = opt.dataset.category;
+                        summaryDiv.innerHTML = `
+                            <div class="summary-row"><span class="label">📤 من</span><span class="value">${source}</span></div>
+                            <div class="summary-row"><span class="label">📥 إلى</span><span class="value">${category}</span></div>
+                            <div class="summary-row"><span class="label">💰 المبلغ</span><span class="value positive">${Utils.formatCurrency(amount)}</span></div>
+                            <div class="summary-row"><span class="label">📊 المتبقي بعد النقل (${source})</span><span class="value">${Utils.formatCurrency(parseFloat(opt.dataset.amount) - amount)}</span></div>
+                        `;
+                    });
+                });
+
+                // Trigger first selection
+                if (firstOption) firstOption.click();
+
+                this.openModal('budgetOverrideModal');
+            },
+
             // ===== RENDER METHODS =====
 
             renderCoach: async function(ctx) {
                 ctx = ctx || this.getContext();
                 const currentPanel = Utils.id('coach-current');
                 const nextPanel = Utils.id('coach-next');
-                
-                // Check if coach page is active
                 const coachPage = Utils.id('page-coach');
                 if (!coachPage || !coachPage.classList.contains('active')) return;
 
                 try {
-                    // Render current plan
                     const currentPlan = await Gemini.generateCoachPlan(ctx, false);
                     if (currentPanel) {
                         currentPanel.innerHTML = this.buildCoachHTML(currentPlan, false);
                     }
-
-                    // Render next month plan
                     const nextPlan = await Gemini.generateCoachPlan(ctx, true);
                     if (nextPanel) {
                         nextPanel.innerHTML = this.buildNextMonthPlanHTML(nextPlan);
@@ -5452,42 +5758,25 @@
                 if (!plan || !plan.summary) {
                     return `<div class="analytics-placeholder glass"><i class="fas fa-robot fa-3x"></i><p>لا توجد بيانات كافية لبناء الخطة</p></div>`;
                 }
-
                 const s = plan.summary;
                 const hasIncome = s.netLivingBudget !== undefined && s.netLivingBudget > 0;
-
                 if (!hasIncome) {
                     return `<div class="analytics-placeholder glass"><i class="fas fa-edit fa-3x"></i><p>يرجى إدخال راتبك الشهري لتفعيل خطة الشهر القادم</p></div>`;
                 }
 
                 let html = '';
-
-                // ===== ملخص الخطة =====
                 html += `<div style="margin-bottom:20px;">`;
                 html += `<div class="settings-container glass" style="max-width:100%;margin-bottom:16px;background:var(--accent-gradient);color:#fff;border:none;">`;
                 html += `<h3 style="color:#fff;margin:0;font-size:1.2rem;">📋 خطة الشهر القادم (${s.monthName || 'الشهر القادم'})</h3>`;
                 html += `<p style="color:rgba(255,255,255,0.9);margin:6px 0 0;font-size:0.95rem;">مبنية على تحليل سلوكك المالي خلال آخر 6 أشهر</p>`;
                 html += `</div>`;
-
-                // ===== الأرقام الرئيسية =====
                 html += `<div class="dashboard-cards" style="margin-bottom:16px;">`;
-                
-                // صافي المعيشة
                 html += `<div class="dash-card accent"><div class="card-icon"><i class="fas fa-calculator"></i></div><div class="card-label">صافي المعيشة</div><div class="card-value">${Utils.formatCurrency(s.netLivingBudget)}</div></div>`;
-                
-                // ميزانية اليوم
                 html += `<div class="dash-card accent"><div class="card-icon"><i class="fas fa-calendar-day"></i></div><div class="card-label">ميزانية اليوم</div><div class="card-value">${Utils.formatCurrency(s.dailyBudget)}</div><div style="font-size:0.7rem;color:var(--text-muted);margin-top:4px;">${s.dailyBudgetReason || ''}</div></div>`;
-                
-                // ميزانية الأسبوع
                 html += `<div class="dash-card accent"><div class="card-icon"><i class="fas fa-calendar-week"></i></div><div class="card-label">ميزانية الأسبوع</div><div class="card-value">${Utils.formatCurrency(s.weeklyBudget)}</div><div style="font-size:0.7rem;color:var(--text-muted);margin-top:4px;">${s.weeklyBudgetReason || ''}</div></div>`;
-                
-                // أيام الشهر
                 html += `<div class="dash-card accent"><div class="card-icon"><i class="fas fa-calendar-alt"></i></div><div class="card-label">أيام ${s.monthName || 'الشهر القادم'}</div><div class="card-value">${s.daysInMonth || 30} يوم</div></div>`;
-                
-                html += `</div>`;
-                html += `</div>`;
+                html += `</div></div>`;
 
-                // ===== التوزيع الذكي =====
                 if (plan.distribution && plan.distribution.length > 0) {
                     html += `<div class="settings-container glass" style="margin-bottom:16px;max-width:100%;">`;
                     html += `<h3>📊 توزيع الميزانية الذكي</h3>`;
@@ -5510,7 +5799,6 @@
                     html += `</div>`;
                 }
 
-                // ===== خطة الادخار =====
                 if (plan.savingsPlan) {
                     const sp = plan.savingsPlan;
                     html += `<div class="settings-container glass" style="margin-bottom:16px;max-width:100%;">`;
@@ -5526,7 +5814,6 @@
                     html += `</div>`;
                 }
 
-                // ===== خطة الطوارئ =====
                 if (plan.emergencyPlan && plan.emergencyPlan.suggested) {
                     const ep = plan.emergencyPlan;
                     html += `<div class="settings-container glass" style="margin-bottom:16px;max-width:100%;border-right:3px solid var(--warning);">`;
@@ -5538,7 +5825,6 @@
                     html += `</div>`;
                 }
 
-                // ===== خطة تقليل المصروفات =====
                 if (plan.reductionPlan && plan.reductionPlan.length > 0) {
                     html += `<div class="settings-container glass" style="margin-bottom:16px;max-width:100%;">`;
                     html += `<h3>📉 خطة تقليل المصروفات</h3>`;
@@ -5553,7 +5839,6 @@
                     html += `</div>`;
                 }
 
-                // ===== الجدول الزمني =====
                 if (plan.timeline && plan.timeline.length > 0) {
                     html += `<div class="settings-container glass" style="margin-bottom:16px;max-width:100%;">`;
                     html += `<h3>📅 الجدول الزمني للشهر القادم</h3>`;
@@ -5572,7 +5857,6 @@
                     html += `</div>`;
                 }
 
-                // ===== الأولويات =====
                 if (plan.priorities && plan.priorities.length > 0) {
                     html += `<div class="settings-container glass" style="margin-bottom:16px;max-width:100%;">`;
                     html += `<h3>🏆 الأولويات المالية</h3>`;
@@ -5584,7 +5868,6 @@
                     html += `</div>`;
                 }
 
-                // ===== السيناريوهات =====
                 if (plan.scenarios && plan.scenarios.length > 0) {
                     html += `<div class="settings-container glass" style="margin-bottom:16px;max-width:100%;">`;
                     html += `<h3>🔮 سيناريوهات ماذا لو؟</h3>`;
@@ -5598,14 +5881,12 @@
                     html += `</div>`;
                 }
 
-                // ===== التقرير النهائي =====
                 if (plan.report) {
                     html += `<div class="settings-container glass" style="margin-bottom:16px;max-width:100%;background:var(--bg-glass);border-right:3px solid var(--accent);">`;
                     html += `<h3>📝 التقرير التحليلي</h3>`;
                     html += `<div style="font-size:0.95rem;line-height:1.8;color:var(--text-secondary);padding:8px 0;">${plan.report}</div>`;
                     html += `</div>`;
                 }
-
                 return html;
             },
 
@@ -5613,17 +5894,13 @@
                 if (!plan || !plan.summary) {
                     return `<div class="analytics-placeholder glass"><i class="fas fa-robot fa-3x"></i><p>لا توجد بيانات كافية لبناء الخطة</p></div>`;
                 }
-
                 const s = plan.summary;
                 const hasIncome = s.salary > 0;
-
                 if (!hasIncome) {
                     return `<div class="analytics-placeholder glass"><i class="fas fa-edit fa-3x"></i><p>يرجى إدخال راتبك الشهري لتفعيل خطة المدرب المالي</p></div>`;
                 }
 
                 let html = '';
-
-                // ===== ملخص الخطة =====
                 html += `<div class="dashboard-cards" style="margin-bottom:16px;">`;
                 html += `<div class="dash-card accent"><div class="card-icon"><i class="fas fa-money-bill-wave"></i></div><div class="card-label">الراتب المتوقع</div><div class="card-value">${Utils.formatCurrency(s.salary)}</div></div>`;
                 html += `<div class="dash-card accent"><div class="card-icon"><i class="fas fa-lock"></i></div><div class="card-label">الأموال المحجوزة</div><div class="card-value">${Utils.formatCurrency(s.reserved)}</div></div>`;
@@ -5635,7 +5912,6 @@
                 html += `<div class="dash-card ${s.remainingDays > 0 ? 'positive' : 'accent'}"><div class="card-icon"><i class="fas fa-hourglass-half"></i></div><div class="card-label">الأيام المتبقية</div><div class="card-value">${s.remainingDays > 0 ? s.remainingDays + ' يوم' : '—'}</div></div>`;
                 html += `</div>`;
 
-                // ===== توزيع الميزانية =====
                 if (plan.distribution && plan.distribution.length > 0) {
                     html += `<div class="settings-container glass" style="margin-bottom:16px;max-width:100%;">`;
                     html += `<h3>📊 توزيع الميزانية</h3>`;
@@ -5648,13 +5924,11 @@
                     html += `</div>`;
                 }
 
-                // ===== التوقعات =====
                 if (plan.forecast) {
                     const f = plan.forecast;
                     html += `<div class="settings-container glass" style="margin-bottom:16px;max-width:100%;">`;
                     html += `<h3>📈 التوقعات</h3>`;
                     html += `<div class="dashboard-cards" style="margin-top:8px;">`;
-                    
                     const endBalance = f.projectedEndBalance;
                     const isPositive = endBalance !== null && endBalance >= 0;
                     html += `<div class="dash-card ${isPositive ? 'positive' : 'negative'}">
@@ -5662,19 +5936,16 @@
                         <div class="card-label">الرصيد المتوقع نهاية ${isNextMonth ? 'الشهر القادم' : 'الشهر'}</div>
                         <div class="card-value">${endBalance !== null ? Utils.formatCurrency(endBalance) : '—'}</div>
                     </div>`;
-                    
                     html += `<div class="dash-card ${f.willMeetSavingsGoal ? 'positive' : 'negative'}">
                         <div class="card-icon"><i class="fas fa-${f.willMeetSavingsGoal ? 'check-circle' : 'exclamation-circle'}"></i></div>
                         <div class="card-label">تحقيق هدف الادخار</div>
                         <div class="card-value">${f.willMeetSavingsGoal ? '✅ نعم' : '⚠️ لا'}</div>
                     </div>`;
-                    
                     html += `<div class="dash-card ${f.willEndWithDeficit ? 'negative' : 'positive'}">
                         <div class="card-icon"><i class="fas fa-${f.willEndWithDeficit ? 'exclamation-triangle' : 'check-circle'}"></i></div>
                         <div class="card-label">العجز المتوقع</div>
                         <div class="card-value">${f.willEndWithDeficit ? '⚠️ نعم' : '✅ لا'}</div>
                     </div>`;
-                    
                     if (f.categoriesAtRisk && f.categoriesAtRisk.length > 0) {
                         html += `<div class="dash-card negative" style="grid-column:1/-1;">
                             <div class="card-icon"><i class="fas fa-exclamation-triangle"></i></div>
@@ -5682,11 +5953,9 @@
                             <div class="card-value" style="font-size:0.9rem;">${f.categoriesAtRisk.join('، ')}</div>
                         </div>`;
                     }
-                    
                     html += `</div></div>`;
                 }
 
-                // ===== سيناريوهات ماذا لو =====
                 if (plan.scenarios && plan.scenarios.length > 0) {
                     html += `<div class="settings-container glass" style="margin-bottom:16px;max-width:100%;">`;
                     html += `<h3>🤔 ماذا لو؟ (What-If Scenarios)</h3>`;
@@ -5701,7 +5970,6 @@
                     html += `</div>`;
                 }
 
-                // ===== التحسينات المقترحة =====
                 if (plan.improvements && plan.improvements.length > 0) {
                     html += `<div class="settings-container glass" style="margin-bottom:16px;max-width:100%;">`;
                     html += `<h3>💡 التحسينات المقترحة</h3>`;
@@ -5712,7 +5980,6 @@
                     html += `</ul></div>`;
                 }
 
-                // ===== الفرص =====
                 if (plan.opportunities && plan.opportunities.length > 0) {
                     html += `<div class="settings-container glass" style="margin-bottom:16px;max-width:100%;">`;
                     html += `<h3>🌟 فرص تحسين الوضع المالي</h3>`;
@@ -5728,7 +5995,6 @@
                     html += `</div>`;
                 }
 
-                // ===== المخاطر =====
                 if (plan.risks && plan.risks.length > 0) {
                     html += `<div class="settings-container glass" style="margin-bottom:16px;max-width:100%;">`;
                     html += `<h3>⚠️ المخاطر المستقبلية</h3>`;
@@ -5744,7 +6010,6 @@
                     html += `</div>`;
                 }
 
-                // ===== النصائح اليومية =====
                 if (plan.dailyTips && plan.dailyTips.length > 0) {
                     html += `<div class="settings-container glass" style="margin-bottom:16px;max-width:100%;">`;
                     html += `<h3>📋 النصائح اليومية</h3>`;
@@ -5754,11 +6019,9 @@
                     });
                     html += `</ul></div>`;
                 }
-
                 return html;
             },
 
-            // ===== DASHBOARD RENDER =====
             renderDashboard: function(ctx) {
                 ctx = ctx || this.getContext();
                 const cardsContainer = Utils.id('dashboardCards');
@@ -5794,16 +6057,13 @@
                 else if (healthScore < 50) riskLevel = 'مرتفع';
                 else if (healthScore < 70) riskLevel = 'متوسط';
                 else if (healthScore >= 70) riskLevel = 'منخفض';
-                
                 if (status.status === 'no_income') {
                     riskLevel = 'no_income';
                     healthScore = 0;
                 }
-                
                 const profile = ctx.behavior?.profile || 'Balanced';
 
                 let cards = [];
-
                 if (status.status === 'no_income') {
                     cards = [
                         { icon: 'fa-edit', label: '💡 الراتب', value: 'أدخل الراتب أولاً', cls: 'accent' },
@@ -5861,7 +6121,7 @@
 
                 let statusMessage = '';
                 if (status.status === 'no_income') {
-                    statusMessage = '⚠️ أدخل راتبك الشهري لتفعيل جميع الحسابات';
+                    statusMessage = '⚠️ أدخل راتبك الشهري في صفحة "الدخل والأهداف" لتفعيل جميع الحسابات';
                 } else if (status.status === 'commitments_exceed_income') {
                     statusMessage = `⚠️ إجمالي الالتزامات (${Utils.formatCurrency(reserved)}) أكبر من الراتب (${Utils.formatCurrency(salary)})`;
                 } else if (status.status === 'overspent') {
@@ -5921,12 +6181,14 @@
                     const spent = item.spent || 0;
                     const remaining = item.budget - spent;
                     const isReserved = item.isReserved ? '🔒 محجوز' : '🔓 غير محجوز';
-                    return `<div class="budget-item-card glass" data-id="${item.id}">
+                    const isOver = remaining < 0;
+                    return `<div class="budget-item-card glass" data-id="${item.id}" style="${isOver ? 'border-right: 3px solid var(--danger);' : ''}">
                         <div class="item-info">
                             <div class="item-name">${item.name} <span style="font-size:0.7rem; color:var(--text-muted);">(${item.category})</span></div>
                             <div class="item-meta">
                                 <span>الأولوية: ${item.priority}</span>
                                 <span>${isReserved}</span>
+                                ${isOver ? `<span style="color:var(--danger);font-weight:700;">⚠️ تجاوز</span>` : ''}
                                 ${item.notes ? `<span>📝 ${item.notes}</span>` : ''}
                             </div>
                         </div>
@@ -6218,6 +6480,196 @@
                 Charts.drawBar(remCtx, ['المتاح للصرف', 'المصروفات', 'المحجوز', 'الراتب'], [displayAvailable, displayPaid,
                         displayReserved, displaySalary
                     ], ['#1F7A5C', '#B3452A', '#C98A2E', '#123C57'], 'المتاح');
+            },
+
+            // ===== NEW: Income Page =====
+            setupIncomePage() {
+                const form = Utils.id('incomeForm');
+                const salaryInput = Utils.id('incomeSalary');
+                const goalInput = Utils.id('incomeSavingsGoal');
+                const manualDateInput = Utils.id('incomeManualDate');
+                const applyManualBtn = Utils.id('applyManualDateBtn');
+                const presetGrid = Utils.id('salaryPresetGrid');
+
+                // Preset data
+                const presets = [
+                    { label: 'الراتب', date: 27 },
+                    { label: 'التقاعد', date: 1 },
+                    { label: 'الضمان', date: 1 },
+                    { label: 'ساند', date: 1 },
+                    { label: 'حافز', date: 5 },
+                    { label: 'حساب المواطن', date: 10 },
+                    { label: 'الدعم السكني', date: 24 },
+                    { label: 'التأهيل الشامل', date: 26 },
+                    { label: 'دعم ريف', date: 'range' } // special
+                ];
+
+                // Render preset buttons
+                presetGrid.innerHTML = presets.map((p, idx) => {
+                    let dateDisplay = p.date === 'range' ? 'من 1 إلى 10' : p.date + ' من كل شهر ميلادي';
+                    let extraAttr = p.date === 'range' ? 'data-range="true"' : `data-day="${p.date}"`;
+                    let selectedClass = '';
+                    // Check if this preset matches current salary date
+                    const settings = Storage.getSettings();
+                    if (settings.salaryDate) {
+                        const day = new Date(settings.salaryDate).getDate();
+                        if (p.date === 'range') {
+                            if (day >= 1 && day <= 10) selectedClass = 'selected';
+                        } else if (p.date === day) {
+                            selectedClass = 'selected';
+                        }
+                    }
+                    return `<button class="salary-preset-btn ${selectedClass}" data-preset-index="${idx}" ${extraAttr}>
+                        <span class="preset-label">📌 ${p.label}</span>
+                        <span class="preset-date">📅 ${dateDisplay}</span>
+                    </button>`;
+                }).join('');
+
+                // Load current settings
+                const loadIncome = () => {
+                    const s = Storage.getSettings();
+                    salaryInput.value = s.salary || '';
+                    goalInput.value = s.savingsGoal || '';
+                    if (s.salaryDate) {
+                        manualDateInput.value = s.salaryDate;
+                    }
+                    this.updateIncomeInfo(s.salaryDate);
+                };
+                loadIncome();
+
+                // Preset click handler
+                Utils.qsa('.salary-preset-btn').forEach(btn => {
+                    Utils.on(btn, 'click', () => {
+                        // Remove selected from all
+                        Utils.qsa('.salary-preset-btn').forEach(b => b.classList.remove('selected'));
+                        btn.classList.add('selected');
+                        let dateObj = new Date(WorldTime.now());
+                        const isRange = btn.dataset.range === 'true';
+                        if (isRange) {
+                            // For Rief: we need a dropdown or just default to 1
+                            const day = prompt('أدخل يوم صرف دعم ريف (من 1 إلى 10):', '1');
+                            if (day === null) return;
+                            const d = parseInt(day);
+                            if (isNaN(d) || d < 1 || d > 10) {
+                                alert('الرجاء إدخال يوم بين 1 و 10');
+                                return;
+                            }
+                            dateObj.setDate(d);
+                        } else {
+                            const day = parseInt(btn.dataset.day);
+                            dateObj.setDate(day);
+                        }
+                        const dateStr = dateObj.toISOString().split('T')[0];
+                        // Update settings
+                        const settings = Storage.getSettings();
+                        settings.salaryDate = dateStr;
+                        Storage.setSettings(settings);
+                        FinancialEngine.refreshAll();
+                        this.updateIncomeInfo(dateStr);
+                        this.renderAll();
+                        // Update manual input
+                        manualDateInput.value = dateStr;
+                        // Highlight preset
+                        Utils.qsa('.salary-preset-btn').forEach(b => b.classList.remove('selected'));
+                        btn.classList.add('selected');
+                        this.selectedPreset = btn.dataset.presetIndex;
+                        alert('تم تحديث تاريخ الصرف إلى ' + Utils.formatDate(dateStr));
+                    });
+                });
+
+                // Apply manual date
+                Utils.on(applyManualBtn, 'click', () => {
+                    const date = manualDateInput.value;
+                    if (!date) { alert('الرجاء اختيار تاريخ'); return; }
+                    const settings = Storage.getSettings();
+                    settings.salaryDate = date;
+                    Storage.setSettings(settings);
+                    FinancialEngine.refreshAll();
+                    this.updateIncomeInfo(date);
+                    this.renderAll();
+                    Utils.qsa('.salary-preset-btn').forEach(b => b.classList.remove('selected'));
+                    this.selectedPreset = null;
+                    alert('تم تحديث تاريخ الصرف إلى ' + Utils.formatDate(date));
+                });
+
+                // Submit income form
+                Utils.on(form, 'submit', (e) => {
+                    e.preventDefault();
+                    const salary = parseFloat(salaryInput.value) || 0;
+                    const goal = parseFloat(goalInput.value) || 0;
+                    const settings = Storage.getSettings();
+                    settings.salary = salary;
+                    settings.savingsGoal = goal;
+                    Storage.setSettings(settings);
+                    FinancialEngine.refreshAll();
+                    alert('تم حفظ الدخل والأهداف بنجاح!');
+                    this.renderAll();
+                });
+            },
+
+            renderIncomePage() {
+                // Just update info
+                const settings = Storage.getSettings();
+                Utils.id('incomeSalary').value = settings.salary || '';
+                Utils.id('incomeSavingsGoal').value = settings.savingsGoal || '';
+                Utils.id('incomeManualDate').value = settings.salaryDate || '';
+                this.updateIncomeInfo(settings.salaryDate);
+                // Highlight preset
+                if (settings.salaryDate) {
+                    const day = new Date(settings.salaryDate).getDate();
+                    Utils.qsa('.salary-preset-btn').forEach(btn => {
+                        btn.classList.remove('selected');
+                        if (btn.dataset.range === 'true') {
+                            if (day >= 1 && day <= 10) btn.classList.add('selected');
+                        } else if (parseInt(btn.dataset.day) === day) {
+                            btn.classList.add('selected');
+                        }
+                    });
+                }
+            },
+
+            updateIncomeInfo(dateStr) {
+                const labelEl = Utils.id('selectedPresetLabel');
+                const nextDateEl = Utils.id('nextSalaryDateDisplay');
+                const daysEl = Utils.id('daysUntilSalaryDisplay');
+                if (!dateStr) {
+                    labelEl.textContent = '—';
+                    nextDateEl.textContent = '—';
+                    daysEl.textContent = '—';
+                    return;
+                }
+                // Find preset label
+                const day = new Date(dateStr).getDate();
+                const presets = [
+                    { label: 'الراتب', date: 27 },
+                    { label: 'التقاعد', date: 1 },
+                    { label: 'الضمان', date: 1 },
+                    { label: 'ساند', date: 1 },
+                    { label: 'حافز', date: 5 },
+                    { label: 'حساب المواطن', date: 10 },
+                    { label: 'الدعم السكني', date: 24 },
+                    { label: 'التأهيل الشامل', date: 26 },
+                    { label: 'دعم ريف', date: 'range' }
+                ];
+                let found = presets.find(p => p.date === day || (p.date === 'range' && day >= 1 && day <= 10));
+                labelEl.textContent = found ? found.label : 'إدخال يدوي';
+
+                // Calculate next salary date
+                const now = WorldTime.now();
+                const base = new Date(dateStr);
+                if (isNaN(base.getTime())) {
+                    nextDateEl.textContent = '—';
+                    daysEl.textContent = '—';
+                    return;
+                }
+                const salaryDay = base.getDate();
+                let candidate = new Date(now.getFullYear(), now.getMonth(), salaryDay);
+                if (candidate < now) {
+                    candidate = new Date(now.getFullYear(), now.getMonth() + 1, salaryDay);
+                }
+                nextDateEl.textContent = Utils.formatDateFull(candidate.toISOString().split('T')[0]);
+                const days = Math.round((candidate - now) / 86400000);
+                daysEl.textContent = days > 0 ? days + ' يوم' : 'اليوم';
             }
         };
 
