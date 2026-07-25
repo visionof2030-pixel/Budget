@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Markazi+Text:wght@500;600;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <style>
-        /* ===== نفس الأنماط السابقة (تم الاحتفاظ بها) ===== */
+        /* ===== الأنماط الأساسية (محسّنة للجوال) ===== */
         :root {
             --bg-primary: #EFF5F9;
             --bg-secondary: #FFFFFF;
@@ -37,7 +37,8 @@
             --font: 'IBM Plex Sans Arabic', 'Cairo', sans-serif;
             --font-display: 'Markazi Text', 'Cairo', serif;
             --font-mono: 'IBM Plex Mono', monospace;
-            --chat-max-height: 65vh;
+            --chat-max-height: 60vh;
+            --chat-min-height: 300px;
         }
         [data-theme="dark"] {
             --bg-primary: #0A141C;
@@ -243,6 +244,7 @@
             margin-right: var(--sidebar-width);
             flex: 1;
             height: 100vh;
+            height: 100dvh;
             overflow-y: auto;
             padding: 0 28px 24px;
             transition: margin-right var(--transition)
@@ -366,18 +368,6 @@
             opacity: 0;
             pointer-events: none;
             transform: scale(0.7);
-        }
-        .fab-advisor::after {
-            content: '';
-            position: absolute;
-            inset: -6px;
-            border-radius: 999px;
-            border: 1px solid var(--bg-glass-border);
-            opacity: 0;
-            transition: opacity 0.2s ease;
-        }
-        .fab-advisor:focus-visible::after {
-            opacity: 1;
         }
         .refresh-btn {
             background: var(--bg-glass);
@@ -908,6 +898,29 @@
         .method-tab:hover:not(.active) {
             background: var(--bg-card)
         }
+        .quick-method-tab {
+            flex: 1;
+            padding: 10px 12px;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: transparent;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-family: var(--font);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all var(--transition);
+            touch-action: manipulation;
+            min-height: 44px
+        }
+        .quick-method-tab.active {
+            background: var(--accent-gradient);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(18, 60, 87, 0.20)
+        }
+        .quick-method-tab:hover:not(.active) {
+            background: var(--bg-card)
+        }
         .method-panel {
             padding: 12px 0
         }
@@ -1142,53 +1155,54 @@
             color: var(--danger);
             border: 1px solid var(--danger)
         }
+        /* ===== تحسينات واجهة المحادثة للجوال ===== */
         .chat-container {
             display: flex;
             flex-direction: column;
             height: var(--chat-max-height);
             max-height: var(--chat-max-height);
-            min-height: 400px;
+            min-height: var(--chat-min-height);
             background: var(--bg-card);
             border-radius: var(--radius);
             border: 1px solid var(--bg-glass-border);
             overflow: hidden;
             box-shadow: var(--shadow);
-            width: 100%;
-            max-width: 100%;
-            overflow: hidden;
+            font-size: 0.95rem;
+            /* حجم خط أساسي مناسب للجوال */
         }
         .chat-messages {
             flex: 1;
             overflow-y: auto;
-            padding: 20px;
+            padding: 16px 14px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
             min-height: 0;
-            width: 100%;
-            max-width: 100%;
-            box-sizing: border-box;
+            -webkit-overflow-scrolling: touch;
+            /* تحسين التمرير على iOS */
         }
         .chat-message {
-            max-width: 85%;
-            padding: 12px 18px;
+            max-width: 88%;
+            padding: 10px 14px;
             border-radius: var(--radius-sm);
             animation: messageIn 0.3s ease;
             word-wrap: break-word;
             overflow-wrap: break-word;
+            font-size: 0.92rem;
+            line-height: 1.6;
         }
         .chat-message.user {
             align-self: flex-end;
             background: var(--accent-gradient);
             color: #fff;
-            border-bottom-right-radius: 4px
+            border-bottom-right-radius: 4px;
         }
         .chat-message.assistant {
             align-self: flex-start;
             background: var(--bg-glass);
             border: 1px solid var(--bg-glass-border);
             border-bottom-left-radius: 4px;
-            color: var(--text-primary)
+            color: var(--text-primary);
         }
         .chat-message.system {
             align-self: flex-start;
@@ -1196,7 +1210,7 @@
             border: 1px solid rgba(31, 122, 92, 0.3);
             border-bottom-left-radius: 4px;
             color: var(--success);
-            font-size: 0.85rem
+            font-size: 0.85rem;
         }
         .chat-message.financial-advisor {
             align-self: flex-start;
@@ -1205,41 +1219,42 @@
             border-bottom-left-radius: 4px;
             color: var(--text-primary);
             font-size: 0.92rem;
-            max-width: 90%
+            max-width: 92%;
         }
         .chat-message .message-time {
-            font-size: 0.6rem;
+            font-size: 0.55rem;
             opacity: 0.6;
             margin-top: 4px;
-            text-align: left
+            text-align: left;
         }
         .chat-message.assistant .message-time {
-            color: var(--text-muted)
+            color: var(--text-muted);
         }
         .chat-message.user .message-time {
-            color: rgba(255, 255, 255, 0.7)
+            color: rgba(255, 255, 255, 0.7);
         }
         .chat-message.financial-advisor .message-time {
-            color: var(--text-muted)
+            color: var(--text-muted);
         }
         .chat-quick-replies {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 10px;
-            max-width: 100%;
+            gap: 6px;
+            margin-top: 8px;
         }
         .chat-quick-reply-btn {
             background: var(--accent-gradient);
             color: #fff;
             border: none;
             border-radius: 999px;
-            padding: 7px 16px;
-            font-size: 0.82rem;
+            padding: 6px 14px;
+            font-size: 0.78rem;
             font-weight: 700;
             font-family: inherit;
             cursor: pointer;
             transition: opacity 0.15s ease, transform 0.15s ease;
+            touch-action: manipulation;
+            min-height: 36px;
         }
         .chat-quick-reply-btn:hover {
             transform: translateY(-1px);
@@ -1248,6 +1263,38 @@
             opacity: 0.5;
             cursor: default;
             transform: none;
+        }
+        .chat-quick-actions {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding: 8px 6px;
+            flex-shrink: 0;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .chat-quick-actions::-webkit-scrollbar {
+            display: none;
+        }
+        .chat-quick-action-chip {
+            background: var(--bg-glass);
+            border: 1px solid var(--bg-glass-border);
+            color: var(--text-primary);
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            font-family: inherit;
+            white-space: nowrap;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: background 0.15s ease;
+            touch-action: manipulation;
+            min-height: 32px;
+        }
+        .chat-quick-action-chip:hover {
+            background: var(--accent);
+            color: #fff;
         }
         @keyframes messageIn {
             from {
@@ -1261,17 +1308,17 @@
         }
         .chat-input-area {
             display: flex;
-            gap: 12px;
-            padding: 16px 20px;
+            gap: 8px;
+            padding: 12px 14px;
             border-top: 1px solid var(--bg-glass-border);
             background: var(--bg-glass);
             backdrop-filter: blur(10px);
             flex-shrink: 0;
-            flex-wrap: wrap;
+            align-items: flex-end;
         }
         .chat-input-area textarea {
             flex: 1;
-            padding: 10px 14px;
+            padding: 10px 12px;
             border-radius: var(--radius-sm);
             border: 1px solid var(--bg-glass-border);
             background: var(--bg-card);
@@ -1279,30 +1326,29 @@
             font-family: var(--font);
             font-size: 0.95rem;
             resize: none;
-            min-height: 48px;
-            max-height: 120px;
+            min-height: 44px;
+            max-height: 100px;
             transition: border var(--transition);
-            width: 100%;
-            max-width: 100%;
-            box-sizing: border-box;
+            line-height: 1.4;
         }
         .chat-input-area textarea:focus {
             outline: none;
             border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(46, 125, 181, 0.16)
+            box-shadow: 0 0 0 3px rgba(46, 125, 181, 0.16);
         }
         .chat-input-area .btn-primary {
-            min-height: 48px;
-            padding: 0 20px;
-            flex-shrink: 0
+            min-height: 44px;
+            padding: 0 16px;
+            flex-shrink: 0;
+            font-size: 0.9rem;
         }
         .chat-typing {
             align-self: flex-start;
-            padding: 8px 16px;
+            padding: 6px 14px;
             background: var(--bg-glass);
             border-radius: var(--radius-sm);
             color: var(--text-muted);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             display: flex;
             align-items: center;
             gap: 6px
@@ -1586,6 +1632,7 @@
             border-radius: 10px;
         }
 
+        /* ===== الأنماط المستجيبة للجوال (محسّنة) ===== */
         @media(max-width:992px) {
             .main-content {
                 padding: 0 16px 20px
@@ -1604,6 +1651,10 @@
             }
         }
         @media(max-width:768px) {
+            :root {
+                --chat-max-height: 55vh;
+                --chat-min-height: 260px;
+            }
             .app-header h1 {
                 font-size: 1.35rem
             }
@@ -1621,7 +1672,7 @@
             }
             .main-content {
                 margin-right: 0;
-                padding: 0 12px 16px
+                padding: 0 10px 14px
             }
             .sidebar-toggle {
                 display: block
@@ -1701,13 +1752,44 @@
             .chat-container {
                 height: var(--chat-max-height);
                 max-height: var(--chat-max-height);
-                min-height: 350px
+                min-height: var(--chat-min-height);
+                font-size: 0.9rem;
+            }
+            .chat-messages {
+                padding: 12px 10px;
+                gap: 8px;
+            }
+            .chat-message {
+                max-width: 92%;
+                padding: 8px 12px;
+                font-size: 0.88rem;
+            }
+            .chat-message.financial-advisor {
+                max-width: 95%;
+                font-size: 0.88rem;
             }
             .chat-input-area {
-                flex-direction: column
+                padding: 8px 10px;
+                gap: 6px;
+            }
+            .chat-input-area textarea {
+                font-size: 0.9rem;
+                min-height: 40px;
+                padding: 8px 10px;
             }
             .chat-input-area .btn-primary {
-                width: 100%
+                min-height: 40px;
+                padding: 0 14px;
+                font-size: 0.85rem;
+            }
+            .chat-quick-action-chip {
+                font-size: 0.7rem;
+                padding: 5px 10px;
+                min-height: 28px;
+            }
+            .chat-quick-actions {
+                padding: 6px 4px;
+                gap: 4px;
             }
             .expense-detail-grid {
                 grid-template-columns: 1fr
@@ -1718,8 +1800,23 @@
             .coach-tabs {
                 flex-direction: column;
             }
+            /* زر المستشار المالي في الصفحة الرئيسية */
+            .dashboard-header-actions {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                width: 100%;
+            }
+            .dashboard-header-actions .btn-primary {
+                flex: 1;
+                min-width: 120px;
+            }
         }
         @media(max-width:400px) {
+            :root {
+                --chat-max-height: 50vh;
+                --chat-min-height: 220px;
+            }
             .dashboard-cards {
                 grid-template-columns: 1fr 1fr;
                 gap: 8px
@@ -1772,34 +1869,34 @@
                 min-height: 32px;
                 font-size: 0.8rem
             }
-            .chat-container {
-                min-height: 300px;
-                border-radius: var(--radius-sm);
-            }
-            .chat-messages {
-                padding: 12px;
-            }
             .chat-message {
-                font-size: 0.85rem;
-                padding: 10px 14px;
-                max-width: 98% !important;
+                font-size: 0.82rem;
+                padding: 6px 10px;
+                max-width: 96%;
             }
-            .chat-input-area {
-                padding: 10px 12px;
-                flex-direction: column;
+            .chat-message.financial-advisor {
+                font-size: 0.82rem;
+                max-width: 98%;
             }
             .chat-input-area textarea {
-                font-size: 0.9rem;
-                min-height: 40px;
+                font-size: 0.85rem;
+                min-height: 36px;
+                padding: 6px 8px;
             }
             .chat-input-area .btn-primary {
-                width: 100%;
-                justify-content: center;
+                min-height: 36px;
+                padding: 0 12px;
+                font-size: 0.8rem;
             }
-            .chat-quick-reply-btn {
-                font-size: 0.75rem;
-                padding: 5px 12px;
-                min-height: 34px;
+            .chat-quick-action-chip {
+                font-size: 0.65rem;
+                padding: 4px 8px;
+                min-height: 24px;
+            }
+            .dashboard-header-actions .btn-primary {
+                font-size: 0.8rem;
+                padding: 8px 12px;
+                min-height: 36px;
             }
         }
         .advisor-message {
@@ -1851,18 +1948,6 @@
             padding: 8px 0;
             border-top: 1px solid var(--bg-glass-border);
             margin-top: 8px
-        }
-        @media(max-width:768px) {
-            .chat-message.financial-advisor {
-                max-width: 95%;
-                font-size: 0.88rem
-            }
-            .advisor-message {
-                padding: 10px 12px
-            }
-            .advisor-message .action-item {
-                padding: 4px 8px
-            }
         }
         .budget-item-card {
             background: var(--bg-card);
@@ -2147,7 +2232,7 @@
             box-shadow: 0 2px 12px rgba(18, 60, 87, 0.25);
         }
         .salary-preset-btn.selected .preset-date {
-            color: rgba(255,255,255,0.8);
+            color: rgba(255, 255, 255, 0.8);
         }
         .salary-manual-input {
             margin-top: 12px;
@@ -2256,6 +2341,21 @@
         .override-summary .summary-row .value.negative {
             color: var(--danger);
         }
+        /* زر المستشار المالي في الصفحة الرئيسية */
+        .dashboard-header-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            width: 100%;
+        }
+        .dashboard-header-actions .btn-primary {
+            flex: 1;
+            min-width: 120px;
+            justify-content: center;
+        }
+        .dashboard-header-actions .btn-primary .advisor-icon {
+            margin-left: 6px;
+        }
     </style>
 </head>
 <body>
@@ -2300,6 +2400,10 @@
             <div class="pages-container">
 
                 <section id="page-dashboard" class="page active">
+                    <div class="dashboard-header-actions">
+                        <button id="dashboardAddExpenseBtn" class="btn-primary"><i class="fas fa-plus"></i> إضافة مصروف</button>
+                        <button id="dashboardAdvisorBtn" class="btn-primary"><i class="fas fa-comment-dots advisor-icon"></i> المستشار المالي</button>
+                    </div>
                     <div id="dashboardAlerts"></div>
                     <div id="dashboardCards" class="dashboard-cards"></div>
                     <div id="dashboardSummary" class="dashboard-summary"></div>
@@ -2498,6 +2602,7 @@
 
                 <section id="page-chat" class="page">
                     <div class="chat-container glass">
+                        <div id="chatQuickActions" class="chat-quick-actions"></div>
                         <div class="chat-messages" id="chatMessages">
                             <div class="chat-message financial-advisor">👋 مرحباً! أنا مستشارك المالي الشخصي. لدي وصول كامل لبياناتك المالية وسأقوم بتحليل سلوكك بعمق لمساعدتك في اتخاذ قرارات ذكية. كيف يمكنني مساعدتك اليوم؟<div class="message-time">الآن</div></div>
                         </div>
@@ -2547,10 +2652,21 @@
         <div class="modal-content glass">
             <div class="modal-header"><h2 id="quickExpenseModalTitle">إضافة مصروف</h2><button class="modal-close" id="closeQuickExpenseModal">&times;</button></div>
             <div class="modal-body">
-                <div class="form-row"><div class="form-group"><label>المبلغ (ريال)</label><input type="number" id="quickAmount" class="form-input" step="0.01" min="0" /></div><div class="form-group"><label>التاريخ</label><input type="date" id="quickDate" class="form-input" /></div></div>
-                <div class="form-group"><label>الوصف</label><input type="text" id="quickDescription" class="form-input" placeholder="وصف المصروف" /></div>
-                <div class="form-group"><label>البند</label><select id="quickCategory" class="form-input"></select></div>
-                <div class="modal-actions"><button class="btn-secondary" id="cancelQuickExpenseBtn">إلغاء</button><button class="btn-primary" id="saveQuickExpenseBtn">حفظ</button></div>
+                <div class="method-tabs">
+                    <button class="quick-method-tab active" data-method="ai" type="button">ذكاء اصطناعي</button>
+                    <button class="quick-method-tab" data-method="manual" type="button">إدخال يدوي</button>
+                </div>
+                <div id="quickAiMethod">
+                    <div class="form-group"><label>أرسل رسالة البنك أو اكتب وصفاً (يمكن كتابة أكثر من مصروف، كل مصروف في سطر)</label><textarea id="quickAiInput" class="form-textarea" rows="6" placeholder="مثال: تذكرة طيران 850 ريال&#10;فندق 3 ليالي 600 ريال"></textarea></div>
+                    <button id="quickParseBtn" class="btn-primary" type="button"><i class="fas fa-robot"></i> تحليل بالذكاء</button>
+                    <div id="quickParseResult" class="parse-result"></div>
+                </div>
+                <div id="quickManualMethod" style="display:none;">
+                    <div class="form-row"><div class="form-group"><label>المبلغ (ريال)</label><input type="number" id="quickAmount" class="form-input" step="0.01" min="0" /></div><div class="form-group"><label>التاريخ</label><input type="date" id="quickDate" class="form-input" /></div></div>
+                    <div class="form-group"><label>الوصف</label><input type="text" id="quickDescription" class="form-input" placeholder="وصف المصروف" /></div>
+                    <div class="form-group"><label>البند</label><select id="quickCategory" class="form-input"></select></div>
+                </div>
+                <div class="modal-actions"><button class="btn-secondary" id="cancelQuickExpenseBtn">إلغاء</button><button class="btn-primary" id="saveQuickExpenseBtn" style="display:none;">حفظ</button></div>
             </div>
         </div>
     </div>
@@ -2758,8 +2874,6 @@
                     'الترفيه', 'التسوق', 'التعليم', 'السيارة',
                     'مصروف شخصي', 'العناية الشخصية', 'مستلزمات المنزل'
                 ];
-                // ندمج أي تصنيفات مخصصة أنشأها المستخدم عبر بنود ميزانية جديدة (مثل "دفع تمارا"، "دفع تابي")
-                // حتى تُعرف تلقائياً في كل مكان: القوائم اليدوية، الفلاتر، وتصنيف الذكاء الاصطناعي للمصروفات
                 let custom = [];
                 try {
                     custom = (Storage.getBudgetItems() || [])
@@ -2772,18 +2886,13 @@
                 'الطعام والمطاعم', 'التسوق والهدايا', 'التأشيرة والتأمين', 'الطوارئ', 'أخرى'
             ],
             tempCategories: () => ['كشتة', 'قطة', 'واجب', 'فزعة', 'صدقة', 'أخرى'],
-            // ينسّق نص رد الذكاء الاصطناعي: يحوّل **بولد** إلى <strong>، وينسّق النقاط، ويزيل أي ** متبقية عشوائياً
             formatAIText: (text) => {
                 if (!text) return '';
                 let html = String(text);
-                // bold (يدعم النص متعدد الأسطر بين علامتي **)
                 html = html.replace(/\*\*([\s\S]+?)\*\*/g, '<strong>$1</strong>');
-                // أي ** متبقية لم تتزاوج (حالة نادرة) نزيلها بدل عرضها كما هي
                 html = html.replace(/\*\*/g, '');
-                // توحيد رموز النقاط (- أو * أو •) في بداية السطر إلى نقطة موحدة
                 html = html.replace(/^[ \t]*[-*]\s+/gm, '• ');
                 html = html.replace(/•\s*/g, '• ');
-                // إزالة رموز عناوين ماركداون (### إلخ) إن وجدت
                 html = html.replace(/^#{1,6}\s*/gm, '');
                 html = html.replace(/\n/g, '<br>');
                 return html;
@@ -2881,7 +2990,7 @@
             getExpenses() { return this.get('expenses', []); },
             setExpenses(exp) { this.set('expenses', exp); },
             getSettings() {
-                const def = { salary: 0, salaryDate: Utils.today(), savingsGoal: 0 };
+                const def = { salary: 0, salaryDate: Utils.today(), savingsGoal: 0, budgetOrganizationEnabled: false };
                 return this.get('settings', def);
             },
             setSettings(s) { this.set('settings', s); },
@@ -2905,14 +3014,15 @@
             isMigrated() { return this.get('migrated_v2', false); },
             setMigrated() { this.set('migrated_v2', true); },
             isFirstLaunch() { return !localStorage.getItem('ai_budget_launched'); },
-            markLaunched() { localStorage.setItem('ai_budget_launched', 'true'); }
+            markLaunched() { localStorage.setItem('ai_budget_launched', 'true'); },
+            getDismissedAlerts() { return this.get('dismissed_alerts', []); },
+            setDismissedAlerts(list) { this.set('dismissed_alerts', list); }
         };
 
         // ============================================================
         // 4. FINANCIAL ENGINE v4.0 (مع الإنشاء التلقائي والتنظيف)
         // ============================================================
         const FinancialEngine = {
-            // ---- Core Validation ----
             _hasValidSalary() {
                 const salary = this.getSalary();
                 return salary > 0;
@@ -2923,7 +3033,6 @@
                 return salary > 0 ? salary : null;
             },
 
-            // ---- Helpers ----
             getSalary() {
                 return parseFloat(Storage.getSettings().salary) || 0;
             },
@@ -2953,6 +3062,37 @@
                 return expenses.filter(e => e.date >= startDate);
             },
 
+            detectRecurringSubscriptions() {
+                const expenses = this.getExpenses();
+                const groups = {};
+                expenses.forEach(e => {
+                    if (!e.date || !e.amount) return;
+                    const key = (e.description || '').trim().toLowerCase().replace(/\s+/g, ' ');
+                    if (!key) return;
+                    if (!groups[key]) groups[key] = [];
+                    groups[key].push(e);
+                });
+                const recurring = [];
+                Object.entries(groups).forEach(([key, list]) => {
+                    if (list.length < 2) return;
+                    const months = new Set(list.map(e => e.date.slice(0, 7)));
+                    if (months.size < 2) return;
+                    const amounts = list.map(e => parseFloat(e.amount) || 0);
+                    const avgAmount = amounts.reduce((s, a) => s + a, 0) / amounts.length;
+                    const isConsistent = amounts.every(a => Math.abs(a - avgAmount) <= avgAmount * 0.1 + 1);
+                    if (!isConsistent) return;
+                    recurring.push({
+                        description: list[0].description,
+                        occurrences: list.length,
+                        monthsCount: months.size,
+                        avgAmount: Math.round(avgAmount * 100) / 100,
+                        category: list[0].category || 'أخرى',
+                        lastDate: list.map(e => e.date).sort().slice(-1)[0]
+                    });
+                });
+                return recurring.sort((a, b) => b.monthsCount - a.monthsCount);
+            },
+
             getTotal(expenses) {
                 return expenses.reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
             },
@@ -2961,8 +3101,6 @@
                 return expenses.filter(e => e.category === category).reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
             },
 
-            // ---- Core Calculations ----
-            
             calculateReservedMoney() {
                 const items = this.getBudgetItems();
                 return items.filter(item => item.isReserved === true)
@@ -2996,8 +3134,6 @@
                 return Math.round((candidate - today0) / 86400000);
             },
 
-            // يحسب تفاصيل خطة الادخار: كم يجب ادخاره يومياً، وأي البنود (باستثناء الإيجار والأقساط)
-            // يمكن تخفيضها بنسبة بسيطة للوصول إلى هدف الادخار
             getSavingsBreakdown(goal) {
                 const g = parseFloat(goal);
                 const range = Utils.getMonthRange();
@@ -3116,7 +3252,6 @@
                         reserved: reserved, paid: paid, difference: null } };
             },
 
-            // ===== BUDGET ITEMS CRUD =====
             addBudgetItem(data) {
                 const items = this.getBudgetItems();
                 const item = {
@@ -3131,7 +3266,6 @@
                     color: data.color || '#2E7DB5',
                     notes: data.notes || '',
                     isAutoCreated: data.isAutoCreated || false,
-                    // تاريخ انتهاء اختياري (مفيد للالتزامات المحدودة المدة مثل تمارا/تابي أو أي اشتراك له عدد أقساط معروف)
                     endDate: data.endDate || null,
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString()
@@ -3148,7 +3282,6 @@
                 if (index === -1) return null;
                 const item = items[index];
                 Object.assign(item, data);
-                // إذا عدّل المستخدم البند يدوياً، نزيل علامة التلقائي
                 item.isAutoCreated = false;
                 item.updatedAt = new Date().toISOString();
                 items[index] = item;
@@ -3164,30 +3297,23 @@
                 this.refreshAll();
             },
 
-            // ===== 🔥 التعديل الرئيسي: الإنشاء التلقائي للبنود =====
             syncBudgetItemsSpent() {
                 let items = this.getBudgetItems();
                 const monthExp = this.getMonthExpenses();
 
-                // 1. إعادة تعيين spent
                 items.forEach(item => { item.spent = 0; });
 
-                // 2. حساب المصروفات حسب التصنيف للشهر الحالي
                 const catMap = {};
                 monthExp.forEach(e => {
                     const cat = e.category || 'أخرى';
                     catMap[cat] = (catMap[cat] || 0) + (parseFloat(e.amount) || 0);
                 });
 
-                // 3. الحصول على التصنيفات الموجودة حالياً في بنود الميزانية
                 const existingCategories = new Set(items.map(i => i.category));
 
-                // 4. إنشاء بنود جديدة للتصنيفات المفقودة (مع ميزانية تقديرية)
                 for (const [cat, spentAmount] of Object.entries(catMap)) {
                     if (!existingCategories.has(cat)) {
-                        // الميزانية التقديرية = المصروف الحالي + 20% (لتجنب التجاوز الفوري)
-                        const estimatedBudget = Math.ceil(spentAmount * 1.2) || 10; // حد أدنى 10 ريال
-
+                        const estimatedBudget = Math.ceil(spentAmount * 1.2) || 10;
                         const newItem = {
                             id: Utils.generateId(),
                             name: cat,
@@ -3208,7 +3334,6 @@
                     }
                 }
 
-                // 5. تحديث spent للبنود الموجودة (بما فيها القديمة والجديدة)
                 items.forEach(item => {
                     item.spent = catMap[item.category] || 0;
                 });
@@ -3216,31 +3341,24 @@
                 Storage.setBudgetItems(items);
             },
 
-            // ===== 🧹 التنظيف التلقائي: حذف البنود التلقائية غير المستخدمة =====
             cleanupAutoCreatedItems() {
                 let items = this.getBudgetItems();
                 const twoMonthsAgo = new Date(WorldTime.now());
                 twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
 
                 const kept = items.filter(item => {
-                    // احتفظ بالبنود التي ليست تلقائية، أو التي تم استخدامها خلال شهرين
                     if (!item.isAutoCreated) return true;
-                    // إذا كان لديه spent > 0 في أي وقت (نحتفظ به)
                     if (item.spent > 0) return true;
-                    // إذا كان تاريخ الإنشاء منذ أقل من شهرين (يعطي فرصة)
                     const createdDate = new Date(item.createdAt);
                     if (createdDate > twoMonthsAgo) return true;
-                    // غير ذلك: احذفه
                     return false;
                 });
 
                 if (kept.length !== items.length) {
                     Storage.setBudgetItems(kept);
-                    console.log(`🧹 تم حذف ${items.length - kept.length} بنداً تلقائياً غير مستخدم.`);
                 }
             },
 
-            // ===== BUDGET OVERRIDE SYSTEM =====
             findSurplusCategories(excludeCategory) {
                 const items = this.getBudgetItems();
                 const result = [];
@@ -3271,7 +3389,6 @@
                 target.budget = target.budget + amount;
                 source.updatedAt = new Date().toISOString();
                 target.updatedAt = new Date().toISOString();
-                // إذا كان الهدف تلقائياً، نزيل العلامة لأن المستخدم تفاعل معه
                 target.isAutoCreated = false;
                 Storage.setBudgetItems(items);
                 this.refreshAll();
@@ -3303,7 +3420,6 @@
 
             refreshAll() {
                 this.syncBudgetItemsSpent();
-                // نقوم بالتنظيف كل مرة يتم فيها التحديث (يمكن تفعيله بشكل دوري)
                 this.cleanupAutoCreatedItems();
                 if (typeof UI !== 'undefined') {
                     UI.refreshContext();
@@ -3341,7 +3457,12 @@
                     };
                 });
                 Storage.setBudgetItems(defaultItems);
-                Storage.setSettings({ salary: 0, salaryDate: Utils.today(), savingsGoal: 0 });
+                const settings = Storage.getSettings();
+                settings.salary = 0;
+                settings.salaryDate = Utils.today();
+                settings.savingsGoal = 0;
+                settings.budgetOrganizationEnabled = false;
+                Storage.setSettings(settings);
                 Storage.setExpenses([]);
                 Storage.setTravelBudget({ enabled: false, tripName: '', totalBudget: 0, categoryBudgets: {} });
                 Storage.setTravelExpenses([]);
@@ -3353,7 +3474,6 @@
             }
         };
 
-        // ---- Migration from old categoryBudgets to Budget Items ----
         function migrateToBudgetItems() {
             if (Storage.isMigrated()) return;
             const settings = Storage.getSettings();
@@ -3408,7 +3528,7 @@
         }
 
         // ============================================================
-        // 5. INCOME, COMMITMENT, INDICATOR, etc. (unchanged)
+        // 5. INCOME, COMMITMENT, INDICATOR, etc.
         // ============================================================
 
         const IncomeAnalysisEngine = {
@@ -3507,8 +3627,6 @@
                 });
 
                 const goalProgress = savingsGoal > 0 && available !== null ? Math.min(100, (available / savingsGoal) * 100) : 0;
-                // متوسط الصرف اليومي الدقيق: نافذة متحركة من 30 يوماً عبر كل المصروفات (وليس فقط الشهر التقويمي الحالي)
-                // هذا أدق وأكثر استقراراً من "إجمالي الشهر ÷ يوم اليوم من الشهر"، الذي يهتز بشدة أول أيام الشهر
                 const allExpForAvg = (typeof allExpenses !== 'undefined' && allExpenses) ? allExpenses : expenses;
                 const todayDateForAvg = WorldTime.now();
                 const windowStartDate = new Date(todayDateForAvg);
@@ -3631,7 +3749,6 @@
                 result.highestSpendingDays = sortedDays.slice(0, 3).map(d => d[0]);
                 result.lowestSpendingDays = sortedDays.slice(-3).map(d => d[0]);
                 const savingsRate = indicators.savingsRate || 0;
-                // مقياس واحد وواضح مرتب من الأقل صرفاً إلى الأكثر صرفاً، بناءً على نسبة الادخار من الدخل
                 if (savingsRate >= 30) result.profile = 'Saver';
                 else if (savingsRate >= 15) result.profile = 'Economical';
                 else if (savingsRate >= 0) result.profile = 'Balanced';
@@ -3718,17 +3835,13 @@
                 });
                 const items = FinancialEngine.getBudgetItems();
                 const atRisk = [];
-                // بنود الالتزامات الثابتة (إيجار/أقساط) تُدفع عادة دفعة واحدة شهرياً وليست معدل يومي،
-                // ولذلك لا يصح إسقاطها بمعدل يومي — تُستثنى من هذا التوقع (تُحسب كالتزامات ثابتة في مكان آخر)
                 const excludedFromProjection = ['الإيجار', 'الأقساط'];
                 const daysPassed = Math.max(1, WorldTime.now().getDate());
                 items.forEach(item => {
                     const budget = item.budget || 0;
                     const spent = catMap[item.category] || 0;
                     if (excludedFromProjection.includes(item.category)) return;
-                    // إذا لم يُصرف شيء في هذا البند بعد، لا توجد بيانات فعلية لبناء توقع منه — نتجاهله بدل افتراض معدل عام
                     if (budget > 0 && spent > 0) {
-                        // معدل الصرف اليومي الخاص بهذا التصنيف تحديداً (وليس معدل كل التصنيفات مجتمعة)
                         const categoryDailyRate = spent / daysPassed;
                         const projected = spent + (categoryDailyRate * daysLeft);
                         if (projected > budget) {
@@ -4040,7 +4153,10 @@
                     'منظف', 'مناديل', 'ورق حمام', 'معطر جو', 'ملمع أثاث', 'اسفنج', 'قطعة قماش', 'صابون غسيل',
                     'منظف أرضيات', 'مبيض', 'كلور', 'جلو', 'ريموت', 'جهاز تحكم', 'شاحن', 'بطارية', 'لمبة',
                     'مصباح', 'سلك', 'محول', 'مفتاح كهرباء', 'فيش', 'طقم أدوات', 'مفك', 'مسامير', 'غراء', 'شريط لاصق',
-                    'علاقة ملابس', 'شماعة', 'سلة مهملات', 'فرشاة تنظيف', 'مكنسة', 'ممسحة', 'دلو'
+                    'علاقة ملابس', 'شماعة', 'سلة مهملات', 'فرشاة تنظيف', 'مكنسة', 'ممسحة', 'دلو',
+                    'مكتب', 'كرسي', 'كرسي مكتب', 'طاولة', 'خزانة', 'دولاب', 'رف', 'سرير', 'مرتبة', 'أثاث مكتبي',
+                    'وسادة', 'مخدة', 'بطانية', 'مفرش', 'ستارة', 'سجادة', 'مكواة', 'غسالة', 'ثلاجة', 'مكيف',
+                    'مروحة', 'مايكرويف', 'خلاط', 'مكنسة كهربائية', 'أدوات منزلية'
                 ];
                 const entertainmentKeywords = [
                     'ترفيه', 'سينما', 'مسرح', 'حفلة', 'فعالية', 'مهرجان', 'مدينة ألعاب', 'بولينج', 'بلياردو',
@@ -4089,16 +4205,13 @@
                 return { category: 'أخرى' };
             },
 
-            // يحوّل الأرقام العربية (٠-٩) إلى أرقام إنجليزية عادية حتى تعمل معها تعابير regex القياسية
             normalizeDigits(str) {
                 const map = { '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4', '٥': '5', '٦': '6', '٧': '7',
                     '٨': '8', '٩': '9' };
                 return (str || '').replace(/[٠-٩]/g, d => map[d]);
             },
 
-            // يحاول استخراج تاريخ رقمي من سطر واحد (بأي صيغة فواصل شائعة) ويرجع التاريخ + النص بعد إزالته
             extractDateFromLine(line) {
-                // صيغة كاملة: سنة-شهر-يوم (مثل 2026-07-01 أو 2026/7/1)
                 let m = line.match(/\b(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})\b/);
                 if (m) {
                     const y = m[1],
@@ -4108,7 +4221,6 @@
                         return { match: m[0], date: `${y}-${mo}-${d}` };
                     }
                 }
-                // صيغة: يوم/شهر/سنة (سنة كاملة أو مختصرة)
                 m = line.match(/\b(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})\b/);
                 if (m) {
                     let d = m[1],
@@ -4120,7 +4232,6 @@
                         mo = tmp; }
                     return { match: m[0], date: `${y}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}` };
                 }
-                // صيغة: يوم/شهر بدون سنة (نفترض السنة الحالية)
                 m = line.match(/\b(\d{1,2})[\/\-\.](\d{1,2})\b(?!\d)/);
                 if (m) {
                     let d = m[1],
@@ -4146,7 +4257,6 @@
                 if (dateMatch) result.date = dateMatch[1];
                 for (const line of lines) {
                     let cleaned = line.replace(/,/g, '');
-                    // نحاول استخراج تاريخ خاص بهذا السطر تحديداً (أقرب تاريخ لهذه العملية)
                     let lineDate = null;
                     const dateInfo = this.extractDateFromLine(cleaned);
                     if (dateInfo) {
@@ -4294,7 +4404,6 @@
                 }
             },
 
-            // يتحقق أن التاريخ بصيغة YYYY-MM-DD صحيحة وواقعية (ليس بعيداً جداً في الماضي أو المستقبل)
             isValidExpenseDate(dateStr) {
                 if (!dateStr || typeof dateStr !== 'string') return false;
                 if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
@@ -4302,7 +4411,6 @@
                 if (isNaN(d.getTime())) return false;
                 const today = new Date(Utils.today() + 'T00:00:00');
                 const diffDays = Math.abs((today - d) / 86400000);
-                // نرفض أي تاريخ يبعد أكثر من سنة عن اليوم الفعلي (غالباً تخمين خاطئ من النموذج)
                 return diffDays <= 366;
             },
 
@@ -4361,9 +4469,8 @@
                 }
             },
 
-            // يستخرج عدة مصروفات دفعة واحدة من نص واحد (سطر لكل مصروف عادةً) ويرجع مصفوفة
-            async parseMultipleExpenses(text) {
-                const categories = Utils.defaultCategories();
+            async parseMultipleExpenses(text, categoriesOverride) {
+                const categories = categoriesOverride || Utils.defaultCategories();
                 const todayStr = Utils.today();
                 const todayHijri = new Date(todayStr + 'T00:00:00').toLocaleDateString('ar-SA-u-ca-islamic', {
                     year: 'numeric', month: 'long', day: 'numeric' });
@@ -4371,7 +4478,7 @@
                     if (!categories.includes(item.category)) {
                         const fallback = ExpenseParser.classifyWithKeywords((item.description || '') + ' ' + (item
                             .merchant || ''));
-                        item.category = fallback.category || 'أخرى';
+                        item.category = categories.includes(fallback.category) ? fallback.category : 'أخرى';
                     }
                     if (!this.isValidExpenseDate(item.date)) {
                         item.date = todayStr;
@@ -4403,6 +4510,7 @@
                     - اسم المصروف هو النص المتبقي بعد إزالة التاريخ والمبلغ والعملة (اسم منتج، خدمة، متجر، اشتراك، أو فاتورة).
                     - إذا كان النص من OCR وغير مرتب أو مكسور الكلمات، حاول إعادة ترتيب البيانات منطقياً قبل الاستخراج.
                     - تجاهل أي عملية لا يمكن استخراج مبلغ لها بثقة عالية.
+                    - كن حازماً في اختيار التصنيف: أي أثاث أو غرض منزلي (مكتب، كرسي، طاولة، خزانة) هو "مستلزمات المنزل"، لا تضعه في "أخرى". استخدم "أخرى" فقط عندما يكون الوصف غامضاً فعلاً ولا ينتمي منطقياً لأي تصنيف آخر.
 
                     أخرج النتيجة بتنسيق JSON صالح فقط على شكل مصفوفة (Array) بدون أي نص إضافي قبلها أو بعدها، بهذا الهيكل تماماً:
                     [
@@ -4443,7 +4551,6 @@
                 }
             },
 
-            // القواعد المشتركة لاستخراج التاريخ (تُستخدم في كل من parseExpense و parseMultipleExpenses)
             dateExtractionRules(todayStr, todayHijri) {
                 return `قواعد استخراج التاريخ (طبّقها بدقة تامة):
                 - التاريخ قد يظهر في بداية السطر، وسطه، نهايته، أو داخل جملة كاملة.
@@ -4457,7 +4564,6 @@
                 - إذا لم يُذكر أي تاريخ لعملية، استخدم تاريخ اليوم الفعلي بالضبط دون تخمين.`;
             },
 
-            // يحلل مصروفات بند "أخرى" ويقترح تصنيفاً أدق لكل واحد منها من قائمة التصنيفات المعروفة
             async reclassifyOtherExpenses(expenses) {
                 if (!expenses || expenses.length === 0) return [];
                 const categories = Utils.defaultCategories().filter(c => c !== 'أخرى');
@@ -4470,6 +4576,8 @@
 
                     قائمة المصروفات (بصيغة JSON):
                     ${JSON.stringify(list)}
+
+                    كن حازماً في التصنيف: أي غرض منزلي أو أثاث (مثل مكتب، كرسي، طاولة، خزانة) يصنَّف "مستلزمات المنزل"، وأي منتج غذائي "المواد الغذائية"، وهكذا. لا تستخدم "أخرى" إلا إذا كان الوصف غامضاً فعلاً ولا يمكن ربطه منطقياً بأي تصنيف مما سبق.
 
                     أخرج النتيجة بتنسيق JSON صالح فقط (مصفوفة)، بدون أي نص إضافي، بهذا الهيكل تماماً، وبنفس عدد وترتيب العناصر المُدخلة:
                     [
@@ -4490,7 +4598,6 @@
                     throw new Error('تعذر تحليل الرد');
                 } catch (e) {
                     console.warn('فشل Gemini في إعادة التصنيف:', e.message);
-                    // بديل احتياطي: نستخدم نفس المصنّف بالكلمات المفتاحية المستخدم في تحليل المصروفات
                     return expenses.map(e => {
                         const classified = ExpenseParser.classifyWithKeywords((e.description || '') + ' ' + (e
                             .merchant || ''));
@@ -4530,11 +4637,9 @@
                 last6Months.forEach(e => {
                     const cat = e.category || 'أخرى';
                     catMap6Months[cat] = (catMap6Months[cat] || 0) + (parseFloat(e.amount) || 0);
-                    if (e.date) monthsPresent.add(e.date.slice(0, 7)); // "YYYY-MM"
+                    if (e.date) monthsPresent.add(e.date.slice(0, 7));
                 });
                 const avg6Months = {};
-                // نستخدم العدد الحقيقي للأشهر التي توجد بها بيانات فعلية (بحد أدنى شهر واحد)
-                // بدل افتراض 6 أشهر دائماً، حتى لا تكون المتوسطات مضللة لمستخدم جديد لم يكمل 6 أشهر بعد
                 const monthsCount = Math.max(1, monthsPresent.size);
                 for (const [cat, total] of Object.entries(catMap6Months)) {
                     avg6Months[cat] = total / monthsCount;
@@ -4595,6 +4700,52 @@
                 }
                 str += `الإنفاق في عطلة نهاية الأسبوع: ${Utils.formatCurrency(behavior.weekendSpending || 0)}\n`;
                 str += `الإنفاق في أيام الأسبوع: ${Utils.formatCurrency(behavior.weekdaySpending || 0)}\n`;
+
+                const monthExpForWeekly = FinancialEngine.getMonthExpenses();
+                const weekTotalsForCtx = [0, 0, 0, 0, 0];
+                monthExpForWeekly.forEach(e => {
+                    if (!e.date) return;
+                    const day = parseInt(e.date.split('-')[2], 10);
+                    if (isNaN(day)) return;
+                    const wIdx = Math.min(4, Math.floor((day - 1) / 7));
+                    weekTotalsForCtx[wIdx] += parseFloat(e.amount) || 0;
+                });
+                const weekLabelsForCtx = ['الأسبوع الأول (١-٧)', 'الأسبوع الثاني (٨-١٤)', 'الأسبوع الثالث (١٥-٢١)',
+                    'الأسبوع الرابع (٢٢-٢٨)', 'الأسبوع الخامس (٢٩+)'
+                ];
+                str += `\n--- الإنفاق الأسبوعي لهذا الشهر (استخدمها إذا سُئلت عن أكثر أسبوع صرفاً) ---\n`;
+                weekTotalsForCtx.forEach((total, idx) => {
+                    if (total > 0 || idx < 4) str += `${weekLabelsForCtx[idx]}: ${Utils.formatCurrency(total)}\n`;
+                });
+                const maxWeekIdx = weekTotalsForCtx.indexOf(Math.max(...weekTotalsForCtx));
+                if (weekTotalsForCtx[maxWeekIdx] > 0) {
+                    str += `أعلى أسبوع إنفاقاً: ${weekLabelsForCtx[maxWeekIdx]} (${Utils.formatCurrency(weekTotalsForCtx[maxWeekIdx])})\n`;
+                }
+
+                const now4Cmp = WorldTime.now();
+                const prevMonthDate = new Date(now4Cmp.getFullYear(), now4Cmp.getMonth() - 1, 1);
+                const prevMonthKey = prevMonthDate.toISOString().slice(0, 7);
+                const thisMonthKey = Utils.today().slice(0, 7);
+                const prevMonthTotal = last6Months.filter(e => (e.date || '').slice(0, 7) === prevMonthKey)
+                    .reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
+                const thisMonthTotal = monthExpForWeekly.reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
+                if (prevMonthTotal > 0) {
+                    const diffPct = Math.round(((thisMonthTotal - prevMonthTotal) / prevMonthTotal) * 100);
+                    str += `\n--- مقارنة بالشهر الماضي ---\n`;
+                    str += `إجمالي هذا الشهر (حتى الآن): ${Utils.formatCurrency(thisMonthTotal)}\n`;
+                    str += `إجمالي الشهر الماضي: ${Utils.formatCurrency(prevMonthTotal)}\n`;
+                    str += `الفرق: ${diffPct > 0 ? 'زيادة' : 'نقص'} ${Math.abs(diffPct)}%\n`;
+                }
+
+                if (salary > 0) {
+                    const needsPct = Math.round(f.essentialRatio || 0);
+                    const wantsPct = Math.round(f.lifestyleRatio || 0);
+                    const savePct = Math.round(f.savingsRate || 0);
+                    str += `\n--- قاعدة 50/30/20 (احتياجات/كماليات/ادخار) ---\n`;
+                    str += `احتياجات أساسية: ${needsPct}% (المستهدف 50%)\n`;
+                    str += `كماليات: ${wantsPct}% (المستهدف 30%)\n`;
+                    str += `ادخار: ${savePct}% (المستهدف 20%)\n`;
+                }
 
                 if (plan.safeSpendingLimit !== undefined && plan.safeSpendingLimit > 0) {
                     str += `\nالحد الآمن للصرف اليومي: ${Utils.formatCurrency(plan.safeSpendingLimit || 0)}\n`;
@@ -4997,6 +5148,23 @@
                 - لا تذكر أي معلومة أو استنتاج لا تدعمه البيانات المتوفرة أعلاه.
                 - اجعل الانتقال بين الأفكار منطقياً ومباشراً، وفقرات قصيرة تناسب شاشة الجوال.
 
+                قواعد مهمة عند السؤال عن "الشهر القادم" أو "خطة قادمة":
+                - إذا سأل المستخدم عن خطة أو ميزانية "للشهر القادم"، تذكر أن راتباً كاملاً جديداً سينزل في ذلك الشهر — لا تستخدم "المتاح للصرف" أو "المتبقي" من الشهر الحالي كأساس لهذا السؤال إطلاقاً.
+                - احسب ميزانية الشهر القادم بالمعادلة: الراتب الشهري الكامل - الالتزامات الثابتة - هدف الادخار - الأموال المحجوزة = ميزانية المعيشة للشهر القادم.
+                - اقترح لكل بند رئيسي مبلغاً محدداً بناءً على متوسط إنفاق المستخدم الفعلي، بحيث يصل مجموعها لتحقيق هدف الادخار أو على الأقل تفادي أي عجز في نهاية الشهر.
+
+                قواعد الأولوية والتخصيص (طبّقها دائماً عند تقديم توصيات أو تحليل):
+                - رتّب كل التوصيات حسب (الأثر المالي المتوقع × سهولة التنفيذ)، وابدأ دائماً بالأكثر تأثيراً، وليس بمجرد وجود مصروف مرتفع.
+                - لا تذكر كل الملاحظات بنفس الأهمية؛ أبرز أهم 3 أولويات فقط ثم انتقل للأقل أهمية.
+                - إن أمكن حساب التوفير المتوقع من البيانات، اذكر رقماً شهرياً أو سنوياً تقريبياً بدل نصيحة عامة؛ إن لم يمكن حسابه بدقة استخدم تقديراً منطقياً دون اختلاق أرقام.
+                - عند وجود عدة فرص للتوفير، قارن بينها وابدأ بالبند الأكبر أثراً.
+                - ميّز بين المصروفات الثابتة والمتغيرة؛ لا تطلب تخفيض مصروف ثابت بلا بديل عملي، وانتقل للفرص الأكثر قابلية للتنفيذ.
+                - غيّر أسلوبك حسب حالة المستخدم: عجز مالي → أسلوب حازم يركز على إيقاف النزيف؛ فائض مالي → التركيز على تنمية الثروة والاستثمار؛ ديون مرتفعة → سداد الديون أولوية أعلى من الادخار إلا إذا دلّت البيانات على غير ذلك؛ ضعف ادخار → التركيز على زيادة الادخار؛ إسراف → التركيز على ضبط الإنفاق.
+                - وضّح أي إنفاق موسمي أو مؤقت بأنه استثنائي ولا تعتبره عادة دائمة.
+                - إذا كانت البيانات غير كافية لقرار قوي، صرّح بذلك بوضوح بدل التخمين، ولا تختلق أسباباً أو ظروفاً غير مذكورة.
+                - لا توافق المستخدم دائماً؛ إن كان قراره المالي غير مناسب فقل ذلك بوضوح واقترح التأجيل مع توضيح السبب.
+                - اجعل التقرير يقود لخطوة عملية واحدة قابلة للتنفيذ اليوم تحقق أكبر أثر، وينتقل منطقياً من التشخيص إلى التفسير إلى الحل إلى النتيجة المتوقعة.
+
                 تعليمات الرد الإضافية (مهمة جداً):
 
                 1. لا تقم بأي عمليات حسابية — كل الأرقام والمؤشرات جاهزة أعلاه.
@@ -5149,19 +5317,41 @@
 
             async runAdvancedAnalytics(expenses, settings) {
                 const context = FinancialContextBuilder.build();
-                const prompt = `أنت مستشار مالي خبير. بناءً على السياق المالي أدناه، قدم تحليلاً شاملاً مع توصيات عملية قابلة للتنفيذ.
+                const prompt = `أنت محلل مالي خبير. بناءً على السياق المالي أدناه، أجرِ تحليلاً عميقاً متعدد الأبعاد ثم اعرض أهم النتائج فقط.
 
                 ${this.buildContextString(context)}
 
-                المطلوب:
-                1. تحليل عميق للصحة المالية مع تحديد نقاط القوة والضعف.
-                2. تحديد أكبر 3 مخاطر مالية حالية.
-                3. أكبر 3 فرص للتوفير.
-                4. خطة عمل مقترحة للشهر القادم.
-                5. توصيات لتحسين درجة الصحة المالية.
+                إطار التحليل (طبّقه داخلياً على البيانات، ولا تعرض كل خطوة بالتفصيل في الرد النهائي):
 
-                معايير الجودة: اكتب كمستشار مالي محترف حقيقي وليس كنموذج ذكاء اصطناعي. كل جملة تعتمد على بيانات المستخدم أعلاه فقط، بدون عبارات عامة أو حشو أو تحفيز مبالغ فيه. رتّب حسب الأهمية للمستخدم. كل رقم مصحوب بمعناه وتأثيره. لا تستخدم ** أو أي رموز ماركداون، واستخدم "•" فقط للنقاط. فقرات قصيرة تناسب شاشة الجوال.
-                أجب بشكل مختصر ومفيد، باللغة العربية الفصحى.`;
+                1) الأسباب الجذرية: فسّر لماذا ارتفع أو انخفض الإنفاق بالاعتماد على البيانات الفعلية فقط، ميّز بين تغيّر طبيعي وتغيّر غير معتاد، واربط كل استنتاج برقم أو نمط حقيقي.
+
+                2) الأنماط المتكررة: اكتشف العادات المتكررة أسبوعياً/شهرياً، الفئات التي يتصاعد إنفاقها تدريجياً حتى لو لم تكن الأعلى، الاعتماد على التقسيط أو الشراء المؤجل، وأي تأجيل متكرر للادخار — دون إصدار أحكام شخصية، فقط صف السلوك.
+
+                3) المخاطر: قيّم استقرار النمط المالي، احتمال حدوث عجز إذا استمر النمط الحالي، ارتفاع الالتزامات الثابتة مقابل الدخل، والفئات التي قد تسبب ضغطاً مستقبلياً — صنّف مستوى الخطر مع سبب واضح.
+
+                4) التوقعات: بناءً على النمط الحالي فقط، توقع الرصيد/الفائض/العجز المحتمل وأي فئة قد تتجاوز ميزانيتها قبل حدوث ذلك — ووضّح صراحة أن كل توقع تقديري وليس مؤكداً.
+
+                5) المقارنة: قارن الأداء الحالي بالفترات السابقة المتوفرة في البيانات، وحدد أكبر تحسّن وأكبر تراجع فعلي، دون ذكر أي تغيّر غير جوهري.
+
+                6) أكبر الفرص: حدد الفئة أو القرار الذي يحقق أكبر توفير ممكن عند تحسينه، مع توضيح النتيجة المتوقعة رقمياً إن أمكن.
+
+                7) توزيع الميزانية: قيّم مدى توازن توزيع الإنفاق بين الفئات، واذكر أي فئة تحصل على إنفاق أكبر من حاجتها الفعلية أو فئة تعاني نقصاً واضحاً.
+
+                8) الشذوذ: اكتشف أي عملية أو قفزة إنفاق غير معتادة مقارنة بتاريخ المستخدم مع توضيح سبب اعتبارها شاذة — ولا تعتبر أي عملية شاذة إذا كانت تتكرر بشكل طبيعي.
+
+                9) كفاءة الإنفاق والعلاقات: قيّم أي فئة ذات عائد منخفض مقابل حجمها، واكتشف أي علاقة بين ارتفاع/انخفاض فئة وتأثيرها على باقي الميزانية، ومدى اعتماد المستخدم على عدد محدود من الفئات.
+
+                10) الاتجاه العام: هل يقترب المستخدم من أهدافه المالية أم يبتعد عنها، ولو بتغيّر بسيط؟
+
+                قواعد صارمة على المخرج النهائي:
+                - لا تختلق أي استنتاج أو نمط أو سبب لا تدعمه البيانات أعلاه؛ إذا كانت البيانات غير كافية لاستنتاج موثوق فصرّح بذلك بوضوح بدل التخمين.
+                - لا تكرر أرقاماً ظاهرة أصلاً في الرسوم البيانية أو الجداول بلا تفسير جديد.
+                - اعرض فقط الرؤى التي تضيف قيمة فعلية وتساعد على قرار أفضل، ورتّبها حسب الأثر المالي.
+                - ابرز أهم معلومة قد لا يلاحظها المستخدم بنفسه في البداية.
+                - اختصر: 4-6 نقاط كحد أقصى في الرد النهائي، كل نقطة سطر أو سطران فقط.
+
+                معايير الجودة: اكتب كمستشار مالي محترف حقيقي وليس كنموذج ذكاء اصطناعي. كل جملة تعتمد على بيانات المستخدم أعلاه فقط، بدون عبارات عامة أو حشو أو تحفيز مبالغ فيه. كل رقم مصحوب بمعناه وتأثيره. لا تستخدم ** أو أي رموز ماركداون، واستخدم "•" فقط للنقاط. فقرات قصيرة تناسب شاشة الجوال.
+                أجب باللغة العربية الفصحى.`;
 
                 try {
                     const response = await this.sendRequest(prompt);
@@ -5433,7 +5623,6 @@
                 const maxVal = Math.max(...allValues, 1);
                 const stepX = labels.length > 1 ? chartWidth / (labels.length - 1) : 0;
 
-                // خطوط الشبكة الأفقية
                 ctx.strokeStyle = 'rgba(148,163,184,0.15)';
                 ctx.lineWidth = 1;
                 for (let g = 0; g <= 3; g++) {
@@ -5465,7 +5654,6 @@
                     });
                 });
 
-                // تسميات المحور الأفقي (الأشهر)
                 ctx.fillStyle = '#94A3B8';
                 ctx.font = '9px Cairo';
                 ctx.textAlign = 'center';
@@ -5474,7 +5662,6 @@
                     ctx.fillText(label, x, padding.top + chartHeight + 14);
                 });
 
-                // مفتاح الألوان (Legend)
                 let legendX = padding.left;
                 let legendY = padding.top + chartHeight + 30;
                 ctx.font = '9px Cairo';
@@ -5710,7 +5897,6 @@
                 const spent = this.getByCategory(this.getMonthExpenses())[category] || 0;
                 return item.budget - spent;
             },
-            // travel & temp
             addTravelExpense(data) { const exp = Storage.getTravelExpenses(); const entry = { id: Utils.generateId(),
                     amount: parseFloat(data.amount) || 0, description: data.description || '', category: data.category ||
                     'أخرى', date: data.date || Utils.today(), notes: data.notes || '', createdAt: new Date()
@@ -5746,17 +5932,17 @@
         };
 
         // ============================================================
-        // 11. UI (updated with Budget Override + Auto-Created styling + Refresh Button)
+        // 11. UI (updated with Budget Override + Auto-Created styling + Refresh Button + Dashboard Advisor Button)
         // ============================================================
         const UI = {
             chatMessages: null,
             financialContext: null,
             selectedPreset: null,
             overrideData: null,
+            installmentFlow: null,
 
             init() {
                 migrateToBudgetItems();
-                // أول تنظيف للبنود التلقائية عند بدء التشغيل
                 FinancialEngine.cleanupAutoCreatedItems();
                 FinancialEngine.syncBudgetItemsSpent();
 
@@ -5787,8 +5973,9 @@
                 this.setupCoach();
                 this.setupIncomePage();
                 this.setupBudgetOverride();
-                this.setupRefreshButton(); // <-- إضافة زر التحديث
+                this.setupRefreshButton();
                 this.setupFloatingAdvisor();
+                this.setupDashboardAdvisorButton(); // <-- زر المستشار في الصفحة الرئيسية
                 this.renderAll();
                 WorldTime.init().then(() => { this.setupDate();
                     this.renderAll(); });
@@ -5933,7 +6120,9 @@
                         if (page === 'income') this.renderIncomePage();
                         if (page === 'travel') this.renderTravel();
                         if (page === 'temp') this.renderTemp();
-                        if (page === 'chat') { setTimeout(() => Utils.id('chatInput').focus(), 200); }
+                        if (page === 'chat') {
+                            if (this.updateChatHeight) this.updateChatHeight();
+                        }
                         const fab = Utils.id('financialAdvisorFab');
                         if (fab) fab.classList.toggle('fab-hidden', page === 'chat');
                     });
@@ -5942,7 +6131,6 @@
                         '.nav-link[data-page="chat"]'); if (chatLink) chatLink.click(); });
             },
 
-            // زر المستشار المالي العائم: قابل للسحب لأي جهة (يمين/يسار/أعلى/أسفل)، يحفظ موضعه، ويفتح المحادثة عند الضغط عليه بدون سحب
             setupFloatingAdvisor() {
                 const fab = Utils.id('financialAdvisorFab');
                 if (!fab) return;
@@ -5975,7 +6163,6 @@
                 if (saved && typeof saved.x === 'number' && typeof saved.y === 'number') {
                     applyPosition(saved.x, saved.y);
                 } else {
-                    // موضع افتراضي: أسفل يمين الشاشة، بعيداً عن أي عناصر أخرى
                     applyPosition(window.innerWidth - defaultW - 20, window.innerHeight - defaultH - 110);
                 }
 
@@ -6009,14 +6196,12 @@
                     fab.classList.remove('dragging');
                     const rect = fab.getBoundingClientRect();
                     const { w } = getSize();
-                    // إلصاق الزر بأقرب حافة (يمين أو يسار) لمظهر أكثر احترافية بعد ترك السحب
                     const snapToRight = (rect.left + w / 2) > (window.innerWidth / 2);
                     const finalX = snapToRight ? window.innerWidth - w - margin : margin;
                     const pos = applyPosition(finalX, rect.top);
                     Storage.set('advisor_fab_position', pos);
 
                     if (!moved) {
-                        // ضغطة عادية (بدون سحب): افتح صفحة المستشار المالي
                         const chatLink = Utils.qs('.nav-link[data-page="chat"]');
                         if (chatLink) chatLink.click();
                     }
@@ -6027,12 +6212,22 @@
                 Utils.on(fab, 'pointerup', onPointerUp);
                 Utils.on(fab, 'pointercancel', onPointerUp);
 
-                // عند تغيير حجم الشاشة (مثل تدوير الجهاز) نعيد ضبط الموضع حتى لا يخرج الزر عن حدود الشاشة
                 window.addEventListener('resize', () => {
                     const rect = fab.getBoundingClientRect();
                     const pos = applyPosition(rect.left, rect.top);
                     Storage.set('advisor_fab_position', pos);
                 });
+            },
+
+            // ===== زر المستشار المالي في الصفحة الرئيسية =====
+            setupDashboardAdvisorButton() {
+                const btn = Utils.id('dashboardAdvisorBtn');
+                if (btn) {
+                    Utils.on(btn, 'click', () => {
+                        const chatLink = Utils.qs('.nav-link[data-page="chat"]');
+                        if (chatLink) chatLink.click();
+                    });
+                }
             },
 
             setupSidebar() {
@@ -6182,6 +6377,8 @@
                 this.setupModalClose(modalId, 'closeExpenseModal', 'cancelExpenseBtn');
 
                 const openBtn = Utils.id('addExpenseBtn');
+                const dashboardOpenBtn = Utils.id('dashboardAddExpenseBtn');
+                if (dashboardOpenBtn) Utils.on(dashboardOpenBtn, 'click', () => openBtn.click());
                 const saveBtn = Utils.id('saveExpenseBtn');
                 const parseBtn = Utils.id('parseExpenseBtn');
                 const aiInput = Utils.id('aiExpenseInput');
@@ -6337,6 +6534,13 @@
                 Utils.id('quickAmount').value = '';
                 Utils.id('quickDescription').value = '';
                 Utils.id('quickDate').value = Utils.today();
+                Utils.id('quickAiInput').value = '';
+                Utils.id('quickParseResult').innerHTML = '';
+                this.quickParsedItems = [];
+                Utils.qsa('.quick-method-tab').forEach(t => t.classList.toggle('active', t.dataset.method === 'ai'));
+                Utils.id('quickAiMethod').style.display = 'block';
+                Utils.id('quickManualMethod').style.display = 'none';
+                Utils.id('saveQuickExpenseBtn').style.display = 'none';
                 this.openModal(modalId);
             },
 
@@ -6345,6 +6549,88 @@
                 this.setupModalClose(modalId, 'closeQuickExpenseModal', 'cancelQuickExpenseBtn');
 
                 const saveBtn = Utils.id('saveQuickExpenseBtn');
+                const parseBtn = Utils.id('quickParseBtn');
+                const aiInput = Utils.id('quickAiInput');
+                const parseResult = Utils.id('quickParseResult');
+                this.quickParsedItems = [];
+
+                Utils.qsa('.quick-method-tab').forEach(tab => {
+                    Utils.on(tab, 'click', () => {
+                        const method = tab.dataset.method;
+                        Utils.qsa('.quick-method-tab').forEach(t => t.classList.toggle('active', t === tab));
+                        Utils.id('quickAiMethod').style.display = method === 'ai' ? 'block' : 'none';
+                        Utils.id('quickManualMethod').style.display = method === 'manual' ? 'block' : 'none';
+                        saveBtn.style.display = method === 'manual' ? 'inline-flex' : 'none';
+                        parseResult.innerHTML = '';
+                        this.quickParsedItems = [];
+                    });
+                });
+
+                const addQuickItem = (item) => {
+                    const data = { amount: item.amount, description: item.description, category: item.category,
+                        date: item.date, merchant: item.merchant || '' };
+                    if (this.quickExpenseTarget === 'travel') Budget.addTravelExpense(data);
+                    else Budget.addTempExpense(data);
+                };
+
+                const renderQuickParsedList = () => {
+                    if (this.quickParsedItems.length === 0) { parseResult.innerHTML = '';
+                        return; }
+                    const total = this.quickParsedItems.reduce((s, it) => s + (parseFloat(it.amount) || 0), 0);
+                    parseResult.innerHTML = `<div class="parse-review">
+                        <div class="row"><span class="label">عدد المصروفات المستخرجة</span><span class="value">${this.quickParsedItems.length}</span></div>
+                        <div class="row"><span class="label">الإجمالي</span><span class="value">${total.toFixed(2)} ريال</span></div>
+                        <div class="parse-bulk-list" style="margin:8px 0;">${this.quickParsedItems.map((it, idx) => `
+                            <div class="parse-bulk-item" style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px dashed var(--bg-glass-border);">
+                                <div style="flex:1;min-width:0;">
+                                    <div style="font-weight:600;">${it.description}</div>
+                                    <div style="font-size:0.8rem;color:var(--text-secondary);">${it.category} • ${Utils.formatDate(it.date)}</div>
+                                </div>
+                                <div style="font-weight:600;white-space:nowrap;">${it.amount.toFixed(2)} ريال</div>
+                                <button type="button" class="remove-quick-parse-item btn-secondary" data-idx="${idx}" style="padding:4px 10px;"><i class="fas fa-times"></i></button>
+                            </div>`).join('')}</div>
+                        <div class="actions">
+                            <button class="btn-secondary" id="cancelQuickParseBtn" type="button">إلغاء</button>
+                            <button class="btn-primary" id="saveQuickParseBtn" type="button">حفظ الكل (${this.quickParsedItems.length})</button>
+                        </div>
+                    </div>`;
+                    Utils.qsa('.remove-quick-parse-item').forEach(btn => {
+                        Utils.on(btn, 'click', () => { this.quickParsedItems.splice(parseInt(btn.dataset.idx), 1);
+                            renderQuickParsedList(); });
+                    });
+                    Utils.on(Utils.id('cancelQuickParseBtn'), 'click', () => { this.quickParsedItems = [];
+                        parseResult.innerHTML = ''; });
+                    Utils.on(Utils.id('saveQuickParseBtn'), 'click', () => {
+                        const count = this.quickParsedItems.length;
+                        this.quickParsedItems.forEach(addQuickItem);
+                        this.quickParsedItems = [];
+                        if (this.quickExpenseTarget === 'travel') this.renderTravel();
+                        else this.renderTemp();
+                        this.closeModal(modalId);
+                        this.renderAll();
+                        alert(count === 1 ? 'تم حفظ المصروف بنجاح!' : `تم حفظ ${count} مصروفات بنجاح!`);
+                    });
+                };
+
+                Utils.on(parseBtn, 'click', async () => {
+                    const text = aiInput.value.trim();
+                    if (!text) { parseResult.innerHTML =
+                            '<div class="parse-review" style="color:var(--danger);">الرجاء إدخال نص</div>';
+                        return; }
+                    parseResult.innerHTML = '<div class="parse-review">جاري التحليل بواسطة الذكاء الاصطناعي...</div>';
+                    try {
+                        const cats = this.quickExpenseTarget === 'travel' ? Utils.travelCategories() : Utils
+                            .tempCategories();
+                        const items = await Gemini.parseMultipleExpenses(text, cats);
+                        this.quickParsedItems = items;
+                        renderQuickParsedList();
+                    } catch (err) {
+                        this.quickParsedItems = [];
+                        parseResult.innerHTML =
+                            `<div class="parse-review" style="color:var(--danger);">${err.message}</div>`;
+                    }
+                });
+
                 Utils.on(saveBtn, 'click', () => {
                     const amount = parseFloat(Utils.id('quickAmount').value);
                     if (!amount || amount <= 0) { alert('الرجاء إدخال مبلغ صحيح'); return; }
@@ -6431,7 +6717,8 @@
                     const settings = {
                         salary: Storage.getSettings().salary || 0,
                         salaryDate: dateInput.value || Utils.today(),
-                        savingsGoal: Storage.getSettings().savingsGoal || 0
+                        savingsGoal: Storage.getSettings().savingsGoal || 0,
+                        budgetOrganizationEnabled: Storage.getSettings().budgetOrganizationEnabled || false
                     };
                     Storage.setSettings(settings);
                     FinancialEngine.refreshAll();
@@ -6605,7 +6892,7 @@
                         });
                     });
                     Storage.setBudgetItems(items);
-                    const settings = { salary, salaryDate: date, savingsGoal: goal || 0 };
+                    const settings = { salary, salaryDate: date, savingsGoal: goal || 0, budgetOrganizationEnabled: false };
                     Storage.setSettings(settings);
                     Storage.markLaunched();
                     this.closeModal(modalId);
@@ -6737,7 +7024,6 @@
                 });
             },
 
-            // يطرح على المستخدم سؤال عدد الدفعات المناسب لمزود الدفع (تابي: 1-4 دفعات، تمارا: 3/4 دفعات أو 6/9/12/24 شهراً)
             askInstallmentCount() {
                 const flow = this.installmentFlow;
                 if (!flow) return;
@@ -6766,22 +7052,29 @@
                 const flow = this.installmentFlow;
                 if (!flow) return;
                 const isTabi = flow.provider === 'tabi';
-                const providerName = isTabi ? 'دفع تابي' : 'دفع تمارا';
+                const baseName = isTabi ? 'دفع تابي' : 'دفع تمارا';
                 const monthly = Math.round((flow.amount / count) * 100) / 100;
                 const endDate = new Date(WorldTime.now());
                 endDate.setMonth(endDate.getMonth() + count);
                 const endDateStr = endDate.toISOString().split('T')[0];
                 const notes = `إجمالي ${Utils.formatCurrency(flow.amount)} مقسّم على ${count} ${isTabi ? 'دفعة' : 'دفعة/شهر'}`;
-                const existing = FinancialEngine.getBudgetItems().find(i => i.category === providerName);
-                if (existing) {
-                    FinancialEngine.updateBudgetItem(existing.id, { budget: monthly, isReserved: true, endDate:
-                        endDateStr, notes });
-                } else {
-                    FinancialEngine.addBudgetItem({ name: providerName, category: providerName, budget: monthly,
-                        isReserved: true, endDate: endDateStr, notes });
+
+                const existingItems = FinancialEngine.getBudgetItems();
+                const sameProviderItems = existingItems.filter(i => i.category === baseName || i.category.startsWith(
+                    baseName + ' ('));
+                let finalName = baseName;
+                if (sameProviderItems.length > 0) {
+                    let n = 2;
+                    while (sameProviderItems.some(i => i.category === `${baseName} (${n})`)) n++;
+                    finalName = `${baseName} (${n})`;
                 }
+                FinancialEngine.addBudgetItem({ name: finalName, category: finalName, budget: monthly,
+                    isReserved: true, endDate: endDateStr, notes });
                 this.addChatMessage(
-                    `✅ تم إعداد "${providerName}": دفعة شهرية ${Utils.formatCurrency(monthly)} لمدة ${count} ${isTabi ? 'دفعات' : 'أشهر'}، تنتهي في ${Utils.formatDate(endDateStr)}. تم حجزها تلقائياً من المتاح للصرف.`,
+                    `✅ تم إضافة طلب جديد "${finalName}": دفعة شهرية ${Utils.formatCurrency(monthly)} لمدة ${count} ${isTabi ? 'دفعات' : 'أشهر'}، تنتهي في ${Utils.formatDate(endDateStr)}. تم حجزها تلقائياً من المتاح للصرف.` +
+                    (sameProviderItems.length > 0 ?
+                        `\nملاحظة: لديك ${sameProviderItems.length} طلب/طلبات سابقة بنفس المزود، تقدر تراجعها في صفحة تنظيم الميزانية.` :
+                        ''),
                     'system');
                 this.installmentFlow = null;
                 this.renderAll();
@@ -6795,10 +7088,10 @@
                 const sendMessage = async () => {
                     const text = input.value.trim();
                     if (!text) return;
+                    const normalizedText = ExpenseParser.normalizeDigits(text);
 
-                    // إذا كنا في منتصف تدفق إعداد تابي/تمارا وننتظر مبلغ المشتريات، عالج الرد هنا مباشرة
                     if (this.installmentFlow && this.installmentFlow.step === 'awaiting_amount') {
-                        const amountMatch = text.match(/[\d.]+/);
+                        const amountMatch = normalizedText.match(/[\d.]+/);
                         this.addChatMessage(text, 'user');
                         input.value = '';
                         input.style.height = 'auto';
@@ -6817,20 +7110,18 @@
                     input.value = '';
                     input.style.height = 'auto';
 
-                    // كشف نية إضافة بند تابي/تمارا لبدء تدفق تحديد المبلغ وعدد الدفعات
                     const mentionsTabi = /تابي|tabby/i.test(text);
                     const mentionsTamara = /تمارا|tamara/i.test(text);
                     if ((mentionsTabi || mentionsTamara) && !this.installmentFlow) {
                         const provider = mentionsTabi ? 'tabi' : 'tamara';
-                        const amountMatch = text.match(/[\d.]+/);
+                        const amountMatch = normalizedText.match(/[\d.]+/);
                         this.installmentFlow = { provider, amount: amountMatch ? parseFloat(amountMatch[0]) :
                             null, step: null };
-                        // إذا ذكر المستخدم عدد الدفعات/الأشهر صراحةً في نفس الرسالة، لا داعي لسؤاله مرة أخرى
                         let detectedCount = null;
                         if (/دفعتين/.test(text)) detectedCount = 2;
                         else if (/دفعة\s*واحدة/.test(text)) detectedCount = 1;
                         else {
-                            const numMatch = text.match(/(\d+)\s*(شهر|أشهر|دفعات|دفعة)/);
+                            const numMatch = normalizedText.match(/(\d+)\s*(شهر|أشهر|دفعات|دفعة)/);
                             if (numMatch) detectedCount = parseInt(numMatch[1]);
                         }
                         if (this.installmentFlow.amount && detectedCount) {
@@ -6842,6 +7133,59 @@
                                 'financial-advisor');
                         } else {
                             this.askInstallmentCount();
+                        }
+                        return;
+                    }
+
+                    if (/أخرى/.test(text) && /(اعرض|عرض|وضح|فصل|فصّل|تفاصيل|شو فيها|ايش فيها|إيش فيها)/.test(
+                            text)) {
+                        const otherBtn = Utils.id('reclassifyOtherBtn');
+                        if (otherBtn) {
+                            otherBtn.click();
+                            this.addChatMessage(
+                                '📂 فتحت لك تفاصيل بند "أخرى" في نافذة منفصلة مع اقتراحات لإعادة التصنيف.',
+                                'system');
+                        } else {
+                            this.addChatMessage('تعذر فتح تفاصيل بند "أخرى" حالياً.', 'financial-advisor');
+                        }
+                        return;
+                    }
+
+                    if (/ماذا لو|لو خفضت|لو قللت|لو وفرت|لو زدت/.test(text)) {
+                        const amountMatch = normalizedText.match(/[\d.]+/);
+                        const foundCategory = Utils.defaultCategories().find(c => text.includes(c));
+                        if (amountMatch && foundCategory) {
+                            const amount = parseFloat(amountMatch[0]);
+                            const isIncrease = /زدت|زيادة|رفعت|صرفت أكثر/.test(text);
+                            const delta = isIncrease ? -amount : amount;
+                            const available = FinancialEngine.calculateAvailableBudget() || 0;
+                            const daysLeft = FinancialEngine.getRemainingDays() || 1;
+                            const newAvailable = available + delta;
+                            const newDaily = daysLeft > 0 ? newAvailable / daysLeft : newAvailable;
+                            const currentDaily = daysLeft > 0 ? available / daysLeft : available;
+                            this.addChatMessage(
+                                `📊 تحليل "ماذا لو" على بند ${foundCategory}:\n` +
+                                `المتاح للصرف حالياً: ${Utils.formatCurrency(available)} ← بعد التغيير: ${Utils.formatCurrency(newAvailable)}\n` +
+                                `الميزانية اليومية حالياً: ${Utils.formatCurrency(currentDaily)} ← بعد التغيير: ${Utils.formatCurrency(newDaily)}\n` +
+                                `${isIncrease ? 'زيادة' : 'توفير'} شهري تقريبي: ${Utils.formatCurrency(amount)}`,
+                                'financial-advisor');
+                            return;
+                        }
+                    }
+
+                    if (/اشتراك.*متكرر|مصروفات متكررة|اشتراكات متكررة|اشتراكاتي/.test(text)) {
+                        const recurring = FinancialEngine.detectRecurringSubscriptions();
+                        if (recurring.length === 0) {
+                            this.addChatMessage(
+                                'لم أجد أي مصروف متكرر بنفس الاسم والمبلغ تقريباً عبر شهرين مختلفين أو أكثر في سجلك حتى الآن.',
+                                'financial-advisor');
+                        } else {
+                            const total = recurring.reduce((s, r) => s + r.avgAmount, 0);
+                            let msg = `🔁 وجدت ${recurring.length} مصروف متكرر شهرياً (إجمالي تقريبي ${Utils.formatCurrency(total)}/شهر):\n`;
+                            recurring.slice(0, 8).forEach(r => {
+                                msg += `• ${r.description}: ${Utils.formatCurrency(r.avgAmount)} تقريباً، تكرر ${r.monthsCount} أشهر مختلفة (${r.category})\n`;
+                            });
+                            this.addChatMessage(msg.trim(), 'financial-advisor');
                         }
                         return;
                     }
@@ -6879,19 +7223,52 @@
                 Utils.on(input, 'keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault();
                         sendMessage(); } });
                 Utils.on(input, 'input', () => { input.style.height = 'auto';
-                    input.style.height = Math.min(input.scrollHeight, 120) + 'px'; });
+                    input.style.height = Math.min(input.scrollHeight, 100) + 'px'; });
+
+                const quickActionsBox = Utils.id('chatQuickActions');
+                if (quickActionsBox) {
+                    const quickActions = [
+                        { label: '📊 أكثر أسبوع صرفاً', text: 'أي أسبوع من هذا الشهر صرفت فيه أكثر؟' },
+                        { label: '📂 تفاصيل بند أخرى', text: 'اعرض تفاصيل بند أخرى' },
+                        { label: '📅 مقارنة بالشهر الماضي', text: 'قارن مصروفات هذا الشهر بالشهر الماضي' },
+                        { label: '🔁 الاشتراكات المتكررة', text: 'اعرض اشتراكاتي المتكررة' },
+                        { label: '📏 قاعدة 50/30/20', text: 'هل أنا ملتزم بقاعدة 50/30/20؟' }
+                    ];
+                    quickActionsBox.innerHTML = quickActions.map((q, idx) =>
+                        `<button type="button" class="chat-quick-action-chip" data-idx="${idx}">${q.label}</button>`
+                        ).join('');
+                    quickActionsBox.querySelectorAll('.chat-quick-action-chip').forEach(chip => {
+                        Utils.on(chip, 'click', () => {
+                            const idx = parseInt(chip.dataset.idx);
+                            input.value = quickActions[idx].text;
+                            sendMessage();
+                        });
+                    });
+                }
 
                 const chatContainer = document.querySelector('.chat-container');
                 if (chatContainer) {
                     const updateHeight = () => {
-                        const windowHeight = window.innerHeight;
-                        const headerHeight = document.querySelector('.app-header').offsetHeight || 80;
-                        const availableHeight = windowHeight - headerHeight - 40;
-                        chatContainer.style.setProperty('--chat-max-height', Math.min(availableHeight, 600) +
-                            'px');
+                        const viewportHeight = window.visualViewport ? window.visualViewport.height : window
+                            .innerHeight;
+                        const headerEl = document.querySelector('.app-header');
+                        const headerHeight = headerEl ? headerEl.offsetHeight : 80;
+                        const quickActionsEl = Utils.id('chatQuickActions');
+                        const quickActionsHeight = quickActionsEl ? quickActionsEl.offsetHeight : 0;
+                        const safetyMargin = 32;
+                        const availableHeight = viewportHeight - headerHeight - quickActionsHeight - safetyMargin;
+                        const newHeight = Math.max(260, Math.min(availableHeight, 600));
+                        chatContainer.style.setProperty('--chat-max-height', newHeight + 'px');
+                        // تحديث min-height أيضاً ليكون متناسباً مع الوضع الجديد
+                        const minHeight = Math.min(260, newHeight);
+                        chatContainer.style.setProperty('--chat-min-height', minHeight + 'px');
                     };
+                    this.updateChatHeight = updateHeight;
                     updateHeight();
                     window.addEventListener('resize', updateHeight);
+                    if (window.visualViewport) {
+                        window.visualViewport.addEventListener('resize', updateHeight);
+                    }
                 }
             },
 
@@ -6910,7 +7287,6 @@
                 });
             },
 
-            // ===== BUDGET OVERRIDE SYSTEM =====
             setupBudgetOverride() {
                 const modalId = 'budgetOverrideModal';
                 this.setupModalClose(modalId, 'closeOverrideModal', 'cancelOverrideBtn');
@@ -7003,17 +7379,12 @@
                 this.openModal('budgetOverrideModal');
             },
 
-            // ===== 🔄 زر التحديث اليدوي =====
             setupRefreshButton() {
                 const refreshBtn = Utils.id('refreshBtn');
                 Utils.on(refreshBtn, 'click', () => {
-                    // إعادة حساب كل شيء
                     FinancialEngine.refreshAll();
-                    // تحديث التاريخ المعروض
                     this.setupDate();
-                    // إعادة رسم جميع الصفحات
                     this.renderAll();
-                    // رسالة تأكيد
                     alert('✅ تم تحديث البيانات بنجاح!');
                 });
             },
@@ -7332,12 +7703,9 @@
                     items.forEach(item => {
                         const spent = item.spent || 0;
                         const pct = item.budget > 0 ? (spent / item.budget) * 100 : 0;
-                        // تنبيه "قريب من الحد" له معنى فقط لبند محجوز (التزام ثابت) أو عندما يكون تنظيم الميزانية مفعّلاً
-                        // (لأن سقف البند التقديري التلقائي ليس التزاماً حقيقياً من المستخدم عند إيقاف الميزانية)
                         if (item.budget > 0 && pct >= 80 && pct < 100 && (item.isReserved || orgEnabled)) {
                             alerts.push({ key: `nearlimit-${item.id}-${Math.floor(pct / 10)}`, type: 'warning', text: `🔶 بند "${item.name}" وصل ${Math.round(pct)}% من ميزانيته (${Utils.formatCurrency(spent)} من ${Utils.formatCurrency(item.budget)})` });
                         }
-                        // تنبيهات انتهاء الالتزام تظهر دائماً بغض النظر عن تفعيل تنظيم الميزانية
                         if (item.endDate) {
                             const daysToEnd = Math.round((new Date(item.endDate) - new Date(todayStr)) / 86400000);
                             if (daysToEnd < 0) {
@@ -7347,7 +7715,17 @@
                             }
                         }
                     });
-                    const dismissed = Storage.get('dismissed_alerts', []) || [];
+
+                    const forecastCtx = ctx.forecast || {};
+                    if (forecastCtx.willEndWithDeficit && forecastCtx.projectedEndBalance < 0) {
+                        const monthKeyForAlert = Utils.today().slice(0, 7);
+                        alerts.push({
+                            key: `deficit-forecast-${monthKeyForAlert}-${Math.floor(Math.abs(forecastCtx.projectedEndBalance) / 100)}`,
+                            type: 'danger',
+                            text: `📉 بناءً على معدل صرفك الحالي، من المتوقع أن تنتهي الشهر بعجز ${Utils.formatCurrency(Math.abs(forecastCtx.projectedEndBalance))} — قلل الصرف الآن لتفادي ذلك`
+                        });
+                    }
+                    const dismissed = Storage.getDismissedAlerts() || [];
                     const visibleAlerts = alerts.filter(a => !dismissed.includes(a.key));
                     if (visibleAlerts.length === 0) {
                         alertsContainer.innerHTML = '';
@@ -7361,9 +7739,9 @@
                         Utils.qsa('.dismiss-alert-btn').forEach(btn => {
                             Utils.on(btn, 'click', () => {
                                 const key = btn.dataset.key;
-                                const list = Storage.get('dismissed_alerts', []) || [];
+                                const list = Storage.getDismissedAlerts() || [];
                                 if (!list.includes(key)) list.push(key);
-                                Storage.set('dismissed_alerts', list);
+                                Storage.setDismissedAlerts(list);
                                 const card = btn.closest('[data-alert-key]');
                                 if (card) card.remove();
                             });
@@ -7526,7 +7904,6 @@
                 }
             },
 
-            // ===== 🔥 عرض البنود مع تمييز التلقائي =====
             buildBudgetItemCardHtml(item, todayStr) {
                 const spent = item.spent || 0;
                 const remaining = item.budget - spent;
@@ -7622,7 +7999,6 @@
                 const settings = Storage.getSettings();
                 const orgEnabled = settings.budgetOrganizationEnabled === true;
 
-                // ===== الالتزامات الثابتة (تظهر دائماً بغض النظر عن تفعيل تنظيم الميزانية) =====
                 const fixedList = Utils.id('fixedItemsList');
                 if (fixedList) {
                     fixedList.innerHTML = fixedItems.length === 0 ?
@@ -7631,7 +8007,6 @@
                     this.bindBudgetItemCardEvents(fixedList);
                 }
 
-                // ===== زر/مفتاح تفعيل تنظيم الميزانية =====
                 const toggleBox = Utils.id('budgetOrgToggleBox');
                 if (toggleBox) {
                     toggleBox.innerHTML = `<div class="settings-container glass" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
@@ -7658,7 +8033,6 @@
                     });
                 }
 
-                // ===== بنود تنظيم الميزانية التفصيلية (تصنيفات اختيارية، تظهر فقط عند التفعيل) =====
                 const orgList = Utils.id('budgetOrgList');
                 const orgSetupBtnBox = Utils.id('budgetOrgSetupBtnBox');
                 if (orgList) {
@@ -7678,7 +8052,6 @@
                 }
             },
 
-            // تُستدعى عند تفعيل تنظيم الميزانية: تحفظ الإعداد وتفتح مباشرة دليل الإعداد لتحديد ميزانية كل التصنيفات
             enableBudgetOrganization() {
                 const s = Storage.getSettings();
                 s.budgetOrganizationEnabled = true;
@@ -8048,10 +8421,9 @@
                         displayReserved, displaySalary
                     ], ['#1F7A5C', '#B3452A', '#C98A2E', '#123C57'], 'المتاح');
 
-                // ===== أكثر أسابيع الشهر صرفاً (لتتبع الأيام التي يرتفع فيها الإنفاق) =====
                 const weeklyCanvas = Utils.id('weeklyPatternChart');
                 if (weeklyCanvas) {
-                    const weekTotals = [0, 0, 0, 0, 0]; // الأسبوع 1-5 من الشهر
+                    const weekTotals = [0, 0, 0, 0, 0];
                     monthExp.forEach(e => {
                         if (!e.date) return;
                         const day = parseInt(e.date.split('-')[2], 10);
@@ -8059,7 +8431,6 @@
                         const weekIdx = Math.min(4, Math.floor((day - 1) / 7));
                         weekTotals[weekIdx] += parseFloat(e.amount) || 0;
                     });
-                    // إخفاء الأسبوع الخامس إذا كان صفراً ولا يوجد يوم 29+ فعلي هذا الشهر (لتفادي عمود فارغ مضلل)
                     const range = Utils.getMonthRange();
                     const daysInThisMonth = Math.round((new Date(range.end) - new Date(range.start)) / 86400000) + 1;
                     const weekLabelsAll = ['الأسبوع 1 (١-٧)', 'الأسبوع 2 (٨-١٤)', 'الأسبوع 3 (١٥-٢١)', 'الأسبوع 4 (٢٢-٢٨)', 'الأسبوع 5 (٢٩+)'];
@@ -8069,7 +8440,6 @@
                     Charts.drawBar(weeklyCtx, weekLabels, weekData, ['#1F5C87', '#4FA3D1', '#123C57', '#7FC1E3', '#2C7DA0'], 'أسبوع');
                 }
 
-                // ===== اتجاه الإنفاق عبر الأشهر =====
                 const trendSelect = Utils.id('trendCategoryFilter');
                 const trendCanvas = Utils.id('trendChart');
                 if (trendSelect && trendCanvas) {
@@ -8119,7 +8489,6 @@
                 Utils.on(trendSelect, 'change', () => this.renderReports());
             },
 
-            // ===== NEW: Income Page =====
             setupIncomePage() {
                 const form = Utils.id('incomeForm');
                 const salaryInput = Utils.id('incomeSalary');
@@ -8350,4 +8719,4 @@
         });
     </script>
 </body>
-</html> 
+</html>
