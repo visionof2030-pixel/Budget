@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>AI Budget Manager - المستشار المالي الذكي</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -1155,7 +1155,7 @@
             color: var(--danger);
             border: 1px solid var(--danger)
         }
-        /* ===== تحسينات واجهة المحادثة للجوال ===== */
+        /* ===== تحسينات واجهة المحادثة للجوال (منع التكبير) ===== */
         .chat-container {
             display: flex;
             flex-direction: column;
@@ -1168,7 +1168,8 @@
             overflow: hidden;
             box-shadow: var(--shadow);
             font-size: 0.95rem;
-            /* حجم خط أساسي مناسب للجوال */
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
         }
         .chat-messages {
             flex: 1;
@@ -1179,7 +1180,9 @@
             gap: 10px;
             min-height: 0;
             -webkit-overflow-scrolling: touch;
-            /* تحسين التمرير على iOS */
+            font-size: 0.95rem;
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
         }
         .chat-message {
             max-width: 88%;
@@ -1190,6 +1193,8 @@
             overflow-wrap: break-word;
             font-size: 0.92rem;
             line-height: 1.6;
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
         }
         .chat-message.user {
             align-self: flex-end;
@@ -1330,6 +1335,8 @@
             max-height: 100px;
             transition: border var(--transition);
             line-height: 1.4;
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
         }
         .chat-input-area textarea:focus {
             outline: none;
@@ -1758,6 +1765,7 @@
             .chat-messages {
                 padding: 12px 10px;
                 gap: 8px;
+                font-size: 0.9rem;
             }
             .chat-message {
                 max-width: 92%;
@@ -1800,7 +1808,6 @@
             .coach-tabs {
                 flex-direction: column;
             }
-            /* زر المستشار المالي في الصفحة الرئيسية */
             .dashboard-header-actions {
                 display: flex;
                 flex-wrap: wrap;
@@ -5975,7 +5982,7 @@
                 this.setupBudgetOverride();
                 this.setupRefreshButton();
                 this.setupFloatingAdvisor();
-                this.setupDashboardAdvisorButton(); // <-- زر المستشار في الصفحة الرئيسية
+                this.setupDashboardAdvisorButton();
                 this.renderAll();
                 WorldTime.init().then(() => { this.setupDate();
                     this.renderAll(); });
@@ -6124,9 +6131,21 @@
                             if (this.updateChatHeight) this.updateChatHeight();
                         }
                         const fab = Utils.id('financialAdvisorFab');
-                        if (fab) fab.classList.toggle('fab-hidden', page === 'chat');
+                        if (fab) {
+                            // إخفاء الأيقونة العائمة في الصفحة الرئيسية وصفحة المحادثة
+                            if (page === 'dashboard' || page === 'chat') {
+                                fab.classList.add('fab-hidden');
+                            } else {
+                                fab.classList.remove('fab-hidden');
+                            }
+                        }
                     });
                 });
+                // التأكد من أن الأيقونة العائمة مخفية عند تحميل الصفحة الرئيسية افتراضياً
+                const fab = Utils.id('financialAdvisorFab');
+                if (fab && document.querySelector('#page-dashboard.page.active')) {
+                    fab.classList.add('fab-hidden');
+                }
                 Utils.on(Utils.id('chatToggleBtn'), 'click', () => { const chatLink = Utils.qs(
                         '.nav-link[data-page="chat"]'); if (chatLink) chatLink.click(); });
             },
@@ -6219,7 +6238,6 @@
                 });
             },
 
-            // ===== زر المستشار المالي في الصفحة الرئيسية =====
             setupDashboardAdvisorButton() {
                 const btn = Utils.id('dashboardAdvisorBtn');
                 if (btn) {
@@ -7259,7 +7277,6 @@
                         const availableHeight = viewportHeight - headerHeight - quickActionsHeight - safetyMargin;
                         const newHeight = Math.max(260, Math.min(availableHeight, 600));
                         chatContainer.style.setProperty('--chat-max-height', newHeight + 'px');
-                        // تحديث min-height أيضاً ليكون متناسباً مع الوضع الجديد
                         const minHeight = Math.min(260, newHeight);
                         chatContainer.style.setProperty('--chat-min-height', minHeight + 'px');
                     };
