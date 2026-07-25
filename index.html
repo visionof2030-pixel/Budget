@@ -448,6 +448,20 @@
         .dash-card.positive {
             border-top-color: var(--success)
         }
+        .dash-card.clickable-card {
+            position: relative;
+        }
+        .dash-card.clickable-card::after {
+            content: '\f105';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 10px;
+            left: 12px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            opacity: 0.6;
+        }
         .dash-card .card-icon {
             font-size: 1.5rem;
             margin-bottom: 6px;
@@ -2301,6 +2315,10 @@
                         <div class="report-card glass"><h3>المصروفات الشهرية</h3><canvas id="monthlyChart" height="200"></canvas></div>
                         <div class="report-card glass"><h3>المتبقي</h3><canvas id="remainingChart" height="200"></canvas></div>
                         <div class="report-card glass" style="grid-column:1/-1;">
+                            <h3 style="margin:0 0 6px;">أكثر أسابيع الشهر صرفاً</h3>
+                            <canvas id="weeklyPatternChart" height="200"></canvas>
+                        </div>
+                        <div class="report-card glass" style="grid-column:1/-1;">
                             <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px;">
                                 <h3 style="margin:0;">اتجاه الإنفاق عبر الأشهر</h3>
                                 <select id="trendCategoryFilter" class="filter-select" style="max-width:180px;"><option value="__top__">أعلى 4 تصنيفات</option></select>
@@ -2530,6 +2548,24 @@
                     <button class="btn-secondary" id="cancelBudgetWizardBtn">لاحقاً</button>
                     <button class="btn-primary" id="saveBudgetWizardBtn"><i class="fas fa-check"></i> حفظ الميزانيات</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="reservedMoneyModal" class="modal">
+        <div class="modal-content glass">
+            <div class="modal-header"><h2>🔒 تفاصيل الأموال المحجوزة</h2><button class="modal-close" id="closeReservedMoneyModal">&times;</button></div>
+            <div class="modal-body">
+                <div id="reservedMoneyContent" class="expenses-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="monthExpensesModal" class="modal">
+        <div class="modal-content glass">
+            <div class="modal-header"><h2>💸 مصروفات هذا الشهر</h2><button class="modal-close" id="closeMonthExpensesModal">&times;</button></div>
+            <div class="modal-body">
+                <div id="monthExpensesContent" class="expenses-list"></div>
             </div>
         </div>
     </div>
@@ -4012,7 +4048,55 @@
                 return { category: 'أخرى' };
             },
 
+            // يحوّل الأرقام العربية (٠-٩) إلى أرقام إنجليزية عادية حتى تعمل معها تعابير regex القياسية
+            normalizeDigits(str) {
+                const map = { '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4', '٥': '5', '٦': '6', '٧': '7',
+                    '٨': '8', '٩': '9' };
+                return (str || '').replace(/[٠-٩]/g, d => map[d]);
+            },
+
+            // يحاول استخراج تاريخ رقمي من سطر واحد (بأي صيغة فواصل شائعة) ويرجع التاريخ + النص بعد إزالته
+            extractDateFromLine(line) {
+                // صيغة كاملة: سنة-شهر-يوم (مثل 2026-07-01 أو 2026/7/1)
+                let m = line.match(/\b(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})\b/);
+                if (m) {
+                    const y = m[1],
+                        mo = String(m[2]).padStart(2, '0'),
+                        d = String(m[3]).padStart(2, '0');
+                    if (parseInt(mo) >= 1 && parseInt(mo) <= 12) {
+                        return { match: m[0], date: `${y}-${mo}-${d}` };
+                    }
+                }
+                // صيغة: يوم/شهر/سنة (سنة كاملة أو مختصرة)
+                m = line.match(/\b(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})\b/);
+                if (m) {
+                    let d = m[1],
+                        mo = m[2],
+                        y = m[3];
+                    if (y.length === 2) y = '20' + y;
+                    if (parseInt(mo) > 12 && parseInt(d) <= 12) { const tmp = d;
+                        d = mo;
+                        mo = tmp; }
+                    return { match: m[0], date: `${y}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}` };
+                }
+                // صيغة: يوم/شهر بدون سنة (نفترض السنة الحالية)
+                m = line.match(/\b(\d{1,2})[\/\-\.](\d{1,2})\b(?!\d)/);
+                if (m) {
+                    let d = m[1],
+                        mo = m[2];
+                    if (parseInt(mo) > 12 && parseInt(d) <= 12) { const tmp = d;
+                        d = mo;
+                        mo = tmp; }
+                    if (parseInt(mo) >= 1 && parseInt(mo) <= 12 && parseInt(d) >= 1 && parseInt(d) <= 31) {
+                        const year = new Date(Utils.today()).getFullYear();
+                        return { match: m[0], date: `${year}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}` };
+                    }
+                }
+                return null;
+            },
+
             parse(text) {
+                text = this.normalizeDigits(text);
                 const lines = text.split(/[\n\r]+/).filter(l => l.trim());
                 const result = { transactions: [], merchant: null, date: null };
                 const merchantMatch = text.match(/^(?:من|في|عند|من عند|بنده|كارفور|تميم|دانوب|أسواق|سوق)\s*([^\d,،]+)/i);
@@ -4020,7 +4104,15 @@
                 const dateMatch = text.match(/(\d{4}-\d{2}-\d{2})/);
                 if (dateMatch) result.date = dateMatch[1];
                 for (const line of lines) {
-                    const cleaned = line.replace(/,/g, '');
+                    let cleaned = line.replace(/,/g, '');
+                    // نحاول استخراج تاريخ خاص بهذا السطر تحديداً (أقرب تاريخ لهذه العملية)
+                    let lineDate = null;
+                    const dateInfo = this.extractDateFromLine(cleaned);
+                    if (dateInfo) {
+                        lineDate = dateInfo.date;
+                        cleaned = cleaned.replace(dateInfo.match, ' ').replace(/\s{2,}/g, ' ').trim();
+                    }
+                    const effectiveDate = lineDate || result.date || Utils.today();
                     const patternColon = /^([^\d:]+)[:：]\s*([\d.]+)\s*(?:ريال)?\s*$/i;
                     const matchColon = cleaned.match(patternColon);
                     if (matchColon) {
@@ -4028,7 +4120,7 @@
                         const amount = parseFloat(matchColon[2]);
                         if (!isNaN(amount) && amount > 0) {
                             result.transactions.push({ description: desc || 'مصروف', amount: amount, merchant: result
-                                    .merchant || '', date: result.date || Utils.today() });
+                                    .merchant || '', date: effectiveDate });
                             continue;
                         }
                     }
@@ -4039,7 +4131,7 @@
                         const amount = parseFloat(match[2]);
                         if (!isNaN(amount) && amount > 0) {
                             result.transactions.push({ description: desc || 'مصروف', amount: amount, merchant: result
-                                    .merchant || '', date: result.date || Utils.today() });
+                                    .merchant || '', date: effectiveDate });
                             continue;
                         }
                     }
@@ -4050,7 +4142,7 @@
                         const desc = match2[2].trim();
                         if (!isNaN(amount) && amount > 0) {
                             result.transactions.push({ description: desc || 'مصروف', amount: amount, merchant: result
-                                    .merchant || '', date: result.date || Utils.today() });
+                                    .merchant || '', date: effectiveDate });
                             continue;
                         }
                     }
@@ -4061,16 +4153,16 @@
                         const amount = parseFloat(match3[2]);
                         if (!isNaN(amount) && amount > 0 && amount < 1000000) {
                             result.transactions.push({ description: desc || 'مصروف', amount: amount, merchant: result
-                                    .merchant || '', date: result.date || Utils.today() });
+                                    .merchant || '', date: effectiveDate });
                             continue;
                         }
                     }
-                    const numbers = Utils.extractAllNumbers(line);
+                    const numbers = Utils.extractAllNumbers(cleaned);
                     if (numbers.length === 1 && numbers[0] > 0 && numbers[0] < 1000000) {
-                        const desc = line.replace(/[\d.]+/g, '').trim();
+                        const desc = cleaned.replace(/[\d.]+/g, '').trim();
                         if (desc && desc.length > 1) {
                             result.transactions.push({ description: desc, amount: numbers[0], merchant: result
-                                    .merchant || '', date: result.date || Utils.today() });
+                                    .merchant || '', date: effectiveDate });
                         }
                     }
                 }
@@ -4177,18 +4269,23 @@
                 try {
                     const categories = Utils.defaultCategories();
                     const todayStr = Utils.today();
-                    const prompt = `أنت مساعد مالي ذكي. تاريخ اليوم الفعلي هو: ${todayStr} (بصيغة YYYY-MM-DD).
+                    const todayHijri = new Date(todayStr + 'T00:00:00').toLocaleDateString('ar-SA-u-ca-islamic', {
+                        year: 'numeric', month: 'long', day: 'numeric' });
+                    const prompt = `أنت محلل نصوص مالية خبير. تاريخ اليوم الفعلي: ${todayStr} ميلادي (الموافق ${todayHijri} هجري).
                     استخرج من النص التالي المعلومات المطلوبة بدقة:
                     النص: "${text}"
+
+                    ${this.dateExtractionRules(todayStr, todayHijri)}
+
                     أخرج النتيجة بتنسيق JSON صالح فقط، بدون أي نص إضافي، بالهيكل التالي:
                     {
                         "amount": رقم (المبلغ بالريال),
                         "description": "نص وصف المصروف",
                         "category": "أحد التصنيفات التالية: ${categories.join('، ')}",
                         "merchant": "اسم التاجر إن وُجد وإلا خالي",
-                        "date": "تاريخ المصروف بصيغة YYYY-MM-DD، إذا لم يُذكر تاريخ محدد في النص استخدم بالضبط ${todayStr}"
+                        "date": "تاريخ المصروف بصيغة YYYY-MM-DD ميلادي بعد التحويل، أو ${todayStr} إذا لم يُذكر تاريخ"
                     }
-                    تأكد من أن التصنيف يناسب المصروف بشكل دقيق، ولا تخترع تاريخاً من عندك أبداً.`;
+                    تأكد من أن التصنيف يناسب المصروف بشكل دقيق.`;
                     const response = await this.sendRequest(prompt);
                     const jsonMatch = response.match(/\{[\s\S]*\}/);
                     if (jsonMatch) {
@@ -4227,6 +4324,8 @@
             async parseMultipleExpenses(text) {
                 const categories = Utils.defaultCategories();
                 const todayStr = Utils.today();
+                const todayHijri = new Date(todayStr + 'T00:00:00').toLocaleDateString('ar-SA-u-ca-islamic', {
+                    year: 'numeric', month: 'long', day: 'numeric' });
                 const sanitizeItem = (item) => {
                     if (!categories.includes(item.category)) {
                         const fallback = ExpenseParser.classifyWithKeywords((item.description || '') + ' ' + (item
@@ -4242,22 +4341,39 @@
                     return item;
                 };
                 try {
-                    const prompt = `أنت مساعد مالي ذكي. تاريخ اليوم الفعلي هو: ${todayStr} (بصيغة YYYY-MM-DD).
-                    النص التالي يحتوي على مصروف واحد أو عدة مصروفات، كل سطر أو بند فيه يمثل مصروفاً منفصلاً له وصف ومبلغ خاص به:
+                    const prompt = `أنت محلل نصوص مالية خبير متخصص في استخراج المصروفات من أي نص عربي أو مختلط (كتابة مستخدم، رسالة بنك، نص منسوخ، أو نتيجة OCR).
+
+                    تاريخ اليوم الفعلي: ${todayStr} ميلادي (الموافق ${todayHijri} هجري).
+
+                    النص المطلوب تحليله:
                     """
                     ${text}
                     """
-                    استخرج كل بند مذكور كمصروف مستقل، وأخرج النتيجة بتنسيق JSON صالح فقط على شكل مصفوفة (Array) بدون أي نص إضافي قبلها أو بعدها، بهذا الهيكل تماماً:
+
+                    ${this.dateExtractionRules(todayStr, todayHijri)}
+
+                    قواعد عامة لاستخراج المصروفات:
+                    - استخرج جميع المصروفات الموجودة في النص مهما كان عددها، ولا تتجاهل أي عملية يمكن استنتاجها بثقة عالية.
+                    - لا تعتمد على ترتيب الكلمات داخل السطر (قد يأتي المبلغ قبل الوصف أو بعده أو التاريخ في أي موضع).
+                    - التاريخ حقل اختياري دائماً؛ إذا لم يُذكر أي تاريخ لعملية معينة استخدم ${todayStr} بالضبط.
+                    - إذا احتوى النص على عدة تواريخ وعدة عمليات، استخدم التاريخ الأقرب لكل عملية على حدة (وليس تاريخاً واحداً للجميع).
+                    - في رسائل البنوك (مدى، Visa، Mastercard، Apple Pay، STC Pay، المحافظ الرقمية): تجاهل رقم البطاقة، الرصيد، الرقم المرجعي، ورقم العملية تماماً — هذه ليست مصروفات.
+                    - المبلغ قد يُكتب بأي صيغة: قبل أو بعد كلمة (ريال، ر.س، SAR، SR)، بأرقام عربية أو إنجليزية، مسبوقاً بـ"بـ" أو ":" أو "=" أو بدون أي رمز عملة.
+                    - اسم المصروف هو النص المتبقي بعد إزالة التاريخ والمبلغ والعملة (اسم منتج، خدمة، متجر، اشتراك، أو فاتورة).
+                    - إذا كان النص من OCR وغير مرتب أو مكسور الكلمات، حاول إعادة ترتيب البيانات منطقياً قبل الاستخراج.
+                    - تجاهل أي عملية لا يمكن استخراج مبلغ لها بثقة عالية.
+
+                    أخرج النتيجة بتنسيق JSON صالح فقط على شكل مصفوفة (Array) بدون أي نص إضافي قبلها أو بعدها، بهذا الهيكل تماماً:
                     [
                       {
                         "amount": رقم (المبلغ بالريال),
                         "description": "نص وصف المصروف",
                         "category": "أحد التصنيفات التالية بالضبط: ${categories.join('، ')}",
                         "merchant": "اسم التاجر إن وُجد وإلا خالي",
-                        "date": "تاريخ المصروف بصيغة YYYY-MM-DD، إذا لم يُذكر تاريخ محدد استخدم بالضبط ${todayStr}"
+                        "date": "تاريخ المصروف بصيغة YYYY-MM-DD ميلادي بعد التحويل، أو ${todayStr} إذا لم يُذكر تاريخ"
                       }
                     ]
-                    قواعد مهمة: أخرج كل بند في النص كعنصر منفصل في المصفوفة حتى لو تشابهت الأصناف، لا تدمج بنوداً مختلفة معاً، ولا تخترع تاريخاً من عندك أبداً، وتأكد أن كل تصنيف مطابق تماماً لأحد التصنيفات المذكورة أعلاه.`;
+                    قاعدة أخيرة مهمة: أخرج كل عملية كعنصر منفصل في المصفوفة حتى لو تشابهت الأصناف أو التواريخ، لا تدمج عمليات مختلفة معاً، وتأكد أن كل تصنيف مطابق تماماً لأحد التصنيفات المذكورة أعلاه.`;
                     const response = await this.sendRequest(prompt);
                     const jsonMatch = response.match(/\[[\s\S]*\]/);
                     if (jsonMatch) {
@@ -4284,6 +4400,20 @@
                     }
                     throw new Error('تعذر استخراج أي مصروف من النص');
                 }
+            },
+
+            // القواعد المشتركة لاستخراج التاريخ (تُستخدم في كل من parseExpense و parseMultipleExpenses)
+            dateExtractionRules(todayStr, todayHijri) {
+                return `قواعد استخراج التاريخ (طبّقها بدقة تامة):
+                - التاريخ قد يظهر في بداية السطر، وسطه، نهايته، أو داخل جملة كاملة.
+                - إذا وُجد أكثر من تاريخ في النص، استخدم التاريخ الأقرب فعلياً لكل عملية على حدة.
+                - صيغ رقمية مدعومة: 01/07 أو 1/7 أو 01-07 أو 1-7 أو 01.07 أو 1.7 أو 2026/07/01 أو 2026-07-01 أو 2026.07.01 أو 01/07/2026 أو 1/7/26 أو 07/01 (قد يعني يوم/شهر أو شهر/يوم حسب السياق، افترض يوم/شهر ما لم يكن الرقم الأول أكبر من 12) أو 2026-7-1.
+                - أرقام عربية (٠-٩) مدعومة بنفس صيغ الأرقام الإنجليزية، مثل ٠١/٠٧ أو ١٥/٠٧/٢٠٢٦.
+                - تواريخ مكتوبة بالكلمات مدعومة: "الأول من يوليو"، "1 يوليو"، "٥ أغسطس"، "10 سبتمبر"، وبأي شهر ميلادي بالعربية (يناير...ديسمبر) أو الإنجليزية (January/Jan...December/Dec).
+                - تواريخ هجرية مدعومة (مثل "١ رمضان"، "10 شوال"، "15 صفر"، "1 محرم"، "20 رجب"، "15 ذو القعدة"، "10 ذو الحجة") — حوّلها تقريبياً إلى تاريخ ميلادي مقابل بالاستعانة بأن اليوم الحالي ${todayStr} يوافق ${todayHijri} هجرياً كنقطة مرجعية.
+                - عبارات زمنية طبيعية مدعومة: اليوم، أمس، قبل أمس، غداً، بعد غد، هذا الأسبوع، الأسبوع الماضي، الأسبوع القادم، بداية الشهر، منتصف الشهر، نهاية الشهر — احسبها بالنسبة لتاريخ اليوم الفعلي أعلاه.
+                - إذا ورد وقت مع التاريخ يمكن تجاهله (النظام لا يحتاج الوقت).
+                - إذا لم يُذكر أي تاريخ لعملية، استخدم تاريخ اليوم الفعلي بالضبط دون تخمين.`;
             },
 
             // يحلل مصروفات بند "أخرى" ويقترح تصنيفاً أدق لكل واحد منها من قائمة التصنيفات المعروفة
@@ -5608,6 +5738,8 @@
                 this.setupReclassifyOther();
                 this.setupReportsTrend();
                 this.setupBudgetWizard();
+                this.setupModalClose('reservedMoneyModal', 'closeReservedMoneyModal', null);
+                this.setupModalClose('monthExpensesModal', 'closeMonthExpensesModal', null);
                 this.setupBudgetItems();
                 this.setupResetApp();
                 this.setupBackup();
@@ -7237,29 +7369,29 @@
                 if (status.status === 'no_income') {
                     cards = [
                         { icon: 'fa-edit', label: '💡 الراتب', value: 'أدخل الراتب أولاً', cls: 'accent' },
-                        { icon: 'fa-lock', label: '🔒 الأموال المحجوزة', value: Utils.formatCurrency(reserved), cls: 'accent' },
-                        { icon: 'fa-arrow-down', label: '💸 المصروفات', value: Utils.formatCurrency(paid), cls: 'negative' },
+                        { icon: 'fa-lock', label: '🔒 الأموال المحجوزة', value: Utils.formatCurrency(reserved), cls: 'accent', key: 'reserved' },
+                        { icon: 'fa-arrow-down', label: '💸 المصروفات', value: Utils.formatCurrency(paid), cls: 'negative', key: 'paid' },
                         { icon: 'fa-info-circle', label: '⚠️ الحالة', value: 'لا يوجد دخل مسجل', cls: 'accent' }
                     ];
                 } else if (status.status === 'commitments_exceed_income') {
                     cards = [
                         { icon: 'fa-money-bill-wave', label: '💰 الراتب', value: Utils.formatCurrency(salary), cls: 'accent' },
-                        { icon: 'fa-lock', label: '🔒 الأموال المحجوزة', value: Utils.formatCurrency(reserved), cls: 'negative' },
-                        { icon: 'fa-arrow-down', label: '💸 المصروفات', value: Utils.formatCurrency(paid), cls: 'negative' },
+                        { icon: 'fa-lock', label: '🔒 الأموال المحجوزة', value: Utils.formatCurrency(reserved), cls: 'negative', key: 'reserved' },
+                        { icon: 'fa-arrow-down', label: '💸 المصروفات', value: Utils.formatCurrency(paid), cls: 'negative', key: 'paid' },
                         { icon: 'fa-exclamation-triangle', label: '⚠️ الالتزامات', value: 'تتجاوز الراتب', cls: 'negative' }
                     ];
                 } else if (status.status === 'overspent') {
                     cards = [
                         { icon: 'fa-money-bill-wave', label: '💰 الراتب', value: Utils.formatCurrency(salary), cls: 'accent' },
-                        { icon: 'fa-lock', label: '🔒 الأموال المحجوزة', value: Utils.formatCurrency(reserved), cls: 'accent' },
-                        { icon: 'fa-arrow-down', label: '💸 المصروفات', value: Utils.formatCurrency(paid), cls: 'negative' },
+                        { icon: 'fa-lock', label: '🔒 الأموال المحجوزة', value: Utils.formatCurrency(reserved), cls: 'accent', key: 'reserved' },
+                        { icon: 'fa-arrow-down', label: '💸 المصروفات', value: Utils.formatCurrency(paid), cls: 'negative', key: 'paid' },
                         { icon: 'fa-exclamation-circle', label: '⚠️ التجاوز', value: Utils.formatCurrency(Math.abs(available || 0)), cls: 'negative' }
                     ];
                 } else {
                     cards = [
                         { icon: 'fa-money-bill-wave', label: '💰 الراتب', value: Utils.formatCurrency(salary), cls: 'accent' },
-                        { icon: 'fa-lock', label: '🔒 الأموال المحجوزة', value: Utils.formatCurrency(reserved), cls: 'accent' },
-                        { icon: 'fa-arrow-down', label: '💸 المصروفات الفعلية', value: Utils.formatCurrency(paid), cls: 'negative' },
+                        { icon: 'fa-lock', label: '🔒 الأموال المحجوزة', value: Utils.formatCurrency(reserved), cls: 'accent', key: 'reserved' },
+                        { icon: 'fa-arrow-down', label: '💸 المصروفات الفعلية', value: Utils.formatCurrency(paid), cls: 'negative', key: 'paid' },
                         { icon: 'fa-check-circle', label: '✅ المتاح للصرف', value: available !== null ? Utils.formatCurrency(available) : '—', cls: available !== null && available >= 0 ? 'positive' : 'negative' },
                         { icon: 'fa-calendar-day', label: '📅 ميزانية اليوم', value: daily !== null ? Utils.formatCurrency(daily) : '—', cls: daily !== null && daily > 0 ? 'accent' : 'negative' },
                         { icon: 'fa-calendar-week', label: `📅 ${weeklyLabel}`, value: weekly !== null ? Utils.formatCurrency(weekly) : '—', cls: weekly !== null && weekly > 0 ? 'accent' : 'negative' },
@@ -7282,8 +7414,16 @@
                 }
 
                 cardsContainer.innerHTML = cards.map(c =>
-                    '<div class="dash-card ' + c.cls + '" data-card="' + c.label + '"><div class="card-icon"><i class="fas ' + c.icon + '"></i></div><div class="card-label">' + c.label + '</div><div class="card-value">' + c.value + '</div></div>'
+                    '<div class="dash-card ' + c.cls + (c.key ? ' clickable-card' : '') + '" data-card="' + c.label + '"' + (c.key ? ' data-key="' + c.key + '"' : '') + '><div class="card-icon"><i class="fas ' + c.icon + '"></i></div><div class="card-label">' + c.label + '</div><div class="card-value">' + c.value + '</div></div>'
                 ).join('');
+
+                Utils.qsa('.clickable-card').forEach(card => {
+                    Utils.on(card, 'click', () => {
+                        const key = card.dataset.key;
+                        if (key === 'reserved') this.openReservedMoneyModal();
+                        else if (key === 'paid') this.openMonthExpensesModal();
+                    });
+                });
 
                 const topCat = ctx.behavior?.topCategories?.[0];
                 const count = ctx.raw?.count || 0;
@@ -7294,12 +7434,19 @@
                     statusMessage = '⚠️ أدخل راتبك الشهري في صفحة "الدخل والأهداف" لتفعيل جميع الحسابات';
                 } else if (status.status === 'commitments_exceed_income') {
                     statusMessage = `⚠️ إجمالي الالتزامات (${Utils.formatCurrency(reserved)}) أكبر من الراتب (${Utils.formatCurrency(salary)})`;
-                } else if (status.status === 'overspent') {
-                    statusMessage = `⚠️ لقد تجاوزت ميزانيتك بمقدار ${Utils.formatCurrency(Math.abs(available || 0))}`;
-                } else if (available !== null && available >= 0) {
-                    statusMessage = `✅ وضع مالي مستقر`;
+                } else if (available !== null && available < 0) {
+                    statusMessage = `⚠️ تجاوزت ميزانيتك بمقدار ${Utils.formatCurrency(Math.abs(available))} — يلزم تخفيض الصرف فوراً`;
+                } else if (available !== null && daily !== null && daily <= 0 && daysUntilSalary !== null &&
+                    daysUntilSalary > 0) {
+                    statusMessage = `⚠️ لا يوجد متاح يومي كافٍ حتى نزول الراتب القادم (${daysUntilSalary} يوم متبقي)`;
+                } else if (healthScoreDisplay >= 80) {
+                    statusMessage = `✅ وضعك المالي ممتاز (${healthScoreDisplay}/100)، متاح للصرف ${Utils.formatCurrency(available || 0)}`;
+                } else if (healthScoreDisplay >= 60) {
+                    statusMessage = `✅ وضعك المالي مستقر (${healthScoreDisplay}/100)، متاح للصرف ${Utils.formatCurrency(available || 0)}`;
+                } else if (healthScoreDisplay >= 40) {
+                    statusMessage = `🔶 وضعك المالي متوسط (${healthScoreDisplay}/100) — راجع بنود الإنفاق الكبيرة`;
                 } else {
-                    statusMessage = `📊 عرض البيانات المالية`;
+                    statusMessage = `⚠️ وضعك المالي يحتاج انتباهاً (${healthScoreDisplay}/100)`;
                 }
 
                 summaryContainer.innerHTML =
@@ -7537,6 +7684,45 @@
                 }).join('');
 
                 this.openModal(modalId);
+            },
+
+            openReservedMoneyModal() {
+                const content = Utils.id('reservedMoneyContent');
+                const items = FinancialEngine.getBudgetItems().filter(i => i.isReserved);
+                if (items.length === 0) {
+                    content.innerHTML = '<div class="empty-state glass"><i class="fas fa-lock"></i><p>لا توجد أموال محجوزة حالياً (إيجار، أقساط، تمارا/تابي...).</p></div>';
+                } else {
+                    const total = items.reduce((s, i) => s + (parseFloat(i.budget) || 0), 0);
+                    content.innerHTML = `<div class="expense-item glass" style="background:var(--bg-glass);font-weight:700;"><div class="expense-info"><div class="desc">الإجمالي المحجوز</div></div><div class="amount">${Utils.formatCurrency(total)}</div></div>` +
+                        items.map(item => `<div class="expense-item glass">
+                            <div class="expense-info">
+                                <div class="desc">${item.name}</div>
+                                <div class="meta"><span>${item.category}</span>${item.endDate ? `<span>📅 ينتهي ${Utils.formatDate(item.endDate)}</span>` : ''}</div>
+                            </div>
+                            <div class="amount">${Utils.formatCurrency(item.budget)}</div>
+                        </div>`).join('');
+                }
+                this.openModal('reservedMoneyModal');
+            },
+
+            openMonthExpensesModal() {
+                const content = Utils.id('monthExpensesContent');
+                const expenses = Budget.getMonthExpenses().slice().sort((a, b) => (b.date || '').localeCompare(a
+                    .date || ''));
+                if (expenses.length === 0) {
+                    content.innerHTML = '<div class="empty-state glass"><i class="fas fa-receipt"></i><p>لا توجد مصروفات مسجلة هذا الشهر بعد.</p></div>';
+                } else {
+                    const total = expenses.reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
+                    content.innerHTML = `<div class="expense-item glass" style="background:var(--bg-glass);font-weight:700;"><div class="expense-info"><div class="desc">إجمالي هذا الشهر (${expenses.length} مصروف)</div></div><div class="amount">${Utils.formatCurrency(total)}</div></div>` +
+                        expenses.map(e => `<div class="expense-item glass">
+                            <div class="expense-info">
+                                <div class="desc">${e.description || '—'}</div>
+                                <div class="meta"><span>${Utils.formatDate(e.date)}</span><span>${e.category || 'أخرى'}</span></div>
+                            </div>
+                            <div class="amount">${Utils.formatCurrency(e.amount)}</div>
+                        </div>`).join('');
+                }
+                this.openModal('monthExpensesModal');
             },
 
             setupBudgetWizard() {
@@ -7820,6 +8006,27 @@
                 Charts.drawBar(remCtx, ['المتاح للصرف', 'المصروفات', 'المحجوز', 'الراتب'], [displayAvailable, displayPaid,
                         displayReserved, displaySalary
                     ], ['#1F7A5C', '#B3452A', '#C98A2E', '#123C57'], 'المتاح');
+
+                // ===== أكثر أسابيع الشهر صرفاً (لتتبع الأيام التي يرتفع فيها الإنفاق) =====
+                const weeklyCanvas = Utils.id('weeklyPatternChart');
+                if (weeklyCanvas) {
+                    const weekTotals = [0, 0, 0, 0, 0]; // الأسبوع 1-5 من الشهر
+                    monthExp.forEach(e => {
+                        if (!e.date) return;
+                        const day = parseInt(e.date.split('-')[2], 10);
+                        if (isNaN(day)) return;
+                        const weekIdx = Math.min(4, Math.floor((day - 1) / 7));
+                        weekTotals[weekIdx] += parseFloat(e.amount) || 0;
+                    });
+                    // إخفاء الأسبوع الخامس إذا كان صفراً ولا يوجد يوم 29+ فعلي هذا الشهر (لتفادي عمود فارغ مضلل)
+                    const range = Utils.getMonthRange();
+                    const daysInThisMonth = Math.round((new Date(range.end) - new Date(range.start)) / 86400000) + 1;
+                    const weekLabelsAll = ['الأسبوع 1 (١-٧)', 'الأسبوع 2 (٨-١٤)', 'الأسبوع 3 (١٥-٢١)', 'الأسبوع 4 (٢٢-٢٨)', 'الأسبوع 5 (٢٩+)'];
+                    const weekLabels = daysInThisMonth > 28 ? weekLabelsAll : weekLabelsAll.slice(0, 4);
+                    const weekData = daysInThisMonth > 28 ? weekTotals : weekTotals.slice(0, 4);
+                    const weeklyCtx = weeklyCanvas.getContext('2d');
+                    Charts.drawBar(weeklyCtx, weekLabels, weekData, ['#1F5C87', '#4FA3D1', '#123C57', '#7FC1E3', '#2C7DA0'], 'أسبوع');
+                }
 
                 // ===== اتجاه الإنفاق عبر الأشهر =====
                 const trendSelect = Utils.id('trendCategoryFilter');
