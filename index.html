@@ -320,22 +320,38 @@
         }
         .fab-advisor {
             position: fixed;
-            width: 58px;
-            height: 58px;
-            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            height: 50px;
+            padding: 0 16px 0 8px;
+            border-radius: 999px;
             background: var(--accent-gradient);
             color: #fff;
             border: 2px solid rgba(255, 255, 255, 0.18);
-            font-size: 1.35rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            font-family: inherit;
             box-shadow: 0 10px 28px rgba(18, 60, 87, 0.4);
             z-index: 3000;
             cursor: grab;
             touch-action: none;
             transition: box-shadow 0.2s ease, transform 0.18s ease, opacity 0.2s ease;
-            padding: 0;
+            white-space: nowrap;
+        }
+        .fab-advisor-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        .fab-advisor-label {
+            letter-spacing: 0.2px;
         }
         .fab-advisor:hover {
             box-shadow: 0 14px 34px rgba(18, 60, 87, 0.5);
@@ -343,7 +359,7 @@
         .fab-advisor.dragging {
             transition: none;
             cursor: grabbing;
-            transform: scale(0.94);
+            transform: scale(0.96);
             box-shadow: 0 20px 44px rgba(0, 0, 0, 0.4);
         }
         .fab-advisor.fab-hidden {
@@ -355,7 +371,7 @@
             content: '';
             position: absolute;
             inset: -6px;
-            border-radius: 50%;
+            border-radius: 999px;
             border: 1px solid var(--bg-glass-border);
             opacity: 0;
             transition: opacity 0.2s ease;
@@ -1184,6 +1200,32 @@
         }
         .chat-message.financial-advisor .message-time {
             color: var(--text-muted)
+        }
+        .chat-quick-replies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .chat-quick-reply-btn {
+            background: var(--accent-gradient);
+            color: #fff;
+            border: none;
+            border-radius: 999px;
+            padding: 7px 16px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            transition: opacity 0.15s ease, transform 0.15s ease;
+        }
+        .chat-quick-reply-btn:hover {
+            transform: translateY(-1px);
+        }
+        .chat-quick-reply-btn:disabled {
+            opacity: 0.5;
+            cursor: default;
+            transform: none;
         }
         @keyframes messageIn {
             from {
@@ -2173,7 +2215,7 @@
             <nav class="sidebar-nav">
                 <a href="#" class="nav-link active" data-page="dashboard"><i class="fas fa-th-large"></i><span>الرئيسية</span></a>
                 <a href="#" class="nav-link" data-page="expenses"><i class="fas fa-wallet"></i><span>المصروفات</span></a>
-                <a href="#" class="nav-link" data-page="budget"><i class="fas fa-list-ul"></i><span>الميزانية</span></a>
+                <a href="#" class="nav-link" data-page="budget"><i class="fas fa-list-ul"></i><span>تنظيم الميزانية</span></a>
                 <a href="#" class="nav-link" data-page="coach"><i class="fas fa-robot"></i><span>المدرب المالي</span></a>
                 <a href="#" class="nav-link" data-page="reports"><i class="fas fa-chart-pie"></i><span>التقارير</span></a>
                 <a href="#" class="nav-link" data-page="analytics"><i class="fas fa-robot"></i><span>التحليلات</span></a>
@@ -2196,7 +2238,6 @@
                 <h1 id="pageTitle">الرئيسية</h1>
                 <div class="header-actions">
                     <button class="refresh-btn" id="refreshBtn"><i class="fas fa-sync-alt"></i> تحديث</button>
-                    <button class="chat-toggle-btn" id="chatToggleBtn"><i class="fas fa-comment-dots"></i> المستشار المالي</button>
                     <span id="currentDate" class="current-date"></span>
                 </div>
             </header>
@@ -2204,6 +2245,7 @@
             <div class="pages-container">
 
                 <section id="page-dashboard" class="page active">
+                    <div id="dashboardAlerts"></div>
                     <div id="dashboardCards" class="dashboard-cards"></div>
                     <div id="dashboardSummary" class="dashboard-summary"></div>
                     <div id="dashboardExtraCards" class="dashboard-cards" style="margin-top:16px;"></div>
@@ -2212,6 +2254,7 @@
                 <section id="page-expenses" class="page">
                     <div class="expenses-toolbar">
                         <button id="addExpenseBtn" class="btn-primary"><i class="fas fa-plus"></i> إضافة مصروف</button>
+                        <button id="reclassifyOtherBtn" class="btn-secondary"><i class="fas fa-magic"></i> إعادة تصنيف "أخرى"</button>
                         <button id="clearAllExpensesBtn" class="btn-danger"><i class="fas fa-trash-alt"></i> مسح الكل</button>
                         <div class="expenses-filters">
                             <input type="text" id="expenseSearch" placeholder="بحث..." class="search-input" />
@@ -2225,7 +2268,13 @@
                     <div class="expenses-toolbar">
                         <button id="addBudgetItemBtn" class="btn-primary"><i class="fas fa-plus"></i> إضافة بند</button>
                     </div>
-                    <div id="budgetItemsList" class="expenses-list"></div>
+                    <h3 style="margin:16px 0 8px;font-size:1rem;">🔒 الالتزامات الثابتة</h3>
+                    <p style="margin:0 0 10px;font-size:0.8rem;color:var(--text-muted);">إيجار، أقساط، تمارا/تابي، وأي التزام "محجوز" — تظهر دائماً بغض النظر عن تفعيل تنظيم الميزانية.</p>
+                    <div id="fixedItemsList" class="expenses-list"></div>
+
+                    <div id="budgetOrgToggleBox" style="margin:22px 0 12px;"></div>
+                    <div id="budgetOrgSetupBtnBox"></div>
+                    <div id="budgetOrgList" class="expenses-list"></div>
                 </section>
 
                 <section id="page-coach" class="page">
@@ -2251,6 +2300,13 @@
                         <div class="report-card glass"><h3>المصروفات اليومية</h3><canvas id="dailyChart" height="200"></canvas></div>
                         <div class="report-card glass"><h3>المصروفات الشهرية</h3><canvas id="monthlyChart" height="200"></canvas></div>
                         <div class="report-card glass"><h3>المتبقي</h3><canvas id="remainingChart" height="200"></canvas></div>
+                        <div class="report-card glass" style="grid-column:1/-1;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px;">
+                                <h3 style="margin:0;">اتجاه الإنفاق عبر الأشهر</h3>
+                                <select id="trendCategoryFilter" class="filter-select" style="max-width:180px;"><option value="__top__">أعلى 4 تصنيفات</option></select>
+                            </div>
+                            <canvas id="trendChart" height="220"></canvas>
+                        </div>
                     </div>
                 </section>
 
@@ -2325,6 +2381,15 @@
                             <div class="form-group"><label for="settingsSalaryDate">تاريخ نزول الراتب (مرجع سابق)</label><input type="date" id="settingsSalaryDate" class="form-input" /></div>
                             <button type="submit" class="btn-primary">حفظ الإعدادات</button>
                         </form>
+                        <hr style="margin: 24px 0; border-color: var(--bg-glass-border);" />
+                        <h3>النسخ الاحتياطي</h3>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:10px;">بياناتك محفوظة محلياً في هذا المتصفح فقط. صدّر نسخة احتياطية بشكل دوري حتى لا تفقدها عند تغيير الجهاز أو مسح ذاكرة المتصفح.</p>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                            <button id="exportBackupBtn" class="btn-primary" style="flex:1;"><i class="fas fa-file-export"></i> تصدير نسخة احتياطية</button>
+                            <button id="importBackupBtn" class="btn-secondary" style="flex:1;"><i class="fas fa-file-import"></i> استيراد نسخة احتياطية</button>
+                            <input type="file" id="importBackupInput" accept="application/json" style="display:none;" />
+                        </div>
+                        <div id="backupStatus" style="font-size:0.8rem; margin-top:8px;"></div>
                         <hr style="margin: 24px 0; border-color: var(--bg-glass-border);" />
                         <h3>إدارة البيانات</h3>
                         <button id="resetAppBtn" class="btn-danger" style="width:100%;"><i class="fas fa-trash-alt"></i> 🗑 إعادة ضبط التطبيق</button>
@@ -2441,6 +2506,34 @@
         </div>
     </div>
 
+    <div id="reclassifyModal" class="modal">
+        <div class="modal-content glass">
+            <div class="modal-header"><h2>إعادة تصنيف بند "أخرى"</h2><button class="modal-close" id="closeReclassifyModal">&times;</button></div>
+            <div class="modal-body">
+                <p class="form-hint" style="margin-bottom:12px;">يحلل الذكاء الاصطناعي وصف كل مصروف مصنّف حالياً كـ"أخرى" ويقترح تصنيفاً أدق. راجع الاقتراحات وعدّل ما تريد قبل التطبيق.</p>
+                <div id="reclassifyList" class="expenses-list"></div>
+                <div class="modal-actions">
+                    <button class="btn-secondary" id="cancelReclassifyBtn">إلغاء</button>
+                    <button class="btn-primary" id="applyReclassifyBtn"><i class="fas fa-check"></i> تطبيق التصنيفات المحددة</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="budgetWizardModal" class="modal">
+        <div class="modal-content glass">
+            <div class="modal-header"><h2>دليل إعداد الميزانية</h2><button class="modal-close" id="closeBudgetWizardModal">&times;</button></div>
+            <div class="modal-body">
+                <p class="form-hint" style="margin-bottom:12px;">حدد ميزانية شهرية لكل تصنيف. القيم المقترحة مبنية على متوسط صرفك الفعلي آخر 30 يوماً — عدّلها كما تريد، واترك الحقل صفراً لتجاهل ذلك التصنيف.</p>
+                <div id="budgetWizardList" class="expenses-list"></div>
+                <div class="modal-actions">
+                    <button class="btn-secondary" id="cancelBudgetWizardBtn">لاحقاً</button>
+                    <button class="btn-primary" id="saveBudgetWizardBtn"><i class="fas fa-check"></i> حفظ الميزانيات</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="budgetItemModal" class="modal">
         <div class="modal-content glass">
             <div class="modal-header"><h2 id="budgetItemModalTitle">إضافة بند ميزانية</h2><button class="modal-close" id="closeBudgetItemModal">&times;</button></div>
@@ -2456,6 +2549,7 @@
                         <input type="checkbox" id="budgetItemReserved" style="width:20px; height:20px; accent-color:var(--accent);" />
                         <span style="font-size:0.8rem; color:var(--text-muted);">(يُحجز المبلغ ولا يُحتسب ضمن المتاح للصرف)</span>
                     </div>
+                    <div class="form-group"><label>تاريخ انتهاء الالتزام (اختياري)</label><input type="date" id="budgetItemEndDate" class="form-input" /><span style="font-size:0.75rem; color:var(--text-muted);">مفيد لالتزامات محدودة المدة مثل تمارا/تابي — ستُنبَّه عند اقتراب الانتهاء</span></div>
                     <div class="modal-actions" style="border-top:none; padding-top:0;">
                         <button type="button" class="btn-secondary" id="cancelBudgetItemBtn">إلغاء</button>
                         <button type="submit" class="btn-primary">حفظ</button>
@@ -2491,6 +2585,9 @@
                         <div id="keysList" class="keys-container"></div>
                         <div id="keyCounter" class="key-counter">0 / 12 مفتاح</div>
                         <small class="form-hint">يتم توزيع الطلبات بشكل دائري على المفاتيح النشطة.</small>
+                        <div style="margin-top:8px;padding:10px 12px;background:var(--bg-glass);border-radius:var(--radius-sm);border-right:3px solid var(--warning);font-size:0.78rem;color:var(--text-secondary);">
+                            ⚠️ <strong>تنبيه أمني:</strong> تُحفظ المفاتيح داخل متصفحك فقط (localStorage) بدون تشفير. لا تستخدم هذه الميزة على جهاز مشترك أو عام، ولا تشارك رابط هذا التطبيق مع مفاتيحك المحفوظة فيه مع أي شخص آخر.
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>المفتاح النشط حالياً</label>
@@ -2541,7 +2638,8 @@
 
     <!-- زر المستشار المالي العائم (قابل للسحب لأي جهة من الشاشة) -->
     <button id="financialAdvisorFab" class="fab-advisor" type="button" aria-label="المستشار المالي" title="المستشار المالي">
-        <i class="fas fa-comment-dots"></i>
+        <span class="fab-advisor-icon"><i class="fas fa-comment-dots"></i></span>
+        <span class="fab-advisor-label">المستشار</span>
     </button>
 
     <script>
@@ -2614,16 +2712,12 @@
                 return html;
             },
             spendingProfileLabel: (code) => ({
-                AggressiveSaver: 'مدّخر قوي',
-                Saver: 'مدّخر',
-                LifestyleFocused: 'مُركّز على نمط الحياة',
-                DebtHeavy: 'مثقل بالديون',
-                FinanciallyFragile: 'هش مالياً',
-                FinanciallyStable: 'مستقر مالياً',
-                Spender: 'منفق',
-                HighRisk: 'مرتفع المخاطر',
-                Balanced: 'متوازن'
-            }[code] || 'متوازن'),
+                Saver: 'ادخاري',
+                Economical: 'اقتصادي',
+                Balanced: 'متزن',
+                Consumerist: 'استهلاكي',
+                Impulsive: 'اندفاعي'
+            }[code] || 'متزن'),
             cleanNumber: (str) => {
                 if (!str) return 0;
                 const arabicToEnglish = {
@@ -2960,6 +3054,8 @@
                     color: data.color || '#2E7DB5',
                     notes: data.notes || '',
                     isAutoCreated: data.isAutoCreated || false,
+                    // تاريخ انتهاء اختياري (مفيد للالتزامات المحدودة المدة مثل تمارا/تابي أو أي اشتراك له عدد أقساط معروف)
+                    endDate: data.endDate || null,
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString()
                 };
@@ -3291,7 +3387,7 @@
         };
 
         const IndicatorEngine = {
-            calculate(income, commitments, expenses, settings) {
+            calculate(income, commitments, expenses, settings, allExpenses) {
                 const available = FinancialEngine.calculateAvailableBudget();
                 const dailyBudget = FinancialEngine.calculateDailyBudget();
                 const weeklyBudget = FinancialEngine.calculateWeeklyBudget();
@@ -3334,9 +3430,24 @@
                 });
 
                 const goalProgress = savingsGoal > 0 && available !== null ? Math.min(100, (available / savingsGoal) * 100) : 0;
-                const daysPassed = Math.max(1, WorldTime.now().getDate());
-                // متوسط الصرف اليومي = إجمالي المصروفات ÷ عدد الأيام التي مرت من الشهر (وليس عدد عمليات الشراء)
-                const avgDaily = daysPassed > 0 ? (total === 1 && expenses.length === 0 ? 0 : total) / daysPassed : 0;
+                // متوسط الصرف اليومي الدقيق: نافذة متحركة من 30 يوماً عبر كل المصروفات (وليس فقط الشهر التقويمي الحالي)
+                // هذا أدق وأكثر استقراراً من "إجمالي الشهر ÷ يوم اليوم من الشهر"، الذي يهتز بشدة أول أيام الشهر
+                const allExpForAvg = (typeof allExpenses !== 'undefined' && allExpenses) ? allExpenses : expenses;
+                const todayDateForAvg = WorldTime.now();
+                const windowStartDate = new Date(todayDateForAvg);
+                windowStartDate.setDate(windowStartDate.getDate() - 29);
+                const windowStartStr = windowStartDate.toISOString().split('T')[0];
+                const last30 = allExpForAvg.filter(e => e.date && e.date >= windowStartStr);
+                const last30Total = last30.reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
+                let earliestDate = null;
+                allExpForAvg.forEach(e => { if (e.date && (!earliestDate || e.date < earliestDate))
+                        earliestDate = e.date; });
+                let windowDays = 30;
+                if (earliestDate) {
+                    const daysSinceFirst = Math.floor((todayDateForAvg - new Date(earliestDate)) / 86400000) + 1;
+                    windowDays = Math.max(1, Math.min(30, daysSinceFirst));
+                }
+                const avgDaily = windowDays > 0 ? last30Total / windowDays : 0;
                 const avgWeekly = avgDaily * 7;
                 const daysLeft = remainingDays;
                 const projectedEnd = available !== null ? available - (avgDaily * daysLeft) : 0;
@@ -3443,19 +3554,12 @@
                 result.highestSpendingDays = sortedDays.slice(0, 3).map(d => d[0]);
                 result.lowestSpendingDays = sortedDays.slice(-3).map(d => d[0]);
                 const savingsRate = indicators.savingsRate || 0;
-                const stress = indicators.financialStressIndex || 0;
-                const lifestyle = indicators.lifestyleRatio || 0;
-                const debt = indicators.debtRatio || 0;
-                if (savingsRate > 30 && stress < 30) result.profile = 'AggressiveSaver';
-                else if (savingsRate > 15 && stress < 40) result.profile = 'Saver';
-                else if (lifestyle > 40 && debt < 20) result.profile = 'LifestyleFocused';
-                else if (debt > 40) result.profile = 'DebtHeavy';
-                else if (savingsRate < 5 && stress > 60) result.profile = 'FinanciallyFragile';
-                else if (savingsRate > 20 && debt < 10) result.profile = 'FinanciallyStable';
-                else if (lifestyle > 30 && savingsRate < 10) result.profile = 'Spender';
-                else if (stress > 50) result.profile = 'HighRisk';
-                else if (savingsRate > 10 && lifestyle < 25) result.profile = 'Balanced';
-                else result.profile = 'Balanced';
+                // مقياس واحد وواضح مرتب من الأقل صرفاً إلى الأكثر صرفاً، بناءً على نسبة الادخار من الدخل
+                if (savingsRate >= 30) result.profile = 'Saver';
+                else if (savingsRate >= 15) result.profile = 'Economical';
+                else if (savingsRate >= 0) result.profile = 'Balanced';
+                else if (savingsRate >= -15) result.profile = 'Consumerist';
+                else result.profile = 'Impulsive';
                 return result;
             }
         };
@@ -3772,7 +3876,7 @@
                 const settings = Storage.getSettings();
                 const income = IncomeAnalysisEngine.analyze(settings);
                 const commitments = CommitmentAnalysisEngine.analyze(expenses, settings);
-                const indicators = IndicatorEngine.calculate(income, commitments, expenses, settings);
+                const indicators = IndicatorEngine.calculate(income, commitments, expenses, settings, allExpenses);
                 const behavior = BehaviorProfilingEngine.analyze(expenses, indicators);
                 const plan = FinancialPlanEngine.build(income, indicators, commitments, behavior, settings);
                 const forecast = ForecastEngine.forecast(indicators, plan, expenses);
@@ -4179,6 +4283,50 @@
                         }));
                     }
                     throw new Error('تعذر استخراج أي مصروف من النص');
+                }
+            },
+
+            // يحلل مصروفات بند "أخرى" ويقترح تصنيفاً أدق لكل واحد منها من قائمة التصنيفات المعروفة
+            async reclassifyOtherExpenses(expenses) {
+                if (!expenses || expenses.length === 0) return [];
+                const categories = Utils.defaultCategories().filter(c => c !== 'أخرى');
+                const todayStr = Utils.today();
+                const list = expenses.map(e => ({ id: e.id, description: e.description || '', merchant: e
+                        .merchant || '', amount: e.amount }));
+                try {
+                    const prompt = `أنت مساعد مالي ذكي. لديك قائمة مصروفات مصنّفة حالياً تحت تصنيف "أخرى" (تصنيف عام غير دقيق). حلل وصف كل مصروف واقترح له تصنيفاً أدق من القائمة التالية فقط:
+                    ${categories.join('، ')}
+
+                    قائمة المصروفات (بصيغة JSON):
+                    ${JSON.stringify(list)}
+
+                    أخرج النتيجة بتنسيق JSON صالح فقط (مصفوفة)، بدون أي نص إضافي، بهذا الهيكل تماماً، وبنفس عدد وترتيب العناصر المُدخلة:
+                    [
+                      { "id": "نفس المعرف المُدخل", "suggestedCategory": "أحد التصنيفات أعلاه بالضبط", "confidence": "high|medium|low" }
+                    ]
+
+                    إذا لم يكن أي تصنيف من القائمة مناسباً فعلاً لمصروف معين، اجعل suggestedCategory يساوي "أخرى" وconfidence يساوي "low" لذلك العنصر فقط.`;
+                    const response = await this.sendRequest(prompt);
+                    const jsonMatch = response.match(/\[[\s\S]*\]/);
+                    if (jsonMatch) {
+                        const data = JSON.parse(jsonMatch[0]);
+                        if (Array.isArray(data)) {
+                            return data.filter(d => d && d.id && categories.includes(d.suggestedCategory)).map(
+                                d => ({ id: d.id, suggestedCategory: d.suggestedCategory, confidence: d
+                                    .confidence || 'medium' }));
+                        }
+                    }
+                    throw new Error('تعذر تحليل الرد');
+                } catch (e) {
+                    console.warn('فشل Gemini في إعادة التصنيف:', e.message);
+                    // بديل احتياطي: نستخدم نفس المصنّف بالكلمات المفتاحية المستخدم في تحليل المصروفات
+                    return expenses.map(e => {
+                        const classified = ExpenseParser.classifyWithKeywords((e.description || '') + ' ' + (e
+                            .merchant || ''));
+                        return { id: e.id, suggestedCategory: classified.category !== 'أخرى' ? classified
+                                .category : 'أخرى', confidence: classified.category !== 'أخرى' ? 'medium' :
+                                'low' };
+                    });
                 }
             },
 
@@ -4667,7 +4815,18 @@
 
                 ${contextStr}
 
-                تعليمات الرد (مهمة جداً):
+                معايير جودة الرد (التزم بها في كل رد بدون استثناء):
+                - اكتب كما يكتب مستشار مالي محترف حقيقي يكلّم عميله، وليس كنموذج ذكاء اصطناعي.
+                - كل جملة يجب أن تعتمد على بيانات المستخدم الفعلية أعلاه فقط؛ لا تستخدم عبارات عامة أو قوالب جاهزة.
+                - احذف أي جملة لا تضيف قيمة حقيقية. لا مقدمات، لا حشو، لا تكرار للفكرة نفسها بصياغة أخرى.
+                - رتّب المعلومات من الأكثر تأثيراً على وضع المستخدم المالي إلى الأقل.
+                - كل نصيحة تحتاج سبباً واضحاً مبنياً على رقم حقيقي من بياناته يوضح لماذا قُدّمت.
+                - أي رقم مالي تذكره اربطه فوراً بمعناه وتأثيره (مثال: ليس "المصروف 800 ريال" فقط، بل "800 ريال أي 40% من ميزانية هذا البند").
+                - لا تستخدم عبارات تحفيزية مبالغاً فيها أو لغة تسويقية ("أنت قادر!"، "المستقبل المشرق"، إلخ) ولا أسلوباً نمطياً يكشف أن النص مولّد آلياً.
+                - لا تذكر أي معلومة أو استنتاج لا تدعمه البيانات المتوفرة أعلاه.
+                - اجعل الانتقال بين الأفكار منطقياً ومباشراً، وفقرات قصيرة تناسب شاشة الجوال.
+
+                تعليمات الرد الإضافية (مهمة جداً):
 
                 1. لا تقم بأي عمليات حسابية — كل الأرقام والمؤشرات جاهزة أعلاه.
                 2. لا تكرر البيانات — لا تعيد الراتب، المتبقي، إجمالي المصروفات، درجة الصحة، إلا إذا كان ضرورياً لشرح القرار.
@@ -4708,7 +4867,7 @@
                 - set_salary_date (date)
                 - set_savings_goal (amount)
                 - set_budget_item (id, budget) — لتعديل ميزانية بند موجود مسبقاً فقط (استخدم id من بنود الميزانية أعلاه)
-                - add_budget_item (name, category, budget, isReserved) — لإنشاء بند ميزانية جديد بالكامل (مثال: "دفع تمارا"، "دفع تابي"، أو أي بند مستقبلي يذكره المستخدم). اجعل category بنفس اسم name إذا لم يوجد تصنيف قياسي مناسب. isReserved=true يعني أن مبلغ هذا البند يُحجز تلقائياً من "المتاح للصرف" تماماً مثل الإيجار والأقساط (استخدمها إذا طلب المستخدم "حجز" البند أو ذكر أنه التزام ثابت كالأقساط).
+                - add_budget_item (name, category, budget, isReserved, endDate) — لإنشاء بند ميزانية جديد بالكامل (مثال: "دفع تمارا"، "دفع تابي"، أو أي بند مستقبلي يذكره المستخدم). اجعل category بنفس اسم name إذا لم يوجد تصنيف قياسي مناسب. isReserved=true يعني أن مبلغ هذا البند يُحجز تلقائياً من "المتاح للصرف" تماماً مثل الإيجار والأقساط (استخدمها إذا طلب المستخدم "حجز" البند أو ذكر أنه التزام ثابت كالأقساط). endDate اختياري بصيغة YYYY-MM-DD: إذا ذكر المستخدم عدد أقساط متبقية أو تاريخ انتهاء الالتزام (مثال: "تمارا لمدة 6 أشهر")، احسب التاريخ التقريبي لنهاية آخر قسط وضعه هنا حتى يتم تنبيه المستخدم وإزالة البند تلقائياً بعد انتهائه.
                 - delete_budget_item (id أو name)
                 - set_daily_budget (amount)
                 - set_weekly_budget (amount)
@@ -4830,6 +4989,7 @@
                 4. خطة عمل مقترحة للشهر القادم.
                 5. توصيات لتحسين درجة الصحة المالية.
 
+                معايير الجودة: اكتب كمستشار مالي محترف حقيقي وليس كنموذج ذكاء اصطناعي. كل جملة تعتمد على بيانات المستخدم أعلاه فقط، بدون عبارات عامة أو حشو أو تحفيز مبالغ فيه. رتّب حسب الأهمية للمستخدم. كل رقم مصحوب بمعناه وتأثيره. لا تستخدم ** أو أي رموز ماركداون، واستخدم "•" فقط للنقاط. فقرات قصيرة تناسب شاشة الجوال.
                 أجب بشكل مختصر ومفيد، باللغة العربية الفصحى.`;
 
                 try {
@@ -4849,6 +5009,8 @@
                 السؤال: ${question}
 
                 قواعد الرد (مهمة جداً):
+                - اكتب كمستشار مالي محترف حقيقي وليس كنموذج ذكاء اصطناعي؛ بدون مقدمات أو عبارات إنشائية أو تحفيز مبالغ فيه.
+                - كل جملة تعتمد على بيانات المستخدم الفعلية أعلاه فقط، ولا تذكر استنتاجاً لا تدعمه البيانات.
                 - لا تستخدم إطلاقاً علامة ** أو أي رموز ماركداون (##, ---, إلخ). اكتب نصاً عادياً فقط.
                 - كن مختصراً جداً ودقيقاً؛ لا تكرر شرح الأرقام أو الوضع المالي، اذهب مباشرة للإجابة.
                 - إن كان السؤال عن كيفية توفير مبلغ معين، أجب بهذا الترتيب بالضبط وبدون أي إطالة:
@@ -4856,7 +5018,7 @@
                   2) 2-4 بنود إنفاق فعلية (وليست افتراضية) من بياناته أعلاه يمكن تخفيضها — استثنِ الإيجار والأقساط دائماً — كل بند بصيغة: "التصنيف: تخفيض X ريال (Y%)".
                   3) سطر أخير واحد يلخص خطة تنفيذ بسيطة (مثال: قلل كذا هذا الأسبوع وحوّل الفرق لحساب التوفير).
                   لا تكتب أكثر من 6 أسطر إجمالاً لهذا النوع من الأسئلة.
-                - لغيرها من الأسئلة: أجب بشكل مباشر وعملي في 2-4 أسطر كحد أقصى، واستخدم الأرقام من السياق لتخصيص الإجابة.
+                - لغيرها من الأسئلة: أجب بشكل مباشر وعملي في 2-4 أسطر كحد أقصى، واستخدم الأرقام من السياق لتخصيص الإجابة، وكل رقم مصحوب بمعناه وتأثيره.
                 أجب باللغة العربية الفصحى.`;
 
                 try {
@@ -5027,11 +5189,12 @@
                                     budget: parseFloat(a.budget) || 0,
                                     isReserved: a.isReserved === true,
                                     priority: a.priority || 'Medium',
-                                    notes: a.notes || ''
+                                    notes: a.notes || '',
+                                    endDate: a.endDate || null
                                 });
                                 log.push('➕ تم إضافة بند "' + item.name + '" بميزانية ' + Utils.formatCurrency(item
                                     .budget) + (item.isReserved ? ' 🔒 (محجوز - لا يُحتسب ضمن المتاح للصرف)' :
-                                    ''));
+                                    '') + (item.endDate ? ` — ينتهي في ${Utils.formatDate(item.endDate)}` : ''));
                                 break;
                             }
                             case 'delete_budget_item': {
@@ -5073,6 +5236,90 @@
         // 9. CHARTS (unchanged)
         // ============================================================
         const Charts = {
+            drawMultiLine(ctx, labels, series, colors) {
+                const canvas = ctx.canvas;
+                const dpr = window.devicePixelRatio || 1;
+                const rect = canvas.parentElement.getBoundingClientRect();
+                const width = rect.width || 280;
+                const height = 220;
+                canvas.width = width * dpr;
+                canvas.height = height * dpr;
+                canvas.style.width = width + 'px';
+                canvas.style.height = height + 'px';
+                ctx.scale(dpr, dpr);
+                ctx.clearRect(0, 0, width, height);
+                const padding = { top: 16, bottom: 46, left: 12, right: 12 };
+                const chartWidth = width - padding.left - padding.right;
+                const chartHeight = height - padding.top - padding.bottom;
+                if (!labels || labels.length === 0 || !series || series.length === 0) {
+                    ctx.fillStyle = '#94A3B8';
+                    ctx.font = '12px Cairo';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('لا توجد بيانات كافية بعد', width / 2, height / 2);
+                    return;
+                }
+                const allValues = series.flatMap(s => s.data);
+                const maxVal = Math.max(...allValues, 1);
+                const stepX = labels.length > 1 ? chartWidth / (labels.length - 1) : 0;
+
+                // خطوط الشبكة الأفقية
+                ctx.strokeStyle = 'rgba(148,163,184,0.15)';
+                ctx.lineWidth = 1;
+                for (let g = 0; g <= 3; g++) {
+                    const y = padding.top + (chartHeight / 3) * g;
+                    ctx.beginPath();
+                    ctx.moveTo(padding.left, y);
+                    ctx.lineTo(padding.left + chartWidth, y);
+                    ctx.stroke();
+                }
+
+                series.forEach((s, si) => {
+                    const color = colors[si % colors.length];
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 2.5;
+                    ctx.beginPath();
+                    s.data.forEach((val, i) => {
+                        const x = padding.left + (labels.length > 1 ? stepX * i : chartWidth / 2);
+                        const y = padding.top + chartHeight - (val / maxVal) * chartHeight;
+                        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                    });
+                    ctx.stroke();
+                    s.data.forEach((val, i) => {
+                        const x = padding.left + (labels.length > 1 ? stepX * i : chartWidth / 2);
+                        const y = padding.top + chartHeight - (val / maxVal) * chartHeight;
+                        ctx.fillStyle = color;
+                        ctx.beginPath();
+                        ctx.arc(x, y, 3, 0, Math.PI * 2);
+                        ctx.fill();
+                    });
+                });
+
+                // تسميات المحور الأفقي (الأشهر)
+                ctx.fillStyle = '#94A3B8';
+                ctx.font = '9px Cairo';
+                ctx.textAlign = 'center';
+                labels.forEach((label, i) => {
+                    const x = padding.left + (labels.length > 1 ? stepX * i : chartWidth / 2);
+                    ctx.fillText(label, x, padding.top + chartHeight + 14);
+                });
+
+                // مفتاح الألوان (Legend)
+                let legendX = padding.left;
+                let legendY = padding.top + chartHeight + 30;
+                ctx.font = '9px Cairo';
+                ctx.textAlign = 'left';
+                series.forEach((s, si) => {
+                    const color = colors[si % colors.length];
+                    ctx.fillStyle = color;
+                    ctx.fillRect(legendX, legendY - 8, 10, 10);
+                    ctx.fillStyle = '#94A3B8';
+                    const label = s.name.length > 10 ? s.name.substring(0, 9) + '..' : s.name;
+                    ctx.fillText(label, legendX + 14, legendY);
+                    legendX += 70;
+                    if (legendX > width - 60) { legendX = padding.left;
+                        legendY += 16; }
+                });
+            },
             drawBar(ctx, labels, data, colors, label) {
                 const canvas = ctx.canvas;
                 const dpr = window.devicePixelRatio || 1;
@@ -5225,6 +5472,14 @@
             deleteExpense(id) { let exp = this.getExpenses();
                 exp = exp.filter(e => e.id !== id);
                 this.saveExpenses(exp); },
+            updateExpense(id, data) {
+                const exp = this.getExpenses();
+                const idx = exp.findIndex(e => e.id === id);
+                if (idx === -1) return null;
+                Object.assign(exp[idx], data);
+                this.saveExpenses(exp);
+                return exp[idx];
+            },
             clearAllExpenses() { this.saveExpenses([]); },
             getExpense(id) { return this.getExpenses().find(e => e.id === id); },
             getExpensesByDateRange(start, end) { const exp = this.getExpenses(); return exp.filter(e => e.date >= start && e
@@ -5350,8 +5605,12 @@
                 this.setupTemp();
                 this.setupExpenseDetailModal();
                 this.setupClearAllExpenses();
+                this.setupReclassifyOther();
+                this.setupReportsTrend();
+                this.setupBudgetWizard();
                 this.setupBudgetItems();
                 this.setupResetApp();
+                this.setupBackup();
                 this.setupCoach();
                 this.setupIncomePage();
                 this.setupBudgetOverride();
@@ -5478,7 +5737,7 @@
                     analytics: Utils.id('page-analytics'), income: Utils.id('page-income'),
                     settings: Utils.id('page-settings'), travel: Utils.id('page-travel'), temp: Utils.id('page-temp'),
                     chat: Utils.id('page-chat') };
-                const titles = { dashboard: 'الرئيسية', expenses: 'المصروفات', budget: 'الميزانية',
+                const titles = { dashboard: 'الرئيسية', expenses: 'المصروفات', budget: 'تنظيم الميزانية',
                     coach: 'المدرب المالي', reports: 'التقارير', analytics: 'التحليلات', income: 'الدخل والأهداف',
                     settings: 'الإعدادات', travel: 'ميزانية السفر', temp: 'ميزانية مؤقتة', chat: 'المستشار المالي' };
                 links.forEach(link => {
@@ -5515,13 +5774,21 @@
                 const fab = Utils.id('financialAdvisorFab');
                 if (!fab) return;
                 const margin = 12;
-                const size = 58;
+                const defaultW = 140,
+                    defaultH = 50;
+
+                const getSize = () => {
+                    const w = fab.offsetWidth || defaultW;
+                    const h = fab.offsetHeight || defaultH;
+                    return { w, h };
+                };
 
                 const clamp = (val, min, max) => Math.min(Math.max(val, min), max);
 
                 const applyPosition = (x, y) => {
-                    const maxX = Math.max(margin, window.innerWidth - size - margin);
-                    const maxY = Math.max(margin, window.innerHeight - size - margin);
+                    const { w, h } = getSize();
+                    const maxX = Math.max(margin, window.innerWidth - w - margin);
+                    const maxY = Math.max(margin, window.innerHeight - h - margin);
                     const cx = clamp(x, margin, maxX);
                     const cy = clamp(y, margin, maxY);
                     fab.style.left = cx + 'px';
@@ -5536,7 +5803,7 @@
                     applyPosition(saved.x, saved.y);
                 } else {
                     // موضع افتراضي: أسفل يمين الشاشة، بعيداً عن أي عناصر أخرى
-                    applyPosition(window.innerWidth - size - 20, window.innerHeight - size - 110);
+                    applyPosition(window.innerWidth - defaultW - 20, window.innerHeight - defaultH - 110);
                 }
 
                 let dragging = false;
@@ -5568,9 +5835,10 @@
                     dragging = false;
                     fab.classList.remove('dragging');
                     const rect = fab.getBoundingClientRect();
+                    const { w } = getSize();
                     // إلصاق الزر بأقرب حافة (يمين أو يسار) لمظهر أكثر احترافية بعد ترك السحب
-                    const snapToRight = (rect.left + size / 2) > (window.innerWidth / 2);
-                    const finalX = snapToRight ? window.innerWidth - size - margin : margin;
+                    const snapToRight = (rect.left + w / 2) > (window.innerWidth / 2);
+                    const finalX = snapToRight ? window.innerWidth - w - margin : margin;
                     const pos = applyPosition(finalX, rect.top);
                     Storage.set('advisor_fab_position', pos);
 
@@ -5664,6 +5932,75 @@
                         this.renderAll();
                         alert('تم مسح جميع المصروفات بنجاح.');
                     }
+                });
+            },
+
+            setupReclassifyOther() {
+                const modalId = 'reclassifyModal';
+                const openBtn = Utils.id('reclassifyOtherBtn');
+                const listEl = Utils.id('reclassifyList');
+                const applyBtn = Utils.id('applyReclassifyBtn');
+                this.setupModalClose(modalId, 'closeReclassifyModal', 'cancelReclassifyBtn');
+                const categories = Utils.defaultCategories().filter(c => c !== 'أخرى');
+                let currentExpenses = [];
+
+                Utils.on(openBtn, 'click', async () => {
+                    const others = Budget.getExpenses().filter(e => (e.category || 'أخرى') === 'أخرى');
+                    if (others.length === 0) {
+                        alert('لا توجد حالياً مصروفات مصنّفة كـ"أخرى" لإعادة تصنيفها. 👍');
+                        return;
+                    }
+                    currentExpenses = others;
+                    this.openModal(modalId);
+                    listEl.innerHTML = '<div class="analytics-placeholder glass"><i class="fas fa-spinner fa-spin fa-3x"></i><p>جاري تحليل ' + others.length + ' مصروف...</p></div>';
+
+                    let suggestions = [];
+                    try {
+                        suggestions = await Gemini.reclassifyOtherExpenses(others);
+                    } catch (e) {
+                        suggestions = [];
+                    }
+                    const suggestionMap = {};
+                    suggestions.forEach(s => { suggestionMap[s.id] = s; });
+
+                    listEl.innerHTML = others.map(e => {
+                        const s = suggestionMap[e.id];
+                        const suggested = s ? s.suggestedCategory : 'أخرى';
+                        const confidence = s ? s.confidence : 'low';
+                        const confidenceBadge = confidence === 'high' ?
+                            '<span style="color:var(--success);font-size:0.75rem;">ثقة عالية</span>' :
+                            confidence === 'medium' ?
+                            '<span style="color:var(--warning);font-size:0.75rem;">ثقة متوسطة</span>' :
+                            '<span style="color:var(--text-muted);font-size:0.75rem;">غير متأكد</span>';
+                        const checkedByDefault = suggested !== 'أخرى';
+                        return `<div class="expense-item glass" data-id="${e.id}" style="align-items:center;">
+                            <input type="checkbox" class="reclassify-check" data-id="${e.id}" ${checkedByDefault ? 'checked' : ''} style="width:18px;height:18px;margin-left:10px;accent-color:var(--accent);" />
+                            <div class="expense-info" style="flex:1;">
+                                <div class="desc">${e.description || '—'}</div>
+                                <div class="meta"><span>${Utils.formatCurrency(e.amount)}</span>${confidenceBadge}</div>
+                            </div>
+                            <select class="reclassify-select form-input" data-id="${e.id}" style="max-width:150px;">
+                                <option value="أخرى" ${suggested === 'أخرى' ? 'selected' : ''}>أخرى (بدون تغيير)</option>
+                                ${categories.map(c => `<option value="${c}" ${c === suggested ? 'selected' : ''}>${c}</option>`).join('')}
+                            </select>
+                        </div>`;
+                    }).join('');
+                });
+
+                Utils.on(applyBtn, 'click', () => {
+                    const rows = Utils.qsa('.reclassify-select');
+                    let count = 0;
+                    rows.forEach(sel => {
+                        const id = sel.dataset.id;
+                        const checkbox = Utils.qs(`.reclassify-check[data-id="${id}"]`);
+                        if (checkbox && checkbox.checked && sel.value !== 'أخرى') {
+                            Budget.updateExpense(id, { category: sel.value });
+                            count++;
+                        }
+                    });
+                    this.closeModal(modalId);
+                    this.renderAll();
+                    alert(count > 0 ? `✅ تم إعادة تصنيف ${count} مصروف بنجاح.` : 'لم يتم تحديد أي مصروف لإعادة التصنيف.');
                 });
             },
 
@@ -5931,6 +6268,73 @@
                 });
             },
 
+            setupBackup() {
+                const exportBtn = Utils.id('exportBackupBtn');
+                const importBtn = Utils.id('importBackupBtn');
+                const importInput = Utils.id('importBackupInput');
+                const statusEl = Utils.id('backupStatus');
+
+                Utils.on(exportBtn, 'click', () => {
+                    try {
+                        const data = {};
+                        Object.keys(localStorage).forEach(key => {
+                            if (key.startsWith('ai_budget_')) {
+                                const raw = localStorage.getItem(key);
+                                try { data[key.replace('ai_budget_', '')] = JSON.parse(raw); } catch (e) {
+                                    data[key.replace('ai_budget_', '')] = raw; }
+                            }
+                        });
+                        const payload = { app: 'ai-budget-manager', version: 1, exportedAt: new Date()
+                                .toISOString(), data };
+                        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `budget-backup-${Utils.today()}.json`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                        if (statusEl) { statusEl.style.color = 'var(--success)';
+                            statusEl.textContent = '✅ تم تصدير النسخة الاحتياطية بنجاح.'; }
+                    } catch (e) {
+                        if (statusEl) { statusEl.style.color = 'var(--danger)';
+                            statusEl.textContent = '⚠️ فشل التصدير: ' + e.message; }
+                    }
+                });
+
+                Utils.on(importBtn, 'click', () => importInput.click());
+
+                Utils.on(importInput, 'change', (e) => {
+                    const file = e.target.files && e.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        try {
+                            const parsed = JSON.parse(reader.result);
+                            const data = parsed && parsed.data ? parsed.data : parsed;
+                            if (!data || typeof data !== 'object') throw new Error('ملف غير صالح');
+                            if (!confirm(
+                                    'سيتم استبدال جميع بياناتك الحالية بالنسخة المستوردة. هل تريد المتابعة؟'
+                                    )) { importInput.value = ''; return; }
+                            Object.entries(data).forEach(([key, value]) => {
+                                localStorage.setItem('ai_budget_' + key, JSON.stringify(value));
+                            });
+                            FinancialEngine.refreshAll();
+                            this.renderAll();
+                            if (statusEl) { statusEl.style.color = 'var(--success)';
+                                statusEl.textContent = '✅ تم استيراد النسخة الاحتياطية بنجاح.'; }
+                            alert('تم استيراد النسخة الاحتياطية بنجاح!');
+                        } catch (err) {
+                            if (statusEl) { statusEl.style.color = 'var(--danger)';
+                                statusEl.textContent = '⚠️ فشل الاستيراد: الملف غير صالح.'; }
+                        }
+                        importInput.value = '';
+                    };
+                    reader.readAsText(file);
+                });
+            },
+
             setupResetApp() {
                 const resetBtn = Utils.id('resetAppBtn');
                 Utils.on(resetBtn, 'click', () => {
@@ -6140,6 +6544,76 @@
                         addBtn.click(); } });
             },
 
+            addChatQuickReplies(promptText, options, onSelect) {
+                if (!this.chatMessages) return;
+                const div = document.createElement('div');
+                div.className = 'chat-message financial-advisor';
+                const btnsHtml = options.map((o, idx) =>
+                    `<button class="chat-quick-reply-btn" data-idx="${idx}">${o.label}</button>`).join('');
+                div.innerHTML = '<div>' + Utils.formatAIText(promptText) + '</div><div class="chat-quick-replies">' +
+                    btnsHtml + '</div><div class="message-time">' + new Date().toLocaleTimeString('ar-SA', {
+                        hour: '2-digit', minute: '2-digit' }) + '</div>';
+                this.chatMessages.appendChild(div);
+                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+                div.querySelectorAll('.chat-quick-reply-btn').forEach(btn => {
+                    Utils.on(btn, 'click', () => {
+                        div.querySelectorAll('.chat-quick-reply-btn').forEach(b => b.disabled = true);
+                        const idx = parseInt(btn.dataset.idx);
+                        onSelect(options[idx]);
+                    });
+                });
+            },
+
+            // يطرح على المستخدم سؤال عدد الدفعات المناسب لمزود الدفع (تابي: 1-4 دفعات، تمارا: 3/4 دفعات أو 6/9/12/24 شهراً)
+            askInstallmentCount() {
+                const flow = this.installmentFlow;
+                if (!flow) return;
+                const isTabi = flow.provider === 'tabi';
+                const options = isTabi ? [
+                    { label: 'دفعة واحدة', count: 1 },
+                    { label: 'دفعتين', count: 2 },
+                    { label: '3 دفعات', count: 3 },
+                    { label: '4 دفعات', count: 4 }
+                ] : [
+                    { label: '3 دفعات', count: 3 },
+                    { label: '4 دفعات', count: 4 },
+                    { label: '6 أشهر', count: 6 },
+                    { label: '9 أشهر', count: 9 },
+                    { label: '12 شهر', count: 12 },
+                    { label: '24 شهر', count: 24 }
+                ];
+                this.addChatQuickReplies(
+                    `كم عدد الدفعات المناسبة لك؟ (المبلغ الإجمالي: ${Utils.formatCurrency(flow.amount)})`,
+                    options,
+                    (opt) => this.finalizeInstallmentFlow(opt.count)
+                );
+            },
+
+            finalizeInstallmentFlow(count) {
+                const flow = this.installmentFlow;
+                if (!flow) return;
+                const isTabi = flow.provider === 'tabi';
+                const providerName = isTabi ? 'دفع تابي' : 'دفع تمارا';
+                const monthly = Math.round((flow.amount / count) * 100) / 100;
+                const endDate = new Date(WorldTime.now());
+                endDate.setMonth(endDate.getMonth() + count);
+                const endDateStr = endDate.toISOString().split('T')[0];
+                const notes = `إجمالي ${Utils.formatCurrency(flow.amount)} مقسّم على ${count} ${isTabi ? 'دفعة' : 'دفعة/شهر'}`;
+                const existing = FinancialEngine.getBudgetItems().find(i => i.category === providerName);
+                if (existing) {
+                    FinancialEngine.updateBudgetItem(existing.id, { budget: monthly, isReserved: true, endDate:
+                        endDateStr, notes });
+                } else {
+                    FinancialEngine.addBudgetItem({ name: providerName, category: providerName, budget: monthly,
+                        isReserved: true, endDate: endDateStr, notes });
+                }
+                this.addChatMessage(
+                    `✅ تم إعداد "${providerName}": دفعة شهرية ${Utils.formatCurrency(monthly)} لمدة ${count} ${isTabi ? 'دفعات' : 'أشهر'}، تنتهي في ${Utils.formatDate(endDateStr)}. تم حجزها تلقائياً من المتاح للصرف.`,
+                    'system');
+                this.installmentFlow = null;
+                this.renderAll();
+            },
+
             setupChat() {
                 const messagesContainer = Utils.id('chatMessages');
                 const input = Utils.id('chatInput');
@@ -6148,9 +6622,56 @@
                 const sendMessage = async () => {
                     const text = input.value.trim();
                     if (!text) return;
+
+                    // إذا كنا في منتصف تدفق إعداد تابي/تمارا وننتظر مبلغ المشتريات، عالج الرد هنا مباشرة
+                    if (this.installmentFlow && this.installmentFlow.step === 'awaiting_amount') {
+                        const amountMatch = text.match(/[\d.]+/);
+                        this.addChatMessage(text, 'user');
+                        input.value = '';
+                        input.style.height = 'auto';
+                        if (amountMatch) {
+                            this.installmentFlow.amount = parseFloat(amountMatch[0]);
+                            this.installmentFlow.step = null;
+                            this.askInstallmentCount();
+                        } else {
+                            this.addChatMessage('لم أفهم المبلغ، الرجاء كتابة رقم المشتريات بالريال فقط.',
+                                'financial-advisor');
+                        }
+                        return;
+                    }
+
                     this.addChatMessage(text, 'user');
                     input.value = '';
                     input.style.height = 'auto';
+
+                    // كشف نية إضافة بند تابي/تمارا لبدء تدفق تحديد المبلغ وعدد الدفعات
+                    const mentionsTabi = /تابي|tabby/i.test(text);
+                    const mentionsTamara = /تمارا|tamara/i.test(text);
+                    if ((mentionsTabi || mentionsTamara) && !this.installmentFlow) {
+                        const provider = mentionsTabi ? 'tabi' : 'tamara';
+                        const amountMatch = text.match(/[\d.]+/);
+                        this.installmentFlow = { provider, amount: amountMatch ? parseFloat(amountMatch[0]) :
+                            null, step: null };
+                        // إذا ذكر المستخدم عدد الدفعات/الأشهر صراحةً في نفس الرسالة، لا داعي لسؤاله مرة أخرى
+                        let detectedCount = null;
+                        if (/دفعتين/.test(text)) detectedCount = 2;
+                        else if (/دفعة\s*واحدة/.test(text)) detectedCount = 1;
+                        else {
+                            const numMatch = text.match(/(\d+)\s*(شهر|أشهر|دفعات|دفعة)/);
+                            if (numMatch) detectedCount = parseInt(numMatch[1]);
+                        }
+                        if (this.installmentFlow.amount && detectedCount) {
+                            this.finalizeInstallmentFlow(detectedCount);
+                        } else if (!this.installmentFlow.amount) {
+                            this.installmentFlow.step = 'awaiting_amount';
+                            this.addChatMessage(
+                                `كم قيمة المشتريات التي تريد تقسيمها عبر ${provider === 'tabi' ? 'تابي' : 'تمارا'}؟`,
+                                'financial-advisor');
+                        } else {
+                            this.askInstallmentCount();
+                        }
+                        return;
+                    }
 
                     const typingDiv = document.createElement('div');
                     typingDiv.className = 'chat-typing';
@@ -6625,9 +7146,57 @@
                 ctx = ctx || this.getContext();
                 const cardsContainer = Utils.id('dashboardCards');
                 const summaryContainer = Utils.id('dashboardSummary');
+                const alertsContainer = Utils.id('dashboardAlerts');
                 const f = ctx.indicators || {};
                 const health = ctx.financialHealth || {};
                 const status = ctx.financialStatus || {};
+
+                if (alertsContainer) {
+                    const items = FinancialEngine.getBudgetItems();
+                    const todayStr = Utils.today();
+                    const orgEnabled = Storage.getSettings().budgetOrganizationEnabled === true;
+                    const alerts = [];
+                    items.forEach(item => {
+                        const spent = item.spent || 0;
+                        const pct = item.budget > 0 ? (spent / item.budget) * 100 : 0;
+                        // تنبيه "قريب من الحد" له معنى فقط لبند محجوز (التزام ثابت) أو عندما يكون تنظيم الميزانية مفعّلاً
+                        // (لأن سقف البند التقديري التلقائي ليس التزاماً حقيقياً من المستخدم عند إيقاف الميزانية)
+                        if (item.budget > 0 && pct >= 80 && pct < 100 && (item.isReserved || orgEnabled)) {
+                            alerts.push({ key: `nearlimit-${item.id}-${Math.floor(pct / 10)}`, type: 'warning', text: `🔶 بند "${item.name}" وصل ${Math.round(pct)}% من ميزانيته (${Utils.formatCurrency(spent)} من ${Utils.formatCurrency(item.budget)})` });
+                        }
+                        // تنبيهات انتهاء الالتزام تظهر دائماً بغض النظر عن تفعيل تنظيم الميزانية
+                        if (item.endDate) {
+                            const daysToEnd = Math.round((new Date(item.endDate) - new Date(todayStr)) / 86400000);
+                            if (daysToEnd < 0) {
+                                alerts.push({ key: `expired-${item.id}-${item.endDate}`, type: 'danger', text: `⏰ التزام "${item.name}" انتهى في ${Utils.formatDate(item.endDate)} — راجع صفحة الميزانية لحذفه` });
+                            } else if (daysToEnd <= 14) {
+                                alerts.push({ key: `expiring-${item.id}-${item.endDate}`, type: 'warning', text: `⏳ التزام "${item.name}" ينتهي بعد ${daysToEnd} يوم (${Utils.formatDate(item.endDate)})` });
+                            }
+                        }
+                    });
+                    const dismissed = Storage.get('dismissed_alerts', []) || [];
+                    const visibleAlerts = alerts.filter(a => !dismissed.includes(a.key));
+                    if (visibleAlerts.length === 0) {
+                        alertsContainer.innerHTML = '';
+                    } else {
+                        alertsContainer.innerHTML = '<div class="dashboard-alerts-box" style="margin-bottom:16px;display:flex;flex-direction:column;gap:8px;">' +
+                            visibleAlerts.map(a => `<div class="glass" data-alert-key="${a.key}" style="padding:10px 14px;border-radius:var(--radius-sm);border-right:3px solid ${a.type === 'danger' ? 'var(--danger)' : 'var(--warning)'};font-size:0.88rem;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                                <span style="flex:1;">${a.text}</span>
+                                <button class="dismiss-alert-btn" data-key="${a.key}" style="background:none;border:none;color:var(--text-muted);font-size:1.1rem;cursor:pointer;padding:2px 6px;line-height:1;">&times;</button>
+                            </div>`).join('') +
+                            '</div>';
+                        Utils.qsa('.dismiss-alert-btn').forEach(btn => {
+                            Utils.on(btn, 'click', () => {
+                                const key = btn.dataset.key;
+                                const list = Storage.get('dismissed_alerts', []) || [];
+                                if (!list.includes(key)) list.push(key);
+                                Storage.set('dismissed_alerts', list);
+                                const card = btn.closest('[data-alert-key]');
+                                if (card) card.remove();
+                            });
+                        });
+                    }
+                }
                 
                 const salary = FinancialEngine.getSalary();
                 const reserved = FinancialEngine.calculateReservedMoney();
@@ -6770,55 +7339,75 @@
             },
 
             // ===== 🔥 عرض البنود مع تمييز التلقائي =====
-            renderBudgetItems() {
-                const list = Utils.id('budgetItemsList');
-                const items = FinancialEngine.getBudgetItems();
-                if (items.length === 0) {
-                    list.innerHTML = '<div class="empty-state glass"><i class="fas fa-list-ul"></i><p>لا توجد بنود ميزانية. أضف بنداً جديداً.</p></div>';
-                    return;
+            buildBudgetItemCardHtml(item, todayStr) {
+                const spent = item.spent || 0;
+                const remaining = item.budget - spent;
+                const isReserved = item.isReserved ? '🔒 محجوز' : '🔓 غير محجوز';
+                const isOver = remaining < 0;
+                const utilizationPct = item.budget > 0 ? (spent / item.budget) * 100 : 0;
+                const isNearLimit = !isOver && utilizationPct >= 80;
+                const isAuto = item.isAutoCreated || false;
+                const autoClass = isAuto ? 'auto-created' : '';
+                const autoBadge = isAuto ? '<span class="auto-badge">🤖 تلقائي</span>' : '';
+                const estimatedBadge = isAuto ? '<span class="estimated-badge">تقديري</span>' : '';
+
+                let expiryBadge = '';
+                let isExpired = false;
+                if (item.endDate) {
+                    const daysToEnd = Math.round((new Date(item.endDate) - new Date(todayStr)) / 86400000);
+                    if (daysToEnd < 0) {
+                        isExpired = true;
+                        expiryBadge = `<span style="color:var(--danger);font-weight:700;">⏰ انتهى الالتزام في ${Utils.formatDate(item.endDate)}</span>`;
+                    } else if (daysToEnd <= 14) {
+                        expiryBadge = `<span style="color:var(--warning);font-weight:700;">⏳ ينتهي بعد ${daysToEnd} يوم (${Utils.formatDate(item.endDate)})</span>`;
+                    } else {
+                        expiryBadge = `<span style="color:var(--text-muted);">📅 ينتهي في ${Utils.formatDate(item.endDate)}</span>`;
+                    }
                 }
-                FinancialEngine.syncBudgetItemsSpent();
-                const updatedItems = FinancialEngine.getBudgetItems();
-                list.innerHTML = updatedItems.map(item => {
-                    const spent = item.spent || 0;
-                    const remaining = item.budget - spent;
-                    const isReserved = item.isReserved ? '🔒 محجوز' : '🔓 غير محجوز';
-                    const isOver = remaining < 0;
-                    const isAuto = item.isAutoCreated || false;
-                    const autoClass = isAuto ? 'auto-created' : '';
-                    const autoBadge = isAuto ? '<span class="auto-badge">🤖 تلقائي</span>' : '';
-                    const estimatedBadge = isAuto ? '<span class="estimated-badge">تقديري</span>' : '';
 
-                    return `<div class="budget-item-card glass ${autoClass}" data-id="${item.id}" style="${isOver ? 'border-right: 3px solid var(--danger);' : ''}">
-                        <div class="item-info">
-                            <div class="item-name">${item.name} ${autoBadge} <span style="font-size:0.7rem; color:var(--text-muted);">(${item.category})</span></div>
-                            <div class="item-meta">
-                                <span>الأولوية: ${item.priority}</span>
-                                <span>${isReserved}</span>
-                                ${isOver ? `<span style="color:var(--danger);font-weight:700;">⚠️ تجاوز</span>` : ''}
-                                ${item.notes ? `<span>📝 ${item.notes}</span>` : ''}
-                            </div>
+                return `<div class="budget-item-card glass ${autoClass}" data-id="${item.id}" style="${isOver || isExpired ? 'border-right: 3px solid var(--danger);' : isNearLimit ? 'border-right: 3px solid var(--warning);' : ''}">
+                    <div class="item-info">
+                        <div class="item-name">${item.name} ${autoBadge} <span style="font-size:0.7rem; color:var(--text-muted);">(${item.category})</span></div>
+                        <div class="item-meta">
+                            <span>الأولوية: ${item.priority}</span>
+                            <span>${isReserved}</span>
+                            ${isOver ? `<span style="color:var(--danger);font-weight:700;">⚠️ تجاوز</span>` : isNearLimit ? `<span style="color:var(--warning);font-weight:700;">🔶 قريب من الحد (${Math.round(utilizationPct)}%)</span>` : ''}
+                            ${expiryBadge}
+                            ${item.notes ? `<span>📝 ${item.notes}</span>` : ''}
                         </div>
-                        <div class="item-amounts">
-                            <span style="color:${isAuto ? 'var(--text-muted)' : 'var(--accent)'};">الميزانية: ${Utils.formatCurrency(item.budget)} ${estimatedBadge}</span>
-                            <span style="color:var(--danger);">صرف: ${Utils.formatCurrency(spent)}</span>
-                            <span style="color:${remaining >= 0 ? 'var(--success)' : 'var(--danger)'};">متبقي: ${Utils.formatCurrency(remaining)}</span>
-                        </div>
-                        <div class="item-actions">
-                            <button class="edit-item-btn" data-id="${item.id}"><i class="fas fa-edit"></i></button>
-                            <button class="delete-item-btn" data-id="${item.id}"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </div>`;
-                }).join('');
+                    </div>
+                    <div class="item-amounts">
+                        <span style="color:${isAuto ? 'var(--text-muted)' : 'var(--accent)'};">الميزانية: ${Utils.formatCurrency(item.budget)} ${estimatedBadge}</span>
+                        <span style="color:var(--danger);">صرف: ${Utils.formatCurrency(spent)}</span>
+                        <span style="color:${remaining >= 0 ? 'var(--success)' : 'var(--danger)'};">متبقي: ${Utils.formatCurrency(remaining)}</span>
+                    </div>
+                    <div class="item-actions">
+                        ${isExpired ? `<button class="remove-expired-btn" data-id="${item.id}" title="حذف البند المنتهي" style="color:var(--danger);"><i class="fas fa-check-circle"></i></button>` : ''}
+                        <button class="edit-item-btn" data-id="${item.id}"><i class="fas fa-edit"></i></button>
+                        <button class="delete-item-btn" data-id="${item.id}"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>`;
+            },
 
-                Utils.qsa('.edit-item-btn').forEach(btn => {
+            bindBudgetItemCardEvents(container) {
+                if (!container) return;
+                container.querySelectorAll('.remove-expired-btn').forEach(btn => {
                     Utils.on(btn, 'click', (e) => {
                         e.stopPropagation();
-                        const id = btn.dataset.id;
-                        this.openBudgetItemModal(id);
+                        if (confirm('تم انتهاء هذا الالتزام. هل تريد حذف البند نهائياً؟')) {
+                            FinancialEngine.deleteBudgetItem(btn.dataset.id);
+                            this.renderBudgetItems();
+                            this.renderDashboard();
+                        }
                     });
                 });
-                Utils.qsa('.delete-item-btn').forEach(btn => {
+                container.querySelectorAll('.edit-item-btn').forEach(btn => {
+                    Utils.on(btn, 'click', (e) => {
+                        e.stopPropagation();
+                        this.openBudgetItemModal(btn.dataset.id);
+                    });
+                });
+                container.querySelectorAll('.delete-item-btn').forEach(btn => {
                     Utils.on(btn, 'click', (e) => {
                         e.stopPropagation();
                         if (confirm('هل تريد حذف هذا البند؟')) {
@@ -6828,12 +7417,152 @@
                         }
                     });
                 });
-                Utils.qsa('.budget-item-card').forEach(card => {
+                container.querySelectorAll('.budget-item-card').forEach(card => {
                     Utils.on(card, 'click', (e) => {
                         if (e.target.closest('button')) return;
-                        const id = card.dataset.id;
-                        this.openBudgetItemModal(id);
+                        this.openBudgetItemModal(card.dataset.id);
                     });
+                });
+            },
+
+            renderBudgetItems() {
+                FinancialEngine.syncBudgetItemsSpent();
+                const allItems = FinancialEngine.getBudgetItems();
+                const todayStr = Utils.today();
+                const fixedItems = allItems.filter(i => i.isReserved);
+                const orgItems = allItems.filter(i => !i.isReserved);
+                const settings = Storage.getSettings();
+                const orgEnabled = settings.budgetOrganizationEnabled === true;
+
+                // ===== الالتزامات الثابتة (تظهر دائماً بغض النظر عن تفعيل تنظيم الميزانية) =====
+                const fixedList = Utils.id('fixedItemsList');
+                if (fixedList) {
+                    fixedList.innerHTML = fixedItems.length === 0 ?
+                        '<div class="empty-state glass"><i class="fas fa-lock"></i><p>لا توجد التزامات ثابتة (إيجار، أقساط، تمارا/تابي...). أضف بنداً وفعّل خيار "محجوز".</p></div>' :
+                        fixedItems.map(item => this.buildBudgetItemCardHtml(item, todayStr)).join('');
+                    this.bindBudgetItemCardEvents(fixedList);
+                }
+
+                // ===== زر/مفتاح تفعيل تنظيم الميزانية =====
+                const toggleBox = Utils.id('budgetOrgToggleBox');
+                if (toggleBox) {
+                    toggleBox.innerHTML = `<div class="settings-container glass" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+                        <div>
+                            <h3 style="margin:0 0 4px;font-size:1rem;">تنظيم الميزانية</h3>
+                            <p style="margin:0;font-size:0.82rem;color:var(--text-secondary);">${orgEnabled ? 'مفعّل: حدد سقف ميزانية لكل تصنيف ويتم تنبيهك عند تجاوزه.' : 'غير مفعّل: يتابع الذكاء الاصطناعي صرفك تلقائياً ويحدد مواطن التبذير دون سقف ثابت.'}</p>
+                        </div>
+                        <label class="toggle-switch" style="position:relative;display:inline-block;width:52px;height:28px;flex-shrink:0;">
+                            <input type="checkbox" id="budgetOrgToggle" ${orgEnabled ? 'checked' : ''} style="opacity:0;width:0;height:0;">
+                            <span style="position:absolute;inset:0;background:${orgEnabled ? 'var(--success)' : 'var(--bg-glass-border)'};border-radius:999px;transition:0.2s;cursor:pointer;"></span>
+                            <span style="position:absolute;top:3px;${orgEnabled ? 'right:27px' : 'right:3px'};width:22px;height:22px;background:#fff;border-radius:50%;transition:0.2s;"></span>
+                        </label>
+                    </div>`;
+                    Utils.on(Utils.id('budgetOrgToggle'), 'change', (e) => {
+                        if (e.target.checked) {
+                            this.enableBudgetOrganization();
+                        } else {
+                            const s = Storage.getSettings();
+                            s.budgetOrganizationEnabled = false;
+                            Storage.setSettings(s);
+                            this.renderBudgetItems();
+                            this.renderDashboard();
+                        }
+                    });
+                }
+
+                // ===== بنود تنظيم الميزانية التفصيلية (تصنيفات اختيارية، تظهر فقط عند التفعيل) =====
+                const orgList = Utils.id('budgetOrgList');
+                const orgSetupBtnBox = Utils.id('budgetOrgSetupBtnBox');
+                if (orgList) {
+                    if (!orgEnabled) {
+                        orgList.innerHTML = '';
+                        if (orgSetupBtnBox) orgSetupBtnBox.innerHTML = '';
+                    } else {
+                        orgList.innerHTML = orgItems.length === 0 ?
+                            '<div class="empty-state glass"><i class="fas fa-sliders-h"></i><p>لم تُنشئ أي بند تفصيلي بعد. استخدم دليل الإعداد لتحديد ميزانية كل تصنيف دفعة واحدة.</p></div>' :
+                            orgItems.map(item => this.buildBudgetItemCardHtml(item, todayStr)).join('');
+                        this.bindBudgetItemCardEvents(orgList);
+                        if (orgSetupBtnBox) {
+                            orgSetupBtnBox.innerHTML = '<button id="openBudgetWizardBtn" class="btn-secondary" style="width:100%;margin-bottom:12px;"><i class="fas fa-magic"></i> دليل إعداد الميزانية (كل التصنيفات دفعة واحدة)</button>';
+                            Utils.on(Utils.id('openBudgetWizardBtn'), 'click', () => this.openBudgetWizard());
+                        }
+                    }
+                }
+            },
+
+            // تُستدعى عند تفعيل تنظيم الميزانية: تحفظ الإعداد وتفتح مباشرة دليل الإعداد لتحديد ميزانية كل التصنيفات
+            enableBudgetOrganization() {
+                const s = Storage.getSettings();
+                s.budgetOrganizationEnabled = true;
+                Storage.setSettings(s);
+                this.renderBudgetItems();
+                this.renderDashboard();
+                this.openBudgetWizard();
+            },
+
+            openBudgetWizard() {
+                const modalId = 'budgetWizardModal';
+                const listEl = Utils.id('budgetWizardList');
+                const allExpenses = Budget.getExpenses();
+                const todayDate = WorldTime.now();
+                const windowStart = new Date(todayDate);
+                windowStart.setDate(windowStart.getDate() - 29);
+                const windowStartStr = windowStart.toISOString().split('T')[0];
+                const last30 = allExpenses.filter(e => e.date && e.date >= windowStartStr);
+                const catTotals30 = {};
+                last30.forEach(e => { const c = e.category || 'أخرى';
+                    catTotals30[c] = (catTotals30[c] || 0) + (parseFloat(e.amount) || 0); });
+
+                const existingItems = FinancialEngine.getBudgetItems();
+                const existingMap = {};
+                existingItems.forEach(i => { existingMap[i.category] = i; });
+
+                const allCatsSet = new Set(Utils.defaultCategories());
+                Object.keys(catTotals30).forEach(c => allCatsSet.add(c));
+                existingItems.forEach(i => allCatsSet.add(i.category));
+                allCatsSet.delete('الإيجار');
+                allCatsSet.delete('الأقساط');
+                const cats = Array.from(allCatsSet);
+
+                listEl.innerHTML = cats.map(cat => {
+                    const existing = existingMap[cat];
+                    const suggested = existing ? existing.budget : Math.round((catTotals30[cat] || 0));
+                    return `<div class="expense-item glass" style="align-items:center;">
+                        <div class="expense-info" style="flex:1;">
+                            <div class="desc">${cat}</div>
+                            <div class="meta"><span>متوسط آخر 30 يوماً: ${Utils.formatCurrency(catTotals30[cat] || 0)}</span></div>
+                        </div>
+                        <input type="number" class="form-input budget-wizard-input" data-category="${cat}" data-existing-id="${existing ? existing.id : ''}" value="${suggested}" min="0" step="10" style="max-width:110px;" />
+                    </div>`;
+                }).join('');
+
+                this.openModal(modalId);
+            },
+
+            setupBudgetWizard() {
+                this.setupModalClose('budgetWizardModal', 'closeBudgetWizardModal', 'cancelBudgetWizardBtn');
+                Utils.on(Utils.id('saveBudgetWizardBtn'), 'click', () => {
+                    const inputs = Utils.qsa('.budget-wizard-input');
+                    let created = 0,
+                        updated = 0;
+                    inputs.forEach(input => {
+                        const budget = parseFloat(input.value) || 0;
+                        const category = input.dataset.category;
+                        const existingId = input.dataset.existingId;
+                        if (budget <= 0) return;
+                        if (existingId) {
+                            FinancialEngine.updateBudgetItem(existingId, { budget });
+                            updated++;
+                        } else {
+                            FinancialEngine.addBudgetItem({ name: category, category: category, budget: budget,
+                                isReserved: false });
+                            created++;
+                        }
+                    });
+                    this.closeModal('budgetWizardModal');
+                    this.renderBudgetItems();
+                    this.renderDashboard();
+                    alert(`✅ تم إعداد الميزانية: ${created} بند جديد، ${updated} بند مُحدَّث.`);
                 });
             },
 
@@ -6853,13 +7582,15 @@
                     const priority = Utils.id('budgetItemPriority').value;
                     const notes = Utils.id('budgetItemNotes').value.trim();
                     const isReserved = Utils.id('budgetItemReserved').checked;
+                    const endDate = Utils.id('budgetItemEndDate').value || null;
                     if (!name) { alert('الرجاء إدخال اسم البند'); return; }
                     const id = form.dataset.editId;
                     if (id) {
                         FinancialEngine.updateBudgetItem(id, { name, category, budget, priority, notes,
-                            isReserved });
+                            isReserved, endDate });
                     } else {
-                        FinancialEngine.addBudgetItem({ name, category, budget, priority, notes, isReserved });
+                        FinancialEngine.addBudgetItem({ name, category, budget, priority, notes, isReserved,
+                            endDate });
                     }
                     this.closeModal(modalId);
                     this.renderBudgetItems();
@@ -6886,6 +7617,7 @@
                     Utils.id('budgetItemPriority').value = item.priority || 'Medium';
                     Utils.id('budgetItemNotes').value = item.notes || '';
                     Utils.id('budgetItemReserved').checked = item.isReserved || false;
+                    Utils.id('budgetItemEndDate').value = item.endDate || '';
                     form.dataset.editId = id;
                 } else {
                     title.textContent = 'إضافة بند ميزانية';
@@ -6894,6 +7626,7 @@
                     Utils.id('budgetItemPriority').value = 'Medium';
                     Utils.id('budgetItemNotes').value = '';
                     Utils.id('budgetItemReserved').checked = false;
+                    Utils.id('budgetItemEndDate').value = '';
                     form.dataset.editId = '';
                 }
                 this.openModal(modalId);
@@ -7087,6 +7820,55 @@
                 Charts.drawBar(remCtx, ['المتاح للصرف', 'المصروفات', 'المحجوز', 'الراتب'], [displayAvailable, displayPaid,
                         displayReserved, displaySalary
                     ], ['#1F7A5C', '#B3452A', '#C98A2E', '#123C57'], 'المتاح');
+
+                // ===== اتجاه الإنفاق عبر الأشهر =====
+                const trendSelect = Utils.id('trendCategoryFilter');
+                const trendCanvas = Utils.id('trendChart');
+                if (trendSelect && trendCanvas) {
+                    const trendExpenses = FinancialEngine.getLast6MonthsExpenses();
+                    const monthCatMap = {};
+                    trendExpenses.forEach(e => {
+                        const month = (e.date || '').slice(0, 7);
+                        if (!month) return;
+                        if (!monthCatMap[month]) monthCatMap[month] = {};
+                        const cat = e.category || 'أخرى';
+                        monthCatMap[month][cat] = (monthCatMap[month][cat] || 0) + (parseFloat(e.amount) || 0);
+                    });
+                    const monthsSorted = Object.keys(monthCatMap).sort();
+                    const monthLabelsTrend = monthsSorted.map(m => {
+                        const parts = m.split('-');
+                        const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, 1);
+                        return d.toLocaleDateString('ar-SA', { month: 'short' });
+                    });
+                    const catTotals = {};
+                    Object.values(monthCatMap).forEach(catsInMonth => {
+                        Object.entries(catsInMonth).forEach(([cat, amt]) => { catTotals[cat] = (catTotals[
+                                cat] || 0) + amt; });
+                    });
+                    const sortedCatNames = Object.keys(catTotals).sort((a, b) => catTotals[b] - catTotals[a]);
+                    const topCats = sortedCatNames.slice(0, 4);
+
+                    const prevSelection = trendSelect.value || '__top__';
+                    trendSelect.innerHTML = '<option value="__top__">أعلى 4 تصنيفات</option>' + sortedCatNames
+                        .map(c => `<option value="${c}">${c}</option>`).join('');
+                    const validOption = Array.prototype.some.call(trendSelect.options, o => o.value ===
+                        prevSelection);
+                    trendSelect.value = validOption ? prevSelection : '__top__';
+
+                    const catsToShow = trendSelect.value === '__top__' ? topCats : [trendSelect.value];
+                    const trendSeries = catsToShow.map(cat => ({
+                        name: cat,
+                        data: monthsSorted.map(m => (monthCatMap[m] && monthCatMap[m][cat]) || 0)
+                    }));
+                    const trendCtx = trendCanvas.getContext('2d');
+                    Charts.drawMultiLine(trendCtx, monthLabelsTrend, trendSeries, colors);
+                }
+            },
+
+            setupReportsTrend() {
+                const trendSelect = Utils.id('trendCategoryFilter');
+                if (!trendSelect) return;
+                Utils.on(trendSelect, 'change', () => this.renderReports());
             },
 
             // ===== NEW: Income Page =====
