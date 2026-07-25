@@ -2353,7 +2353,7 @@
                         <button class="method-tab" data-method="manual">إدخال يدوي</button>
                     </div>
                     <div id="aiMethod" class="method-panel">
-                        <div class="form-group"><label>أرسل رسالة البنك أو اكتب وصفاً</label><textarea id="aiExpenseInput" class="form-textarea" rows="3" placeholder="مثال: اشتريت قهوة بـ18 ريال"></textarea></div>
+                        <div class="form-group"><label>أرسل رسالة البنك أو اكتب وصفاً (يمكن كتابة أكثر من مصروف، كل مصروف في سطر)</label><textarea id="aiExpenseInput" class="form-textarea" rows="6" placeholder="مثال: اشتريت قهوة بـ18 ريال&#10;أو عدة مصروفات كل واحد في سطر:&#10;دقيق: 35 ريال&#10;بنزين: 60 ريال"></textarea></div>
                         <button id="parseExpenseBtn" class="btn-primary"><i class="fas fa-robot"></i> تحليل بالذكاء</button>
                         <div id="parseResult" class="parse-result"></div>
                     </div>
@@ -2535,6 +2535,17 @@
                 'الطعام والمطاعم', 'التسوق والهدايا', 'التأشيرة والتأمين', 'الطوارئ', 'أخرى'
             ],
             tempCategories: () => ['كشتة', 'قطة', 'واجب', 'فزعة', 'صدقة', 'أخرى'],
+            spendingProfileLabel: (code) => ({
+                AggressiveSaver: 'مدّخر قوي',
+                Saver: 'مدّخر',
+                LifestyleFocused: 'مُركّز على نمط الحياة',
+                DebtHeavy: 'مثقل بالديون',
+                FinanciallyFragile: 'هش مالياً',
+                FinanciallyStable: 'مستقر مالياً',
+                Spender: 'منفق',
+                HighRisk: 'مرتفع المخاطر',
+                Balanced: 'متوازن'
+            }[code] || 'متوازن'),
             cleanNumber: (str) => {
                 if (!str) return 0;
                 const arabicToEnglish = {
@@ -3703,7 +3714,7 @@
                     'سناكس', 'مكسرات', 'تمر', 'عسل', 'خضار', 'فواكه', 'لحم', 'دجاج', 'سمك', 'بيض', 'حليب', 'جبن', 'زبادي',
                     'خبز', 'رز', 'زيت', 'سكر', 'طحين', 'مكرونة', 'بقوليات', 'بهارات', 'توابل', 'معلبات', 'عصائر', 'مياه',
                     'مشروبات غازية', 'بيبسي', 'كوكاكولا', 'سفن اب', 'ريد بول', 'مويه', 'ماء', 'شاي', 'قهوة', 'نسكافيه',
-                    'كابتشينو', 'موكا', 'لاتيه', 'اسبريسو', 'عصير', 'تمر', 'عسل'
+                    'كابتشينو', 'موكا', 'لاتيه', 'اسبريسو', 'عصير', 'تمر', 'عسل', 'دقيق'
                 ];
                 const restaurantKeywords = [
                     'مطعم', 'وجبة', 'فطور', 'عشاء', 'غداء', 'سناك', 'برجر', 'شاورما', 'بيتزا', 'باستا', 'مشاوي', 'مندي',
@@ -3734,7 +3745,8 @@
                 ];
                 const healthKeywords = [
                     'صحي', 'صحة', 'مستشفى', 'عيادة', 'طبيب', 'دواء', 'صيدلية', 'كشف', 'علاج', 'أسنان', 'عيون',
-                    'جراحة', 'فحص', 'مختبر', 'أشعة', 'تطعيم', 'لقاح', 'إسعاف', 'طوارئ', 'نظارات', 'عدسات'
+                    'جراحة', 'فحص', 'مختبر', 'أشعة', 'تطعيم', 'لقاح', 'إسعاف', 'طوارئ', 'نظارات', 'عدسات',
+                    'مسكن', 'ألم', 'حبوب', 'مرهم', 'شراب دواء', 'فيتامين'
                 ];
                 const fuelKeywords = [
                     'بنزين', 'بترول', 'ديزل', 'وقود', 'محطة وقود', 'بترومين', 'الدريس', 'تعبئة', 'تموين'
@@ -3775,6 +3787,17 @@
                 if (dateMatch) result.date = dateMatch[1];
                 for (const line of lines) {
                     const cleaned = line.replace(/,/g, '');
+                    const patternColon = /^([^\d:]+)[:：]\s*([\d.]+)\s*(?:ريال)?\s*$/i;
+                    const matchColon = cleaned.match(patternColon);
+                    if (matchColon) {
+                        const desc = matchColon[1].trim();
+                        const amount = parseFloat(matchColon[2]);
+                        if (!isNaN(amount) && amount > 0) {
+                            result.transactions.push({ description: desc || 'مصروف', amount: amount, merchant: result
+                                    .merchant || '', date: result.date || Utils.today() });
+                            continue;
+                        }
+                    }
                     const pattern = /^([^\d]+)\s*(?:بـ|ب)\s*([\d.]+)\s*ريال/i;
                     const match = cleaned.match(pattern);
                     if (match) {
@@ -3963,6 +3986,69 @@
                         };
                     }
                     throw new Error('تعذر استخراج المصروف من النص حتى باستخدام المحلل الاحتياطي');
+                }
+            },
+
+            // يستخرج عدة مصروفات دفعة واحدة من نص واحد (سطر لكل مصروف عادةً) ويرجع مصفوفة
+            async parseMultipleExpenses(text) {
+                const categories = Utils.defaultCategories();
+                const todayStr = Utils.today();
+                const sanitizeItem = (item) => {
+                    if (!categories.includes(item.category)) {
+                        const fallback = ExpenseParser.classifyWithKeywords((item.description || '') + ' ' + (item
+                            .merchant || ''));
+                        item.category = fallback.category || 'أخرى';
+                    }
+                    if (!this.isValidExpenseDate(item.date)) {
+                        item.date = todayStr;
+                    }
+                    item.amount = parseFloat(item.amount) || 0;
+                    item.description = item.description || 'مصروف';
+                    item.merchant = item.merchant || '';
+                    return item;
+                };
+                try {
+                    const prompt = `أنت مساعد مالي ذكي. تاريخ اليوم الفعلي هو: ${todayStr} (بصيغة YYYY-MM-DD).
+                    النص التالي يحتوي على مصروف واحد أو عدة مصروفات، كل سطر أو بند فيه يمثل مصروفاً منفصلاً له وصف ومبلغ خاص به:
+                    """
+                    ${text}
+                    """
+                    استخرج كل بند مذكور كمصروف مستقل، وأخرج النتيجة بتنسيق JSON صالح فقط على شكل مصفوفة (Array) بدون أي نص إضافي قبلها أو بعدها، بهذا الهيكل تماماً:
+                    [
+                      {
+                        "amount": رقم (المبلغ بالريال),
+                        "description": "نص وصف المصروف",
+                        "category": "أحد التصنيفات التالية بالضبط: ${categories.join('، ')}",
+                        "merchant": "اسم التاجر إن وُجد وإلا خالي",
+                        "date": "تاريخ المصروف بصيغة YYYY-MM-DD، إذا لم يُذكر تاريخ محدد استخدم بالضبط ${todayStr}"
+                      }
+                    ]
+                    قواعد مهمة: أخرج كل بند في النص كعنصر منفصل في المصفوفة حتى لو تشابهت الأصناف، لا تدمج بنوداً مختلفة معاً، ولا تخترع تاريخاً من عندك أبداً، وتأكد أن كل تصنيف مطابق تماماً لأحد التصنيفات المذكورة أعلاه.`;
+                    const response = await this.sendRequest(prompt);
+                    const jsonMatch = response.match(/\[[\s\S]*\]/);
+                    if (jsonMatch) {
+                        const data = JSON.parse(jsonMatch[0]);
+                        if (Array.isArray(data) && data.length > 0) {
+                            const items = data.filter(item => item && item.amount && item.description).map(
+                                sanitizeItem);
+                            if (items.length > 0) return items;
+                        }
+                    }
+                    throw new Error('لم يستطع Gemini استخراج البيانات بشكل صحيح');
+                } catch (e) {
+                    console.warn('فشل Gemini في تحليل المصروفات المتعددة، استخدام المحلل النصي الاحتياطي:', e
+                        .message);
+                    const result = ExpenseParser.parse(text);
+                    if (result.transactions.length > 0) {
+                        return result.transactions.map(t => sanitizeItem({
+                            amount: t.amount,
+                            description: t.description,
+                            category: t.category || 'أخرى',
+                            merchant: t.merchant || '',
+                            date: t.date || todayStr
+                        }));
+                    }
+                    throw new Error('تعذر استخراج أي مصروف من النص');
                 }
             },
 
@@ -5338,56 +5424,95 @@
                     saveBtn.style.display = 'none';
                 });
 
-                let parsedData = null;
+                let parsedItems = [];
+
+                const renderParsedList = () => {
+                    if (parsedItems.length === 0) { parseResult.innerHTML = ''; return; }
+                    const total = parsedItems.reduce((s, it) => s + (parseFloat(it.amount) || 0), 0);
+                    const isSingle = parsedItems.length === 1;
+                    const rowsHtml = parsedItems.map((it, idx) => `
+                        <div class="parse-bulk-item" data-idx="${idx}" style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px dashed var(--bg-glass-border);">
+                            <div style="flex:1;min-width:0;">
+                                <div style="font-weight:600;">${it.description}</div>
+                                <div style="font-size:0.8rem;color:var(--text-secondary);">${it.category} • ${Utils.formatDate(it.date)}${it.merchant ? ' • ' + it.merchant : ''}</div>
+                            </div>
+                            <div style="font-weight:600;white-space:nowrap;">${it.amount.toFixed(2)} ريال</div>
+                            <button type="button" class="remove-parse-item btn-secondary" data-idx="${idx}" title="حذف من القائمة" style="padding:4px 10px;"><i class="fas fa-times"></i></button>
+                        </div>`).join('');
+                    parseResult.innerHTML = `<div class="parse-review">
+                            <div class="row"><span class="label">عدد المصروفات المستخرجة</span><span class="value">${parsedItems.length}</span></div>
+                            <div class="row"><span class="label">الإجمالي</span><span class="value">${total.toFixed(2)} ريال</span></div>
+                            <div class="parse-bulk-list" style="margin:8px 0;">${rowsHtml}</div>
+                            <div class="actions">
+                                <button class="btn-secondary" id="cancelParseBtn">إلغاء</button>
+                                ${isSingle ? '<button class="btn-secondary" id="editParseBtn">تعديل</button>' : ''}
+                                <button class="btn-primary" id="saveParseBtn">${isSingle ? 'حفظ' : 'حفظ الكل (' + parsedItems.length + ')'}</button>
+                            </div>
+                        </div>`;
+
+                    Utils.qsa('.remove-parse-item').forEach(btn => {
+                        Utils.on(btn, 'click', () => {
+                            const idx = parseInt(btn.dataset.idx);
+                            parsedItems.splice(idx, 1);
+                            renderParsedList();
+                        });
+                    });
+
+                    Utils.on(Utils.id('cancelParseBtn'), 'click', () => {
+                        parsedItems = [];
+                        parseResult.innerHTML = '';
+                    });
+
+                    if (isSingle) {
+                        Utils.on(Utils.id('editParseBtn'), 'click', () => {
+                            const item = parsedItems[0];
+                            const tab = Utils.qs('.method-tab[data-method="manual"]');
+                            tab.click();
+                            Utils.id('manualAmount').value = item.amount;
+                            Utils.id('manualDescription').value = item.description;
+                            Utils.id('manualCategory').value = item.category || 'أخرى';
+                            Utils.id('manualDate').value = item.date || Utils.today();
+                            Utils.id('manualMerchant').value = item.merchant || '';
+                            saveBtn.style.display = 'inline-flex';
+                            parseResult.innerHTML = '';
+                            parsedItems = [];
+                        });
+                    }
+
+                    Utils.on(Utils.id('saveParseBtn'), 'click', () => {
+                        if (parsedItems.length === 0) { alert('لا توجد مصروفات لحفظها'); return; }
+                        const count = parsedItems.length;
+                        parsedItems.forEach(item => {
+                            Budget.addExpense({
+                                amount: item.amount,
+                                description: item.description,
+                                category: item.category || 'أخرى',
+                                date: item.date || Utils.today(),
+                                merchant: item.merchant || '',
+                                subCategory: '',
+                                paymentMethod: '',
+                                notes: ''
+                            });
+                        });
+                        parsedItems = [];
+                        this.closeModal(modalId);
+                        this.renderAll();
+                        alert(count === 1 ? 'تم حفظ المصروف بنجاح!' : `تم حفظ ${count} مصروفات بنجاح!`);
+                    });
+                    saveBtn.style.display = 'none';
+                };
+
                 Utils.on(parseBtn, 'click', async () => {
                     const text = aiInput.value.trim();
                     if (!text) { parseResult.innerHTML =
                             '<div class="parse-review" style="color:var(--danger);">الرجاء إدخال نص</div>'; return; }
                     parseResult.innerHTML = '<div class="parse-review">جاري التحليل بواسطة الذكاء الاصطناعي...</div>';
                     try {
-                        const result = await Gemini.parseExpense(text);
-                        parsedData = result;
-                        const displayCat = result.category || 'أخرى';
-                        parseResult.innerHTML = `<div class="parse-review">
-                            <div class="row"><span class="label">المبلغ الإجمالي</span><span class="value">${result.amount.toFixed(2)} ريال</span></div>
-                            <div class="row"><span class="label">التصنيف المقترح</span><span class="value" style="color:var(--accent);">${displayCat}</span></div>
-                            <div class="row"><span class="label">التاجر</span><span class="value">${result.merchant || '—'}</span></div>
-                            <div class="row"><span class="label">التاريخ</span><span class="value">${Utils.formatDate(result.date)}</span></div>
-                            <div class="row"><span class="label">الوصف</span><span class="value">${result.description || text}</span></div>
-                            <div class="actions">
-                                <button class="btn-secondary" id="editParseBtn">تعديل</button>
-                                <button class="btn-primary" id="saveParseBtn">حفظ</button>
-                            </div>
-                        </div>`;
-                        Utils.on(Utils.id('editParseBtn'), 'click', () => {
-                            const tab = Utils.qs('.method-tab[data-method="manual"]');
-                            tab.click();
-                            Utils.id('manualAmount').value = result.amount;
-                            Utils.id('manualDescription').value = result.description || text;
-                            Utils.id('manualCategory').value = result.category || 'أخرى';
-                            Utils.id('manualDate').value = result.date || Utils.today();
-                            Utils.id('manualMerchant').value = result.merchant || '';
-                            saveBtn.style.display = 'inline-flex';
-                            parseResult.innerHTML = '';
-                        });
-                        Utils.on(Utils.id('saveParseBtn'), 'click', () => {
-                            const expenseData = {
-                                amount: result.amount,
-                                description: result.description || text,
-                                category: result.category || 'أخرى',
-                                date: result.date || Utils.today(),
-                                merchant: result.merchant || '',
-                                subCategory: '',
-                                paymentMethod: '',
-                                notes: ''
-                            };
-                            Budget.addExpense(expenseData);
-                            this.closeModal(modalId);
-                            this.renderAll();
-                            alert('تم حفظ المصروف بنجاح!');
-                        });
-                        saveBtn.style.display = 'none';
+                        const items = await Gemini.parseMultipleExpenses(text);
+                        parsedItems = items;
+                        renderParsedList();
                     } catch (err) {
+                        parsedItems = [];
                         parseResult.innerHTML =
                             `<div class="parse-review" style="color:var(--danger);">${err.message}</div>`;
                     }
@@ -6261,6 +6386,8 @@
                     healthScore = 0;
                 }
                 const profile = ctx.behavior?.profile || 'Balanced';
+                const profileLabel = Utils.spendingProfileLabel(profile);
+                const healthScoreDisplay = Math.round(healthScore);
 
                 let cards = [];
                 if (status.status === 'no_income') {
@@ -6293,8 +6420,8 @@
                         { icon: 'fa-calendar-day', label: '📅 ميزانية اليوم', value: daily !== null ? Utils.formatCurrency(daily) : '—', cls: daily !== null && daily > 0 ? 'accent' : 'negative' },
                         { icon: 'fa-calendar-week', label: `📅 ${weeklyLabel}`, value: weekly !== null ? Utils.formatCurrency(weekly) : '—', cls: weekly !== null && weekly > 0 ? 'accent' : 'negative' },
                         { icon: 'fa-piggy-bank', label: '🎯 هدف الادخار', value: Utils.formatCurrency(savingsGoal), cls: 'accent' },
-                        { icon: 'fa-heartbeat', label: 'الصحة المالية', value: healthScore + '/100', cls: healthScore >= 70 ? 'positive' : healthScore >= 50 ? 'accent' : 'negative' },
-                        { icon: 'fa-user-tag', label: 'الملف الشخصي', value: profile, cls: 'accent' },
+                        { icon: 'fa-heartbeat', label: 'الصحة المالية', value: healthScoreDisplay + '/100', cls: healthScoreDisplay >= 70 ? 'positive' : healthScoreDisplay >= 50 ? 'accent' : 'negative' },
+                        { icon: 'fa-user-tag', label: 'نمط الانفاق', value: profileLabel, cls: 'accent' },
                         { icon: 'fa-hourglass-half', label: 'الأيام المتبقية', value: daysUntilSalary !== null ? daysUntilSalary + ' يوم' : '—', cls: daysUntilSalary !== null && daysUntilSalary <= 3 ? 'positive' : 'accent' }
                     ];
                 }
