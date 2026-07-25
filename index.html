@@ -318,6 +318,51 @@
             transform: translateY(-2px);
             box-shadow: 0 8px 24px rgba(18, 60, 87, 0.35)
         }
+        .fab-advisor {
+            position: fixed;
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: var(--accent-gradient);
+            color: #fff;
+            border: 2px solid rgba(255, 255, 255, 0.18);
+            font-size: 1.35rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 28px rgba(18, 60, 87, 0.4);
+            z-index: 3000;
+            cursor: grab;
+            touch-action: none;
+            transition: box-shadow 0.2s ease, transform 0.18s ease, opacity 0.2s ease;
+            padding: 0;
+        }
+        .fab-advisor:hover {
+            box-shadow: 0 14px 34px rgba(18, 60, 87, 0.5);
+        }
+        .fab-advisor.dragging {
+            transition: none;
+            cursor: grabbing;
+            transform: scale(0.94);
+            box-shadow: 0 20px 44px rgba(0, 0, 0, 0.4);
+        }
+        .fab-advisor.fab-hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.7);
+        }
+        .fab-advisor::after {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            border: 1px solid var(--bg-glass-border);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .fab-advisor:focus-visible::after {
+            opacity: 1;
+        }
         .refresh-btn {
             background: var(--bg-glass);
             border: 1px solid var(--bg-glass-border);
@@ -2247,6 +2292,7 @@
                                 </div>
                                 <button type="submit" class="btn-primary"><i class="fas fa-save"></i> حفظ الدخل والأهداف</button>
                             </form>
+                            <div id="savingsBreakdownBox"></div>
                         </div>
 
                         <div class="income-section">
@@ -2493,6 +2539,11 @@
         </div>
     </div>
 
+    <!-- زر المستشار المالي العائم (قابل للسحب لأي جهة من الشاشة) -->
+    <button id="financialAdvisorFab" class="fab-advisor" type="button" aria-label="المستشار المالي" title="المستشار المالي">
+        <i class="fas fa-comment-dots"></i>
+    </button>
+
     <script>
         // ============================================================
         // 1. UTILS (improved: safer event binding)
@@ -2525,16 +2576,43 @@
                     new Date(now.getFullYear(), now.getMonth(), 1); const end = new Date(now.getFullYear(), now.getMonth() +
                     1, 0); return { start: start.toISOString().split('T')[0], end: end.toISOString().split('T')[0] }; },
             generateId: () => Date.now().toString(36) + Math.random().toString(36).substr(2, 6),
-            defaultCategories: () => [
-                'المواد الغذائية', 'البنزين', 'الكهرباء', 'الماء', 'الإنترنت',
-                'الإيجار', 'الأقساط', 'المطاعم', 'المقاهي', 'الصحة',
-                'الترفيه', 'التسوق', 'التعليم', 'السيارة',
-                'مصروف شخصي', 'العناية الشخصية', 'مستلزمات المنزل', 'أخرى'
-            ],
+            defaultCategories: () => {
+                const base = [
+                    'المواد الغذائية', 'البنزين', 'الكهرباء', 'الماء', 'الإنترنت',
+                    'الإيجار', 'الأقساط', 'المطاعم', 'المقاهي', 'الصحة',
+                    'الترفيه', 'التسوق', 'التعليم', 'السيارة',
+                    'مصروف شخصي', 'العناية الشخصية', 'مستلزمات المنزل'
+                ];
+                // ندمج أي تصنيفات مخصصة أنشأها المستخدم عبر بنود ميزانية جديدة (مثل "دفع تمارا"، "دفع تابي")
+                // حتى تُعرف تلقائياً في كل مكان: القوائم اليدوية، الفلاتر، وتصنيف الذكاء الاصطناعي للمصروفات
+                let custom = [];
+                try {
+                    custom = (Storage.getBudgetItems() || [])
+                        .map(i => i.category)
+                        .filter(c => c && !base.includes(c) && c !== 'أخرى');
+                } catch (e) { custom = []; }
+                return [...base, ...new Set(custom), 'أخرى'];
+            },
             travelCategories: () => ['تذاكر الطيران', 'الفنادق والسكن', 'المواصلات الداخلية', 'الإنترنت والاتصالات', 'الفعاليات والأنشطة',
                 'الطعام والمطاعم', 'التسوق والهدايا', 'التأشيرة والتأمين', 'الطوارئ', 'أخرى'
             ],
             tempCategories: () => ['كشتة', 'قطة', 'واجب', 'فزعة', 'صدقة', 'أخرى'],
+            // ينسّق نص رد الذكاء الاصطناعي: يحوّل **بولد** إلى <strong>، وينسّق النقاط، ويزيل أي ** متبقية عشوائياً
+            formatAIText: (text) => {
+                if (!text) return '';
+                let html = String(text);
+                // bold (يدعم النص متعدد الأسطر بين علامتي **)
+                html = html.replace(/\*\*([\s\S]+?)\*\*/g, '<strong>$1</strong>');
+                // أي ** متبقية لم تتزاوج (حالة نادرة) نزيلها بدل عرضها كما هي
+                html = html.replace(/\*\*/g, '');
+                // توحيد رموز النقاط (- أو * أو •) في بداية السطر إلى نقطة موحدة
+                html = html.replace(/^[ \t]*[-*]\s+/gm, '• ');
+                html = html.replace(/•\s*/g, '• ');
+                // إزالة رموز عناوين ماركداون (### إلخ) إن وجدت
+                html = html.replace(/^#{1,6}\s*/gm, '');
+                html = html.replace(/\n/g, '<br>');
+                return html;
+            },
             spendingProfileLabel: (code) => ({
                 AggressiveSaver: 'مدّخر قوي',
                 Saver: 'مدّخر',
@@ -2745,6 +2823,50 @@
                     candidate = new Date(now.getFullYear(), now.getMonth() + 1, day);
                 }
                 return Math.round((candidate - today0) / 86400000);
+            },
+
+            // يحسب تفاصيل خطة الادخار: كم يجب ادخاره يومياً، وأي البنود (باستثناء الإيجار والأقساط)
+            // يمكن تخفيضها بنسبة بسيطة للوصول إلى هدف الادخار
+            getSavingsBreakdown(goal) {
+                const g = parseFloat(goal);
+                const range = Utils.getMonthRange();
+                const daysInMonth = Math.round((new Date(range.end) - new Date(range.start)) / 86400000) + 1;
+                const result = {
+                    goal: g || 0,
+                    daysInMonth: daysInMonth,
+                    dailyAmount: 0,
+                    categories: [],
+                    percentNeeded: 0,
+                    achievable: true
+                };
+                if (!g || g <= 0) return result;
+                result.dailyAmount = Math.round((g / daysInMonth) * 100) / 100;
+
+                const excluded = ['الإيجار', 'الأقساط'];
+                const monthExp = this.getMonthExpenses();
+                const catMap = {};
+                monthExp.forEach(e => {
+                    const cat = e.category || 'أخرى';
+                    if (excluded.includes(cat)) return;
+                    catMap[cat] = (catMap[cat] || 0) + (parseFloat(e.amount) || 0);
+                });
+                const entries = Object.entries(catMap).filter(([, amount]) => amount > 0)
+                    .sort((a, b) => b[1] - a[1]);
+                const totalEligible = entries.reduce((s, [, amount]) => s + amount, 0);
+                if (totalEligible <= 0) return result;
+
+                let percentNeeded = (g / totalEligible) * 100;
+                if (percentNeeded > 100) {
+                    result.achievable = false;
+                    percentNeeded = 100;
+                }
+                result.percentNeeded = Math.round(percentNeeded * 10) / 10;
+                result.categories = entries.slice(0, 6).map(([category, amount]) => ({
+                    category: category,
+                    spent: Math.round(amount * 100) / 100,
+                    cut: Math.round(amount * (percentNeeded / 100) * 100) / 100
+                }));
+                return result;
             },
 
             calculateDailyBudget() {
@@ -3212,10 +3334,10 @@
                 });
 
                 const goalProgress = savingsGoal > 0 && available !== null ? Math.min(100, (available / savingsGoal) * 100) : 0;
-                const count = expenses.length;
-                const avgDaily = count > 0 ? total / count : 0;
+                const daysPassed = Math.max(1, WorldTime.now().getDate());
+                // متوسط الصرف اليومي = إجمالي المصروفات ÷ عدد الأيام التي مرت من الشهر (وليس عدد عمليات الشراء)
+                const avgDaily = daysPassed > 0 ? (total === 1 && expenses.length === 0 ? 0 : total) / daysPassed : 0;
                 const avgWeekly = avgDaily * 7;
-                const daysPassed = WorldTime.now().getDate();
                 const daysLeft = remainingDays;
                 const projectedEnd = available !== null ? available - (avgDaily * daysLeft) : 0;
 
@@ -3415,11 +3537,19 @@
                 });
                 const items = FinancialEngine.getBudgetItems();
                 const atRisk = [];
+                // بنود الالتزامات الثابتة (إيجار/أقساط) تُدفع عادة دفعة واحدة شهرياً وليست معدل يومي،
+                // ولذلك لا يصح إسقاطها بمعدل يومي — تُستثنى من هذا التوقع (تُحسب كالتزامات ثابتة في مكان آخر)
+                const excludedFromProjection = ['الإيجار', 'الأقساط'];
+                const daysPassed = Math.max(1, WorldTime.now().getDate());
                 items.forEach(item => {
                     const budget = item.budget || 0;
                     const spent = catMap[item.category] || 0;
-                    if (budget > 0 && avgDaily > 0) {
-                        const projected = spent + (avgDaily * daysLeft);
+                    if (excludedFromProjection.includes(item.category)) return;
+                    // إذا لم يُصرف شيء في هذا البند بعد، لا توجد بيانات فعلية لبناء توقع منه — نتجاهله بدل افتراض معدل عام
+                    if (budget > 0 && spent > 0) {
+                        // معدل الصرف اليومي الخاص بهذا التصنيف تحديداً (وليس معدل كل التصنيفات مجتمعة)
+                        const categoryDailyRate = spent / daysPassed;
+                        const projected = spent + (categoryDailyRate * daysLeft);
                         if (projected > budget) {
                             atRisk.push({ category: item.category, projected: Math.round(projected),
                                 budget: Math.round(budget), overshoot: Math.round(projected - budget) });
@@ -3572,12 +3702,12 @@
                 }
                 if (behavior.nightSpending > (available !== null && available > 0 ? available * 0.05 : 100)) {
                     recs.push({
-                        action: 'تقليل الإنفاق الليلي',
+                        action: 'مراجعة المشتريات المتأخرة (بين 10م - 6ص)',
                         expectedSavings: behavior.nightSpending * 0.5,
                         impact: 'متوسطة',
                         priority: 'Medium',
                         difficulty: 'متوسط',
-                        expectedOutcome: 'تحسين سلوك الإنفاق',
+                        expectedOutcome: 'مصروفات ساعات متأخرة من الليل غالباً ما تكون مشتريات اندفاعية غير مخطط لها؛ تأجيل القرار حتى الصباح قد يقلل هذا الإنفاق',
                         category: 'السلوك'
                     });
                 }
@@ -4077,12 +4207,16 @@
                 const savingsGoal = FinancialEngine.getSavingsGoal();
 
                 const catMap6Months = {};
+                const monthsPresent = new Set();
                 last6Months.forEach(e => {
                     const cat = e.category || 'أخرى';
                     catMap6Months[cat] = (catMap6Months[cat] || 0) + (parseFloat(e.amount) || 0);
+                    if (e.date) monthsPresent.add(e.date.slice(0, 7)); // "YYYY-MM"
                 });
                 const avg6Months = {};
-                const monthsCount = 6;
+                // نستخدم العدد الحقيقي للأشهر التي توجد بها بيانات فعلية (بحد أدنى شهر واحد)
+                // بدل افتراض 6 أشهر دائماً، حتى لا تكون المتوسطات مضللة لمستخدم جديد لم يكمل 6 أشهر بعد
+                const monthsCount = Math.max(1, monthsPresent.size);
                 for (const [cat, total] of Object.entries(catMap6Months)) {
                     avg6Months[cat] = total / monthsCount;
                 }
@@ -4107,7 +4241,7 @@
                 str += `الأيام حتى نزول الراتب: ${daysUntilSalary !== null ? daysUntilSalary + ' يوم' : 'غير محدد'}\n`;
                 str += `هدف الادخار الشهري: ${Utils.formatCurrency(savingsGoal)}\n\n`;
 
-                str += `--- متوسط المصروفات الشهرية لآخر 6 أشهر ---\n`;
+                str += `--- متوسط المصروفات الشهرية (بناءً على ${monthsCount} ${monthsCount === 1 ? 'شهر فعلي من بياناتك' : 'أشهر فعلية من بياناتك'}) ---\n`;
                 for (const [cat, avg] of Object.entries(avg6Months)) {
                     if (avg > 0) {
                         str += `${cat}: ${Utils.formatCurrency(avg)}\n`;
@@ -4204,9 +4338,9 @@
                        - إذا كان المستخدم يصرف أكثر يوم الخميس والجمعة، أعطهما ميزانية أكبر.
                        - إذا كان يصرف قليلاً أيام العمل، أعطه ميزانية أقل.
 
-                    5. **التوزيع الذكي**: وزع الميزانية حسب تاريخ المستخدم (من آخر 6 أشهر).
+                    5. **التوزيع الذكي**: وزع الميزانية حسب البيانات الفعلية المتوفرة في سجل المستخدم أعلاه فقط (قد تكون البيانات المتوفرة أقل من 6 أشهر إذا كان مستخدماً جديداً — لا تفترض وجود 6 أشهر من البيانات إطلاقاً، واذكر في الأسباب المدة الحقيقية للبيانات المتوفرة).
                        - الطعام، الوقود، المنزل، الترفيه، الطوارئ.
-                       - لا تستخدم نسباً ثابتة، اعتمد على تاريخ المستخدم.
+                       - لا تستخدم نسباً ثابتة، اعتمد على تاريخ المستخدم الحقيقي المتوفر فقط.
 
                     6. **خطة الادخار**: قدم خطة أسبوعية أو يومية لتحقيق هدف الادخار.
 
@@ -4235,7 +4369,8 @@
                             "weeklyBudget": number,
                             "weeklyBudgetReason": string,
                             "daysInMonth": number,
-                            "monthName": string
+                            "monthName": string,
+                            "monthsOfDataLabel": "جملة قصيرة تذكر المدة الحقيقية للبيانات المستخدمة (مثال: 'خلال الشهر الحالي' أو 'خلال آخر شهرين فعليين'), لا تفترض 6 أشهر إذا لم تكن متوفرة"
                         },
                         "distribution": [
                             { "category": string, "amount": number, "reason": string }
@@ -4429,10 +4564,14 @@
 
                 const catMap = {};
                 const last6Months = context.last6Months || [];
+                const monthsPresentPlan = new Set();
                 last6Months.forEach(e => {
                     const cat = e.category || 'أخرى';
                     catMap[cat] = (catMap[cat] || 0) + (parseFloat(e.amount) || 0);
+                    if (e.date) monthsPresentPlan.add(e.date.slice(0, 7));
                 });
+                const monthsCountPlan = Math.max(1, monthsPresentPlan.size);
+                const monthsLabelPlan = monthsCountPlan === 1 ? 'خلال الشهر الحالي' : `خلال آخر ${monthsCountPlan} أشهر فعلية`;
                 const total6Months = Object.values(catMap).reduce((s, v) => s + v, 0) || 1;
                 const distribution = [];
                 const topCats = Object.entries(catMap).sort((a, b) => b[1] - a[1]).slice(0, 6);
@@ -4449,7 +4588,7 @@
                     distribution.push({
                         category: cat,
                         amount: Math.round(categoryAmount),
-                        reason: `بناءً على متوسط إنفاقك الشهري ${Utils.formatCurrency(amount)} في هذا التصنيف خلال آخر 6 أشهر`
+                        reason: `بناءً على متوسط إنفاقك الشهري ${Utils.formatCurrency(amount / monthsCountPlan)} في هذا التصنيف ${monthsLabelPlan}`
                     });
                 });
 
@@ -4489,7 +4628,7 @@
                     { title: 'إذا خفضت المطاعم 20%', impact: `ستوفر ${Utils.formatCurrency((distribution.find(d => d.category === 'المطاعم')?.amount || 0) * 0.2)} إضافية`, type: 'positive' }
                 ];
 
-                const report = `بعد تحليل آخر 6 أشهر، تبين أن أكبر سبب لاستنزاف ميزانيتك هو ${topCats[0]?.[0] || 'التصنيفات غير المحددة'}. الخطة المقترحة للشهر القادم (${monthName}) تركز على تحسين توزيع الميزانية وتقليل المصروفات الكمالية. إذا التزمت بالخطة، ستتمكن من تحقيق هدف الادخار بالكامل مع بناء احتياطي للطوارئ.`;
+                const report = `بعد تحليل بياناتك الفعلية (${monthsLabelPlan})، تبين أن أكبر سبب لاستنزاف ميزانيتك هو ${topCats[0]?.[0] || 'التصنيفات غير المحددة'}. الخطة المقترحة للشهر القادم (${monthName}) تركز على تحسين توزيع الميزانية وتقليل المصروفات الكمالية. إذا التزمت بالخطة، ستتمكن من تحقيق هدف الادخار بالكامل مع بناء احتياطي للطوارئ.`;
 
                 return {
                     summary: {
@@ -4499,7 +4638,8 @@
                         weeklyBudget: Math.round(weeklyBudget * 100) / 100,
                         weeklyBudgetReason: isWeekendHigh ? 'مبنية على عادات الإنفاق (أيام نهاية الأسبوع أعلى)' : 'متوسط الإنفاق الأسبوعي',
                         daysInMonth: daysInNextMonth,
-                        monthName: monthName
+                        monthName: monthName,
+                        monthsOfDataLabel: monthsLabelPlan
                     },
                     distribution: distribution,
                     savingsPlan: {
@@ -4527,23 +4667,27 @@
 
                 ${contextStr}
 
-                تعليمات الرد:
+                تعليمات الرد (مهمة جداً):
 
-                1. **لا تقم بأي عمليات حسابية** — كل الأرقام والمؤشرات جاهزة أعلاه.
-                2. **لا تكرر البيانات** — لا تعيد الراتب، المتبقي، إجمالي المصروفات، درجة الصحة، إلا إذا كان ضرورياً لشرح القرار.
-                3. **ركز على القرارات** — ليس تقارير.
-                4. **إذا طلب المستخدم حلاً**، اتبع هذا الهيكل بالضبط:
+                1. لا تقم بأي عمليات حسابية — كل الأرقام والمؤشرات جاهزة أعلاه.
+                2. لا تكرر البيانات — لا تعيد الراتب، المتبقي، إجمالي المصروفات، درجة الصحة، إلا إذا كان ضرورياً لشرح القرار.
+                3. ركز على القرارات، ليس تقارير. كن مختصراً جداً دائماً.
+                4. لا تستخدم إطلاقاً علامة ** أو أي رموز ماركداون أخرى (##, ---, إلخ). اكتب نصاً عادياً، وابدأ كل نقطة بـ "•" فقط.
+                5. إذا طلب المستخدم حلاً أو خطة عامة، اتبع هذا الهيكل المختصر بالضبط (لا يتجاوز 10 أسطر إجمالاً):
 
                 --- الهيكل للحلول ---
-                **خلاصة المشكلة** (جملة واحدة كحد أقصى)
-                **أهم الإجراءات العاجلة** (3-7 إجراءات، كل إجراء يحتوي على: العنوان، السبب، الأثر المتوقع، الصعوبة)
-                **أكبر فرص التوفير** (رتب من الأعلى إلى الأقل)
-                **إجراء فوري اليوم** (إجراء واحد)
-                **استراتيجية طويلة المدى** (3 عادات)
-                **تحفيز** (جملة واحدة)
+                خلاصة المشكلة: جملة واحدة فقط.
+                أهم 3 إجراءات: كل إجراء سطر واحد فقط بصيغة "• الإجراء — يوفر تقريباً X ريال".
+                إجراء اليوم: سطر واحد.
+                تحفيز: جملة واحدة قصيرة.
+
+                --- إذا طلب المستخدم خطة مفصلة لكل بند/تصنيف من الميزانية ---
+                لا تكتب فقرة منفصلة لكل بند. استخدم سطراً واحداً مضغوطاً لكل بند بالضبط بهذه الصيغة:
+                "• التصنيف: الميزانية X، الصرف Y، (ضمن الميزانية/متجاوز بمقدار Z) — نصيحة عملية قصيرة جداً (أقل من 10 كلمات)"
+                لا تشرح كل بند في عدة أسطر. إذا كان أحد البنود يحتوي على رقم غير منطقي في البيانات أعلاه (مثل صرف صفر مع توقع تجاوز، أو التزام ثابت كالإيجار يظهر له تجاوز)، فتجاهل ذكر ذلك التجاوز ولا تعتمد عليه بدل إرباك المستخدم.
 
                 --- الهيكل للأسئلة العادية ---
-                أجب بشكل مباشر، مختصر، عملي.
+                أجب بشكل مباشر، مختصر جداً (2-4 أسطر كحد أقصى)، عملي.
                 استخدم البيانات المالية لتقديم إجابة مخصصة.
                 قدم نصيحة قابلة للتنفيذ.
 
@@ -4563,13 +4707,17 @@
                 - set_salary (amount)
                 - set_salary_date (date)
                 - set_savings_goal (amount)
-                - set_budget_item (id, budget)
+                - set_budget_item (id, budget) — لتعديل ميزانية بند موجود مسبقاً فقط (استخدم id من بنود الميزانية أعلاه)
+                - add_budget_item (name, category, budget, isReserved) — لإنشاء بند ميزانية جديد بالكامل (مثال: "دفع تمارا"، "دفع تابي"، أو أي بند مستقبلي يذكره المستخدم). اجعل category بنفس اسم name إذا لم يوجد تصنيف قياسي مناسب. isReserved=true يعني أن مبلغ هذا البند يُحجز تلقائياً من "المتاح للصرف" تماماً مثل الإيجار والأقساط (استخدمها إذا طلب المستخدم "حجز" البند أو ذكر أنه التزام ثابت كالأقساط).
+                - delete_budget_item (id أو name)
                 - set_daily_budget (amount)
                 - set_weekly_budget (amount)
                 - set_monthly_budget (amount)
-                - transfer_budget (sourceCategory, targetCategory, amount)  // NEW
+                - transfer_budget (sourceCategory, targetCategory, amount)
 
-                ${query.includes('حل') || query.includes('ساعدني') || query.includes('وش أسوي') ? '**هام:** المستخدم يطلب حلاً، استخدم هيكل الحلول.' : 'قدم إجابة مباشرة ومفيدة.'}
+                ملاحظة: إذا طلب المستخدم إضافة أكثر من بند في نفس الرسالة (مثال: "أضف بند تمارا وبند تابي")، أضف كل بند كعنصر منفصل في نفس مصفوفة json-actions بنفس الرسالة، ولا تطلب منه تكرار الطلب لكل بند على حدة.
+
+                ${query.includes('حل') || query.includes('ساعدني') || query.includes('وش أسوي') ? 'هام: المستخدم يطلب حلاً، استخدم هيكل الحلول.' : 'قدم إجابة مباشرة ومفيدة.'}
 
                 طلب المستخدم: ${query}
 
@@ -4700,7 +4848,15 @@
 
                 السؤال: ${question}
 
-                أجب بشكل مباشر، عملي، ومختصر. استخدم الأرقام من السياق لتخصيص الإجابة.
+                قواعد الرد (مهمة جداً):
+                - لا تستخدم إطلاقاً علامة ** أو أي رموز ماركداون (##, ---, إلخ). اكتب نصاً عادياً فقط.
+                - كن مختصراً جداً ودقيقاً؛ لا تكرر شرح الأرقام أو الوضع المالي، اذهب مباشرة للإجابة.
+                - إن كان السؤال عن كيفية توفير مبلغ معين، أجب بهذا الترتيب بالضبط وبدون أي إطالة:
+                  1) سطر واحد يذكر المبلغ المطلوب وما يعادله يومياً حتى نهاية الشهر.
+                  2) 2-4 بنود إنفاق فعلية (وليست افتراضية) من بياناته أعلاه يمكن تخفيضها — استثنِ الإيجار والأقساط دائماً — كل بند بصيغة: "التصنيف: تخفيض X ريال (Y%)".
+                  3) سطر أخير واحد يلخص خطة تنفيذ بسيطة (مثال: قلل كذا هذا الأسبوع وحوّل الفرق لحساب التوفير).
+                  لا تكتب أكثر من 6 أسطر إجمالاً لهذا النوع من الأسئلة.
+                - لغيرها من الأسئلة: أجب بشكل مباشر وعملي في 2-4 أسطر كحد أقصى، واستخدم الأرقام من السياق لتخصيص الإجابة.
                 أجب باللغة العربية الفصحى.`;
 
                 try {
@@ -4852,6 +5008,41 @@
                                     log.push(`🔄 تم نقل ${Utils.formatCurrency(a.amount)} من "${a.sourceCategory}" إلى "${a.targetCategory}"`);
                                 } else {
                                     log.push(`⚠️ فشل نقل المبلغ. تأكد من وجود فائض كافٍ في "${a.sourceCategory}"`);
+                                }
+                                break;
+                            }
+                            case 'add_budget_item': {
+                                const name = (a.name || a.category || '').trim();
+                                if (!name) { log.push('⚠️ لم يتم تحديد اسم البند'); break; }
+                                const category = (a.category || a.name || 'أخرى').trim();
+                                const existing = FinancialEngine.getBudgetItems().find(i =>
+                                    i.name === name || i.category === category);
+                                if (existing) {
+                                    log.push(`⚠️ يوجد بالفعل بند باسم "${existing.name}"، استخدم أمر تعديل الميزانية بدل الإضافة`);
+                                    break;
+                                }
+                                const item = FinancialEngine.addBudgetItem({
+                                    name: name,
+                                    category: category,
+                                    budget: parseFloat(a.budget) || 0,
+                                    isReserved: a.isReserved === true,
+                                    priority: a.priority || 'Medium',
+                                    notes: a.notes || ''
+                                });
+                                log.push('➕ تم إضافة بند "' + item.name + '" بميزانية ' + Utils.formatCurrency(item
+                                    .budget) + (item.isReserved ? ' 🔒 (محجوز - لا يُحتسب ضمن المتاح للصرف)' :
+                                    ''));
+                                break;
+                            }
+                            case 'delete_budget_item': {
+                                const items = FinancialEngine.getBudgetItems();
+                                const item = items.find(i => i.id === a.id || i.name === a.name || i.category ===
+                                    a.category);
+                                if (item) {
+                                    FinancialEngine.deleteBudgetItem(item.id);
+                                    log.push('🗑️ تم حذف بند "' + item.name + '"');
+                                } else {
+                                    log.push('⚠️ لم يتم العثور على البند المطلوب حذفه');
                                 }
                                 break;
                             }
@@ -5165,6 +5356,7 @@
                 this.setupIncomePage();
                 this.setupBudgetOverride();
                 this.setupRefreshButton(); // <-- إضافة زر التحديث
+                this.setupFloatingAdvisor();
                 this.renderAll();
                 WorldTime.init().then(() => { this.setupDate();
                     this.renderAll(); });
@@ -5225,10 +5417,7 @@
                 if (!this.chatMessages) return;
                 const div = document.createElement('div');
                 div.className = 'chat-message ' + role;
-                let html = text;
-                html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-                html = html.replace(/•\s*/g, '• ');
-                html = html.replace(/\n/g, '<br>');
+                const html = Utils.formatAIText(text);
                 div.innerHTML = html + '<div class="message-time">' + new Date().toLocaleTimeString('ar-SA', { hour: '2-digit',
                         minute: '2-digit' }) + '</div>';
                 this.chatMessages.appendChild(div);
@@ -5313,10 +5502,96 @@
                         if (page === 'travel') this.renderTravel();
                         if (page === 'temp') this.renderTemp();
                         if (page === 'chat') { setTimeout(() => Utils.id('chatInput').focus(), 200); }
+                        const fab = Utils.id('financialAdvisorFab');
+                        if (fab) fab.classList.toggle('fab-hidden', page === 'chat');
                     });
                 });
                 Utils.on(Utils.id('chatToggleBtn'), 'click', () => { const chatLink = Utils.qs(
                         '.nav-link[data-page="chat"]'); if (chatLink) chatLink.click(); });
+            },
+
+            // زر المستشار المالي العائم: قابل للسحب لأي جهة (يمين/يسار/أعلى/أسفل)، يحفظ موضعه، ويفتح المحادثة عند الضغط عليه بدون سحب
+            setupFloatingAdvisor() {
+                const fab = Utils.id('financialAdvisorFab');
+                if (!fab) return;
+                const margin = 12;
+                const size = 58;
+
+                const clamp = (val, min, max) => Math.min(Math.max(val, min), max);
+
+                const applyPosition = (x, y) => {
+                    const maxX = Math.max(margin, window.innerWidth - size - margin);
+                    const maxY = Math.max(margin, window.innerHeight - size - margin);
+                    const cx = clamp(x, margin, maxX);
+                    const cy = clamp(y, margin, maxY);
+                    fab.style.left = cx + 'px';
+                    fab.style.top = cy + 'px';
+                    fab.style.right = 'auto';
+                    fab.style.bottom = 'auto';
+                    return { x: cx, y: cy };
+                };
+
+                const saved = Storage.get('advisor_fab_position', null);
+                if (saved && typeof saved.x === 'number' && typeof saved.y === 'number') {
+                    applyPosition(saved.x, saved.y);
+                } else {
+                    // موضع افتراضي: أسفل يمين الشاشة، بعيداً عن أي عناصر أخرى
+                    applyPosition(window.innerWidth - size - 20, window.innerHeight - size - 110);
+                }
+
+                let dragging = false;
+                let moved = false;
+                let startX = 0, startY = 0, originX = 0, originY = 0;
+
+                const onPointerDown = (e) => {
+                    dragging = true;
+                    moved = false;
+                    fab.classList.add('dragging');
+                    const rect = fab.getBoundingClientRect();
+                    originX = rect.left;
+                    originY = rect.top;
+                    startX = e.clientX;
+                    startY = e.clientY;
+                    try { fab.setPointerCapture(e.pointerId); } catch (err) {}
+                };
+
+                const onPointerMove = (e) => {
+                    if (!dragging) return;
+                    const dx = e.clientX - startX;
+                    const dy = e.clientY - startY;
+                    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) moved = true;
+                    applyPosition(originX + dx, originY + dy);
+                };
+
+                const onPointerUp = () => {
+                    if (!dragging) return;
+                    dragging = false;
+                    fab.classList.remove('dragging');
+                    const rect = fab.getBoundingClientRect();
+                    // إلصاق الزر بأقرب حافة (يمين أو يسار) لمظهر أكثر احترافية بعد ترك السحب
+                    const snapToRight = (rect.left + size / 2) > (window.innerWidth / 2);
+                    const finalX = snapToRight ? window.innerWidth - size - margin : margin;
+                    const pos = applyPosition(finalX, rect.top);
+                    Storage.set('advisor_fab_position', pos);
+
+                    if (!moved) {
+                        // ضغطة عادية (بدون سحب): افتح صفحة المستشار المالي
+                        const chatLink = Utils.qs('.nav-link[data-page="chat"]');
+                        if (chatLink) chatLink.click();
+                    }
+                };
+
+                Utils.on(fab, 'pointerdown', onPointerDown);
+                Utils.on(fab, 'pointermove', onPointerMove);
+                Utils.on(fab, 'pointerup', onPointerUp);
+                Utils.on(fab, 'pointercancel', onPointerUp);
+
+                // عند تغيير حجم الشاشة (مثل تدوير الجهاز) نعيد ضبط الموضع حتى لا يخرج الزر عن حدود الشاشة
+                window.addEventListener('resize', () => {
+                    const rect = fab.getBoundingClientRect();
+                    const pos = applyPosition(rect.left, rect.top);
+                    Storage.set('advisor_fab_position', pos);
+                });
             },
 
             setupSidebar() {
@@ -5679,8 +5954,8 @@
                         const expenses = Budget.getMonthExpenses();
                         const settings = Storage.getSettings();
                         const response = await Gemini.runAdvancedAnalytics(expenses, settings);
-                        resultDiv.innerHTML = '<div class="analytics-response glass">' + response.replace(
-                            /\n/g, '<br>') + '</div>';
+                        resultDiv.innerHTML = '<div class="analytics-response glass">' + Utils.formatAIText(
+                            response) + '</div>';
                     } catch (err) { resultDiv.innerHTML =
                             '<div class="analytics-response glass" style="color:var(--danger);">' + err
                             .message + '</div>'; }
@@ -5697,7 +5972,7 @@
                             const response = await Gemini.answerQuickQuestion(q, expenses, settings);
                             resultDiv.innerHTML =
                                 '<div class="analytics-response glass"><strong>س: ' + q +
-                                '</strong><br><br>' + response.replace(/\n/g, '<br>') + '</div>';
+                                '</strong><br><br>' + Utils.formatAIText(response) + '</div>';
                         } catch (err) { resultDiv.innerHTML =
                                 '<div class="analytics-response glass" style="color:var(--danger);">' +
                                 err.message + '</div>'; }
@@ -6092,7 +6367,7 @@
                 html += `<div style="margin-bottom:20px;">`;
                 html += `<div class="settings-container glass" style="max-width:100%;margin-bottom:16px;background:var(--accent-gradient);color:#fff;border:none;">`;
                 html += `<h3 style="color:#fff;margin:0;font-size:1.2rem;">📋 خطة الشهر القادم (${s.monthName || 'الشهر القادم'})</h3>`;
-                html += `<p style="color:rgba(255,255,255,0.9);margin:6px 0 0;font-size:0.95rem;">مبنية على تحليل سلوكك المالي خلال آخر 6 أشهر</p>`;
+                html += `<p style="color:rgba(255,255,255,0.9);margin:6px 0 0;font-size:0.95rem;">مبنية على تحليل سلوكك المالي ${s.monthsOfDataLabel || 'بناءً على بياناتك المتوفرة فعلياً'}</p>`;
                 html += `</div>`;
                 html += `<div class="dashboard-cards" style="margin-bottom:16px;">`;
                 html += `<div class="dash-card accent"><div class="card-icon"><i class="fas fa-calculator"></i></div><div class="card-label">صافي المعيشة</div><div class="card-value">${Utils.formatCurrency(s.netLivingBudget)}</div></div>`;
@@ -6104,7 +6379,7 @@
                 if (plan.distribution && plan.distribution.length > 0) {
                     html += `<div class="settings-container glass" style="margin-bottom:16px;max-width:100%;">`;
                     html += `<h3>📊 توزيع الميزانية الذكي</h3>`;
-                    html += `<p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:12px;">مبنى على تاريخ إنفاقك خلال آخر 6 أشهر</p>`;
+                    html += `<p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:12px;">مبني على تاريخ إنفاقك ${s.monthsOfDataLabel || 'المتوفر فعلياً'}</p>`;
                     let totalAllocated = 0;
                     plan.distribution.forEach(d => {
                         totalAllocated += d.amount || 0;
@@ -6862,8 +7137,13 @@
                         manualDateInput.value = s.salaryDate;
                     }
                     this.updateIncomeInfo(s.salaryDate);
+                    this.renderSavingsBreakdown(s.savingsGoal || 0);
                 };
                 loadIncome();
+
+                Utils.on(goalInput, 'input', () => {
+                    this.renderSavingsBreakdown(parseFloat(goalInput.value) || 0);
+                });
 
                 Utils.qsa('.salary-preset-btn').forEach(btn => {
                     Utils.on(btn, 'click', () => {
@@ -6927,12 +7207,49 @@
                 });
             },
 
+            renderSavingsBreakdown(goal) {
+                const box = Utils.id('savingsBreakdownBox');
+                if (!box) return;
+                const g = parseFloat(goal) || 0;
+                if (g <= 0) {
+                    box.innerHTML = '';
+                    return;
+                }
+                const bd = FinancialEngine.getSavingsBreakdown(g);
+                let html = `<div class="settings-container glass" style="margin-top:14px;">
+                    <h3><i class="fas fa-bullseye"></i> خطة تفصيلية لتحقيق هدف الادخار</h3>
+                    <p style="font-size:0.95rem;margin-bottom:10px;">لتوفير <strong>${Utils.formatCurrency(g)}</strong>، يجب عليك ادخار
+                        <strong style="color:var(--success);">${Utils.formatCurrency(bd.dailyAmount)}</strong> يومياً لمدة
+                        <strong>${bd.daysInMonth}</strong> يوماً (شهر ${new Date(WorldTime.now()).toLocaleDateString('ar-SA', { month: 'long' })}).</p>`;
+
+                if (bd.categories.length === 0) {
+                    html += `<p style="font-size:0.85rem;color:var(--text-muted);">لا توجد بيانات مصروفات كافية هذا الشهر (باستثناء الإيجار والأقساط) لاقتراح بنود محددة للتخفيض بعد.</p>`;
+                } else {
+                    html += `<p style="font-size:0.9rem;color:var(--text-secondary);margin-bottom:10px;">بناءً على مصروفات هذا الشهر (باستثناء الإيجار والأقساط)، تخفيض حوالي
+                        <strong style="color:var(--accent);">${bd.percentNeeded}%</strong> من كل بند من البنود التالية يوصلك للهدف:</p>`;
+                    bd.categories.forEach(c => {
+                        html += `<div class="coach-distribution-item">
+                            <span class="dist-label">${c.category} <span style="color:var(--text-muted);font-size:0.8rem;">(الصرف الحالي: ${Utils.formatCurrency(c.spent)})</span></span>
+                            <span class="dist-value" style="color:var(--danger);">- ${Utils.formatCurrency(c.cut)}</span>
+                        </div>`;
+                    });
+                    if (!bd.achievable) {
+                        html += `<div style="margin-top:10px;padding:10px 14px;background:var(--bg-glass);border-radius:var(--radius-sm);border-right:3px solid var(--warning);font-size:0.85rem;">
+                            ⚠️ هذا الهدف كبير مقارنة بمصروفاتك القابلة للتخفيض حالياً حتى لو خفضتها بالكامل. فكّر أيضاً في زيادة الدخل أو مراجعة الالتزامات الثابتة (الإيجار/الأقساط).
+                        </div>`;
+                    }
+                }
+                html += `</div>`;
+                box.innerHTML = html;
+            },
+
             renderIncomePage() {
                 const settings = Storage.getSettings();
                 Utils.id('incomeSalary').value = settings.salary || '';
                 Utils.id('incomeSavingsGoal').value = settings.savingsGoal || '';
                 Utils.id('incomeManualDate').value = settings.salaryDate || '';
                 this.updateIncomeInfo(settings.salaryDate);
+                this.renderSavingsBreakdown(settings.savingsGoal || 0);
                 if (settings.salaryDate) {
                     const day = new Date(settings.salaryDate).getDate();
                     Utils.qsa('.salary-preset-btn').forEach(btn => {
