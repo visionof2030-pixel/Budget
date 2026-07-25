@@ -2570,12 +2570,7 @@
                     new Date(now.getFullYear(), now.getMonth() + 1, 1); return next.toLocaleDateString('ar-SA', { month: 'long' }); },
             getDaysInNextMonth: () => { const now = typeof WorldTime !== 'undefined' ? WorldTime.now() : new Date(); const next =
                     new Date(now.getFullYear(), now.getMonth() + 1, 1); return new Date(next.getFullYear(), next.getMonth() + 1,
-                        0).getDate(); },
-            isValidDateStr: (d) => {
-                if (typeof d !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(d)) return false;
-                const dt = new Date(d + 'T00:00:00');
-                return !isNaN(dt.getTime());
-            }
+                        0).getDate(); }
         };
 
         // ============================================================
@@ -3909,10 +3904,24 @@
                 }
             },
 
+            // يتحقق أن التاريخ بصيغة YYYY-MM-DD صحيحة وواقعية (ليس بعيداً جداً في الماضي أو المستقبل)
+            isValidExpenseDate(dateStr) {
+                if (!dateStr || typeof dateStr !== 'string') return false;
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
+                const d = new Date(dateStr + 'T00:00:00');
+                if (isNaN(d.getTime())) return false;
+                const today = new Date(Utils.today() + 'T00:00:00');
+                const diffDays = Math.abs((today - d) / 86400000);
+                // نرفض أي تاريخ يبعد أكثر من سنة عن اليوم الفعلي (غالباً تخمين خاطئ من النموذج)
+                return diffDays <= 366;
+            },
+
             async parseExpense(text) {
                 try {
                     const categories = Utils.defaultCategories();
-                    const prompt = `أنت مساعد مالي ذكي. استخرج من النص التالي المعلومات المطلوبة بدقة:
+                    const todayStr = Utils.today();
+                    const prompt = `أنت مساعد مالي ذكي. تاريخ اليوم الفعلي هو: ${todayStr} (بصيغة YYYY-MM-DD).
+                    استخرج من النص التالي المعلومات المطلوبة بدقة:
                     النص: "${text}"
                     أخرج النتيجة بتنسيق JSON صالح فقط، بدون أي نص إضافي، بالهيكل التالي:
                     {
@@ -3920,9 +3929,9 @@
                         "description": "نص وصف المصروف",
                         "category": "أحد التصنيفات التالية: ${categories.join('، ')}",
                         "merchant": "اسم التاجر إن وُجد وإلا خالي",
-                        "date": "تاريخ المصروف بصيغة YYYY-MM-DD، إن لم يُذكر استخدم اليوم"
+                        "date": "تاريخ المصروف بصيغة YYYY-MM-DD، إذا لم يُذكر تاريخ محدد في النص استخدم بالضبط ${todayStr}"
                     }
-                    تأكد من أن التصنيف يناسب المصروف بشكل دقيق.`;
+                    تأكد من أن التصنيف يناسب المصروف بشكل دقيق، ولا تخترع تاريخاً من عندك أبداً.`;
                     const response = await this.sendRequest(prompt);
                     const jsonMatch = response.match(/\{[\s\S]*\}/);
                     if (jsonMatch) {
@@ -3931,6 +3940,9 @@
                             if (!categories.includes(data.category)) {
                                 const fallback = ExpenseParser.classifyWithKeywords(text);
                                 data.category = fallback.category || 'أخرى';
+                            }
+                            if (!this.isValidExpenseDate(data.date)) {
+                                data.date = todayStr;
                             }
                             return data;
                         }
@@ -3941,12 +3953,13 @@
                     const result = ExpenseParser.parse(text);
                     if (result.transactions.length > 0) {
                         const t = result.transactions[0];
+                        const fallbackDate = this.isValidExpenseDate(t.date) ? t.date : Utils.today();
                         return {
                             amount: t.amount,
                             description: t.description,
                             category: t.category || 'أخرى',
                             merchant: t.merchant || '',
-                            date: t.date || Utils.today()
+                            date: fallbackDate
                         };
                     }
                     throw new Error('تعذر استخراج المصروف من النص حتى باستخدام المحلل الاحتياطي');
@@ -5333,24 +5346,6 @@
                     parseResult.innerHTML = '<div class="parse-review">جاري التحليل بواسطة الذكاء الاصطناعي...</div>';
                     try {
                         const result = await Gemini.parseExpense(text);
-
-                        // ===== تحقق وتنظيف البيانات القادمة من الذكاء الاصطناعي قبل أي استخدام =====
-                        const cleanAmount = Number(result.amount);
-                        if (!Number.isFinite(cleanAmount) || cleanAmount <= 0) {
-                            parseResult.innerHTML =
-                                '<div class="parse-review" style="color:var(--danger);">تعذّر استخراج مبلغ صحيح من النص. الرجاء إدخال المصروف يدوياً.</div>';
-                            return;
-                        }
-                        result.amount = cleanAmount;
-
-                        if (!Utils.isValidDateStr(result.date)) {
-                            result.date = Utils.today();
-                        }
-
-                        if (!Utils.defaultCategories().includes(result.category)) {
-                            result.category = 'أخرى';
-                        }
-
                         parsedData = result;
                         const displayCat = result.category || 'أخرى';
                         parseResult.innerHTML = `<div class="parse-review">
@@ -5376,34 +5371,20 @@
                             parseResult.innerHTML = '';
                         });
                         Utils.on(Utils.id('saveParseBtn'), 'click', () => {
-                            // ===== تحقق أمان إضافي مباشرة قبل الحفظ =====
-                            const finalAmount = Number(result.amount);
-                            if (!Number.isFinite(finalAmount) || finalAmount <= 0) {
-                                alert('المبلغ غير صالح، الرجاء إدخال المصروف يدوياً.');
-                                return;
-                            }
-                            const finalDate = Utils.isValidDateStr(result.date) ? result.date : Utils.today();
-
                             const expenseData = {
-                                amount: finalAmount,
+                                amount: result.amount,
                                 description: result.description || text,
-                                category: Utils.defaultCategories().includes(result.category) ? result.category : 'أخرى',
-                                date: finalDate,
+                                category: result.category || 'أخرى',
+                                date: result.date || Utils.today(),
                                 merchant: result.merchant || '',
                                 subCategory: '',
                                 paymentMethod: '',
                                 notes: ''
                             };
-
-                            try {
-                                Budget.addExpense(expenseData);
-                                this.closeModal(modalId);
-                                this.renderAll();
-                                alert('تم حفظ المصروف بنجاح!');
-                            } catch (saveErr) {
-                                console.error('فشل حفظ المصروف عبر الذكاء الاصطناعي:', saveErr);
-                                alert('حدث خطأ أثناء حفظ المصروف، الرجاء المحاولة مجدداً أو استخدام الإدخال اليدوي.');
-                            }
+                            Budget.addExpense(expenseData);
+                            this.closeModal(modalId);
+                            this.renderAll();
+                            alert('تم حفظ المصروف بنجاح!');
                         });
                         saveBtn.style.display = 'none';
                     } catch (err) {
