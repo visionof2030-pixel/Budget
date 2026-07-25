@@ -1639,6 +1639,34 @@
             border-radius: 10px;
         }
 
+        /* ===== تحسينات إضافية لمنع التمرير الأفقي وضبط البطاقات ===== */
+        body {
+            overflow-x: hidden;
+        }
+        .dash-card {
+            overflow: hidden;
+            word-wrap: break-word;
+        }
+        .dash-card .card-value {
+            word-break: break-word;
+        }
+        .coach-distribution-item {
+            flex-wrap: wrap;
+            word-break: break-word;
+        }
+        .scenario-card,
+        .risk-item,
+        .opportunity-item {
+            word-break: break-word;
+        }
+        .settings-container {
+            max-width: 100%;
+            overflow: hidden;
+        }
+        .dashboard-cards {
+            max-width: 100%;
+        }
+
         /* ===== الأنماط المستجيبة للجوال (محسّنة) ===== */
         @media(max-width:992px) {
             .main-content {
@@ -1906,6 +1934,38 @@
                 min-height: 36px;
             }
         }
+
+        /* تحسينات إضافية للشاشات الصغيرة جداً (أقل من 380px) */
+        @media (max-width: 380px) {
+            .dashboard-cards {
+                grid-template-columns: 1fr;
+            }
+            .dash-card {
+                padding: 8px 10px;
+                min-height: 60px;
+            }
+            .dash-card .card-value {
+                font-size: 0.85rem;
+            }
+            .dash-card .card-label {
+                font-size: 0.6rem;
+            }
+            .coach-distribution-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 2px;
+            }
+            .coach-distribution-item .dist-value {
+                font-size: 0.85rem;
+            }
+            .scenario-card,
+            .risk-item,
+            .opportunity-item {
+                padding: 10px 12px;
+                font-size: 0.85rem;
+            }
+        }
+
         .advisor-message {
             background: linear-gradient(135deg, rgba(46, 125, 181, 0.06) 0%, rgba(18, 60, 87, 0.04) 100%);
             border-right: 3px solid var(--accent);
