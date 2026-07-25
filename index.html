@@ -285,8 +285,7 @@
         .header-actions {
             display: flex;
             align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
+            gap: 12px
         }
         .current-date {
             color: var(--text-muted);
@@ -318,29 +317,6 @@
         .chat-toggle-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 24px rgba(18, 60, 87, 0.35)
-        }
-        /* ===== زر المستشار في الهيدر ===== */
-        #headerAdvisorBtn {
-            background: var(--accent-gradient);
-            color: #fff;
-            border: none;
-            border-radius: 40px;
-            padding: 8px 18px;
-            font-family: var(--font);
-            font-weight: 700;
-            font-size: 0.85rem;
-            display: none;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: all var(--transition);
-            box-shadow: 0 2px 12px rgba(18, 60, 87, 0.25);
-            min-height: 44px;
-            touch-action: manipulation;
-        }
-        #headerAdvisorBtn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(18, 60, 87, 0.35);
         }
         .fab-advisor {
             position: fixed;
@@ -1169,14 +1145,17 @@
         .chat-container {
             display: flex;
             flex-direction: column;
-            height: auto;
+            height: var(--chat-max-height);
             max-height: var(--chat-max-height);
-            min-height: 300px;
+            min-height: 400px;
             background: var(--bg-card);
             border-radius: var(--radius);
             border: 1px solid var(--bg-glass-border);
             overflow: hidden;
-            box-shadow: var(--shadow)
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 100%;
+            overflow: hidden;
         }
         .chat-messages {
             flex: 1;
@@ -1186,15 +1165,17 @@
             flex-direction: column;
             gap: 12px;
             min-height: 0;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
         }
         .chat-message {
-            max-width: 90%;
-            padding: 12px 16px;
+            max-width: 85%;
+            padding: 12px 18px;
             border-radius: var(--radius-sm);
             animation: messageIn 0.3s ease;
             word-wrap: break-word;
             overflow-wrap: break-word;
-            font-size: 0.95rem;
         }
         .chat-message.user {
             align-self: flex-end;
@@ -1224,7 +1205,7 @@
             border-bottom-left-radius: 4px;
             color: var(--text-primary);
             font-size: 0.92rem;
-            max-width: 90%;
+            max-width: 90%
         }
         .chat-message .message-time {
             font-size: 0.6rem;
@@ -1244,21 +1225,21 @@
         .chat-quick-replies {
             display: flex;
             flex-wrap: wrap;
-            gap: 6px;
+            gap: 8px;
             margin-top: 10px;
+            max-width: 100%;
         }
         .chat-quick-reply-btn {
             background: var(--accent-gradient);
             color: #fff;
             border: none;
             border-radius: 999px;
-            padding: 6px 12px;
-            font-size: 0.75rem;
+            padding: 7px 16px;
+            font-size: 0.82rem;
             font-weight: 700;
             font-family: inherit;
             cursor: pointer;
             transition: opacity 0.15s ease, transform 0.15s ease;
-            white-space: nowrap;
         }
         .chat-quick-reply-btn:hover {
             transform: translateY(-1px);
@@ -1280,8 +1261,8 @@
         }
         .chat-input-area {
             display: flex;
-            gap: 8px;
-            padding: 12px 16px;
+            gap: 12px;
+            padding: 16px 20px;
             border-top: 1px solid var(--bg-glass-border);
             background: var(--bg-glass);
             backdrop-filter: blur(10px);
@@ -1298,10 +1279,12 @@
             font-family: var(--font);
             font-size: 0.95rem;
             resize: none;
-            min-height: 44px;
+            min-height: 48px;
             max-height: 120px;
             transition: border var(--transition);
-            min-width: 120px;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
         }
         .chat-input-area textarea:focus {
             outline: none;
@@ -1309,7 +1292,7 @@
             box-shadow: 0 0 0 3px rgba(46, 125, 181, 0.16)
         }
         .chat-input-area .btn-primary {
-            min-height: 44px;
+            min-height: 48px;
             padding: 0 20px;
             flex-shrink: 0
         }
@@ -1603,91 +1586,7 @@
             border-radius: 10px;
         }
 
-        /* ===== تعديلات قسم المستشار المالي لتحسين التوافق مع الجوال ===== */
-        @media (max-width: 400px) {
-            .chat-container {
-                min-height: 250px;
-                max-height: 70vh !important;
-            }
-            .chat-message {
-                max-width: 100%;
-                padding: 10px 14px;
-                font-size: 0.9rem;
-            }
-            .chat-message.financial-advisor {
-                max-width: 100%;
-                font-size: 0.88rem;
-            }
-            .chat-input-area {
-                flex-direction: column;
-                gap: 8px;
-                padding: 10px 12px;
-            }
-            .chat-input-area textarea {
-                min-width: 0;
-                width: 100%;
-                min-height: 40px;
-                font-size: 0.9rem;
-            }
-            .chat-input-area .btn-primary {
-                width: 100%;
-                justify-content: center;
-                min-height: 40px;
-                padding: 0 16px;
-                font-size: 0.9rem;
-            }
-            .chat-quick-replies {
-                gap: 6px;
-            }
-            .chat-quick-reply-btn {
-                padding: 6px 12px;
-                font-size: 0.75rem;
-            }
-            .fab-advisor {
-                max-width: calc(100% - 20px);
-                font-size: 0.8rem;
-                padding: 0 12px 0 6px;
-                height: 44px;
-                width: auto;
-                white-space: nowrap;
-            }
-            .fab-advisor .fab-advisor-label {
-                display: inline-block;
-                max-width: 120px;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .chat-container {
-                height: auto;
-                max-height: var(--chat-max-height);
-                min-height: 350px;
-            }
-            .chat-input-area {
-                flex-direction: row;
-                gap: 8px;
-                padding: 12px 14px;
-            }
-            .chat-input-area textarea {
-                flex: 1;
-                min-width: 0;
-            }
-            .chat-input-area .btn-primary {
-                width: auto;
-                flex-shrink: 0;
-                min-height: 44px;
-            }
-            .chat-message {
-                max-width: 92%;
-                padding: 12px 16px;
-                font-size: 0.92rem;
-            }
-            .chat-message.financial-advisor {
-                max-width: 92%;
-                font-size: 0.9rem;
-            }
+        @media(max-width:992px) {
             .main-content {
                 padding: 0 16px 20px
             }
@@ -1703,6 +1602,8 @@
             .reports-grid {
                 grid-template-columns: 1fr
             }
+        }
+        @media(max-width:768px) {
             .app-header h1 {
                 font-size: 1.35rem
             }
@@ -1798,19 +1699,15 @@
                 flex-direction: column
             }
             .chat-container {
-                height: auto;
+                height: var(--chat-max-height);
                 max-height: var(--chat-max-height);
                 min-height: 350px
             }
             .chat-input-area {
-                flex-direction: row;
-                gap: 8px;
-                padding: 12px 14px;
+                flex-direction: column
             }
             .chat-input-area .btn-primary {
-                width: auto;
-                flex-shrink: 0;
-                min-height: 44px;
+                width: 100%
             }
             .expense-detail-grid {
                 grid-template-columns: 1fr
@@ -1821,29 +1718,88 @@
             .coach-tabs {
                 flex-direction: column;
             }
-            .advisor-message {
-                padding: 10px 12px;
-            }
-            .advisor-message .action-item {
-                padding: 4px 8px;
-            }
         }
-
-        @media(max-width:992px) {
-            .main-content {
-                padding: 0 16px 20px
-            }
+        @media(max-width:400px) {
             .dashboard-cards {
-                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr))
+                grid-template-columns: 1fr 1fr;
+                gap: 8px
             }
-            .category-budgets-grid {
-                grid-template-columns: 1fr
+            .dash-card {
+                padding: 10px 12px;
+                min-height: 70px
             }
-            .form-row {
-                grid-template-columns: 1fr
+            .dash-card .card-value {
+                font-size: 0.95rem
             }
-            .reports-grid {
-                grid-template-columns: 1fr
+            .dash-card .card-icon {
+                font-size: 1rem;
+                width: 28px;
+                height: 28px
+            }
+            .app-header h1 {
+                font-size: 1.1rem
+            }
+            .current-date {
+                font-size: 0.6rem;
+                padding: 4px 10px
+            }
+            .chat-toggle-btn {
+                font-size: 0.7rem;
+                padding: 6px 12px;
+                min-height: 36px
+            }
+            .btn-primary,
+            .btn-secondary,
+            .btn-danger {
+                font-size: 0.85rem;
+                padding: 10px 16px;
+                min-height: 42px
+            }
+            .modal-content {
+                padding: 12px
+            }
+            .expense-info .desc {
+                font-size: 0.85rem
+            }
+            .expense-amount {
+                font-size: 0.85rem;
+                padding: 2px 10px
+            }
+            .settings-container h2 {
+                font-size: 1rem
+            }
+            .category-budget-item input {
+                min-height: 32px;
+                font-size: 0.8rem
+            }
+            .chat-container {
+                min-height: 300px;
+                border-radius: var(--radius-sm);
+            }
+            .chat-messages {
+                padding: 12px;
+            }
+            .chat-message {
+                font-size: 0.85rem;
+                padding: 10px 14px;
+                max-width: 98% !important;
+            }
+            .chat-input-area {
+                padding: 10px 12px;
+                flex-direction: column;
+            }
+            .chat-input-area textarea {
+                font-size: 0.9rem;
+                min-height: 40px;
+            }
+            .chat-input-area .btn-primary {
+                width: 100%;
+                justify-content: center;
+            }
+            .chat-quick-reply-btn {
+                font-size: 0.75rem;
+                padding: 5px 12px;
+                min-height: 34px;
             }
         }
         .advisor-message {
@@ -1895,6 +1851,18 @@
             padding: 8px 0;
             border-top: 1px solid var(--bg-glass-border);
             margin-top: 8px
+        }
+        @media(max-width:768px) {
+            .chat-message.financial-advisor {
+                max-width: 95%;
+                font-size: 0.88rem
+            }
+            .advisor-message {
+                padding: 10px 12px
+            }
+            .advisor-message .action-item {
+                padding: 4px 8px
+            }
         }
         .budget-item-card {
             background: var(--bg-card);
@@ -2324,9 +2292,6 @@
                 <button id="sidebarToggle" class="sidebar-toggle"><i class="fas fa-bars"></i></button>
                 <h1 id="pageTitle">الرئيسية</h1>
                 <div class="header-actions">
-                    <button id="headerAdvisorBtn" class="chat-toggle-btn">
-                        <i class="fas fa-comment-dots"></i> المستشار
-                    </button>
                     <button class="refresh-btn" id="refreshBtn"><i class="fas fa-sync-alt"></i> تحديث</button>
                     <span id="currentDate" class="current-date"></span>
                 </div>
@@ -2349,7 +2314,6 @@
                         <div class="expenses-filters">
                             <input type="text" id="expenseSearch" placeholder="بحث..." class="search-input" />
                             <select id="expenseCategoryFilter" class="filter-select"><option value="all">جميع التصنيفات</option></select>
-                            <select id="expenseSubCategoryFilter" class="filter-select"><option value="all">جميع التصنيفات الفرعية</option></select>
                         </div>
                     </div>
                     <div id="expensesList" class="expenses-list"></div>
@@ -2789,73 +2753,37 @@
             generateId: () => Date.now().toString(36) + Math.random().toString(36).substr(2, 6),
             defaultCategories: () => {
                 const base = [
-                    'الإيجار والسكن',
-                    'الأقساط والتمويل',
-                    'الفواتير والخدمات',
-                    'التأمين',
-                    'المطاعم والمقاهي',
-                    'المواد الغذائية',
-                    'البنزين والوقود',
-                    'المواصلات العامة',
-                    'الصحة والرعاية',
-                    'التعليم',
-                    'الترفيه',
-                    'الاشتراكات',
-                    'التسوق',
-                    'مستلزمات المنزل',
-                    'العناية الشخصية',
-                    'الأطفال والعائلة',
-                    'الحيوانات الأليفة',
-                    'الاستثمار والادخار',
-                    'التحويلات المالية',
-                    'الرسوم الحكومية',
-                    'الهدايا والمناسبات',
-                    'الصيانة والإصلاحات',
-                    'السفر والسياحة',
-                    'الدعم والصدقات',
-                    'أخرى'
+                    'المواد الغذائية', 'البنزين', 'الكهرباء', 'الماء', 'الإنترنت',
+                    'الإيجار', 'الأقساط', 'المطاعم', 'المقاهي', 'الصحة',
+                    'الترفيه', 'التسوق', 'التعليم', 'السيارة',
+                    'مصروف شخصي', 'العناية الشخصية', 'مستلزمات المنزل'
                 ];
+                // ندمج أي تصنيفات مخصصة أنشأها المستخدم عبر بنود ميزانية جديدة (مثل "دفع تمارا"، "دفع تابي")
+                // حتى تُعرف تلقائياً في كل مكان: القوائم اليدوية، الفلاتر، وتصنيف الذكاء الاصطناعي للمصروفات
                 let custom = [];
                 try {
                     custom = (Storage.getBudgetItems() || [])
                         .map(i => i.category)
                         .filter(c => c && !base.includes(c) && c !== 'أخرى');
                 } catch (e) { custom = []; }
-                return [...base, ...new Set(custom)];
-            },
-            defaultSubCategories: () => {
-                return [
-                    'إيجار', 'أقساط', 'فواتير', 'تأمين',
-                    'وجبات جاهزة', 'بقالة', 'توصيل طلبات',
-                    'وقود', 'أجرة', 'صيانة سيارات', 'تأجير سيارات',
-                    'مستشفيات وعيادات', 'أدوية وصيدليات', 'نظارات وعدسات', 'أسنان',
-                    'رسوم دراسية', 'دورات تدريبية', 'كتب وقرطاسية',
-                    'سينما ومسرح', 'ألعاب إلكترونية', 'أنشطة رياضية', 'فعاليات ومناسبات',
-                    'ملابس وأزياء', 'إكسسوارات ومجوهرات', 'إلكترونيات', 'أثاث وديكور', 'منظفات ولوازم',
-                    'عناية وتجميل', 'حلاقة ورجالية',
-                    'مستلزمات أطفال', 'رعاية أطفال',
-                    'رعاية حيوانات',
-                    'استثمار', 'تحويلات',
-                    'ضرائب ورسوم',
-                    'هدايا', 'مناسبات عائلية',
-                    'صيانة منزل', 'صيانة أجهزة',
-                    'تذاكر سفر', 'فنادق وإقامة', 'سياحة وترفيه',
-                    'صدقات وتبرعات',
-                    'خدمات رقمية', 'اتصالات',
-                    'غير مصنف'
-                ];
+                return [...base, ...new Set(custom), 'أخرى'];
             },
             travelCategories: () => ['تذاكر الطيران', 'الفنادق والسكن', 'المواصلات الداخلية', 'الإنترنت والاتصالات', 'الفعاليات والأنشطة',
                 'الطعام والمطاعم', 'التسوق والهدايا', 'التأشيرة والتأمين', 'الطوارئ', 'أخرى'
             ],
             tempCategories: () => ['كشتة', 'قطة', 'واجب', 'فزعة', 'صدقة', 'أخرى'],
+            // ينسّق نص رد الذكاء الاصطناعي: يحوّل **بولد** إلى <strong>، وينسّق النقاط، ويزيل أي ** متبقية عشوائياً
             formatAIText: (text) => {
                 if (!text) return '';
                 let html = String(text);
+                // bold (يدعم النص متعدد الأسطر بين علامتي **)
                 html = html.replace(/\*\*([\s\S]+?)\*\*/g, '<strong>$1</strong>');
+                // أي ** متبقية لم تتزاوج (حالة نادرة) نزيلها بدل عرضها كما هي
                 html = html.replace(/\*\*/g, '');
+                // توحيد رموز النقاط (- أو * أو •) في بداية السطر إلى نقطة موحدة
                 html = html.replace(/^[ \t]*[-*]\s+/gm, '• ');
                 html = html.replace(/•\s*/g, '• ');
+                // إزالة رموز عناوين ماركداون (### إلخ) إن وجدت
                 html = html.replace(/^#{1,6}\s*/gm, '');
                 html = html.replace(/\n/g, '<br>');
                 return html;
@@ -2943,7 +2871,7 @@
         };
 
         // ============================================================
-        // 3. STORAGE
+        // 3. STORAGE (مُحدّث - يدعم Budget Items)
         // ============================================================
         const Storage = {
             get(key, def) { try { const val = localStorage.getItem('ai_budget_' + key); return val ? JSON.parse(val) :
@@ -2981,33 +2909,42 @@
         };
 
         // ============================================================
-        // 4. FINANCIAL ENGINE
+        // 4. FINANCIAL ENGINE v4.0 (مع الإنشاء التلقائي والتنظيف)
         // ============================================================
         const FinancialEngine = {
+            // ---- Core Validation ----
             _hasValidSalary() {
                 const salary = this.getSalary();
                 return salary > 0;
             },
+
             _getValidatedSalary() {
                 const salary = this.getSalary();
                 return salary > 0 ? salary : null;
             },
+
+            // ---- Helpers ----
             getSalary() {
                 return parseFloat(Storage.getSettings().salary) || 0;
             },
+
             getSavingsGoal() {
                 return parseFloat(Storage.getSettings().savingsGoal) || 0;
             },
+
             getExpenses() {
                 return Storage.getExpenses();
             },
+
             getBudgetItems() {
                 return Storage.getBudgetItems();
             },
+
             getMonthExpenses() {
                 const range = Utils.getMonthRange();
                 return this.getExpenses().filter(e => e.date >= range.start && e.date <= range.end);
             },
+
             getLast6MonthsExpenses() {
                 const now = WorldTime.now();
                 const expenses = this.getExpenses();
@@ -3015,20 +2952,27 @@
                 const startDate = sixMonthsAgo.toISOString().split('T')[0];
                 return expenses.filter(e => e.date >= startDate);
             },
+
             getTotal(expenses) {
                 return expenses.reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
             },
+
             getCategoryTotal(expenses, category) {
                 return expenses.filter(e => e.category === category).reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
             },
+
+            // ---- Core Calculations ----
+            
             calculateReservedMoney() {
                 const items = this.getBudgetItems();
                 return items.filter(item => item.isReserved === true)
                     .reduce((sum, item) => sum + (parseFloat(item.budget) || 0), 0);
             },
+
             calculatePaidExpenses() {
                 return this.getTotal(this.getMonthExpenses());
             },
+
             calculateAvailableBudget() {
                 const salary = this._getValidatedSalary();
                 if (salary === null) return null;
@@ -3036,6 +2980,7 @@
                 const paid = this.calculatePaidExpenses();
                 return salary - reserved - paid;
             },
+
             getRemainingDaysUntilSalary() {
                 const settings = Storage.getSettings();
                 if (!settings.salaryDate) return null;
@@ -3050,6 +2995,9 @@
                 }
                 return Math.round((candidate - today0) / 86400000);
             },
+
+            // يحسب تفاصيل خطة الادخار: كم يجب ادخاره يومياً، وأي البنود (باستثناء الإيجار والأقساط)
+            // يمكن تخفيضها بنسبة بسيطة للوصول إلى هدف الادخار
             getSavingsBreakdown(goal) {
                 const g = parseFloat(goal);
                 const range = Utils.getMonthRange();
@@ -3091,6 +3039,7 @@
                 }));
                 return result;
             },
+
             calculateDailyBudget() {
                 const available = this.calculateAvailableBudget();
                 if (available === null) return null;
@@ -3103,6 +3052,7 @@
                 }
                 return available / daysUntilSalary;
             },
+
             calculateWeeklyBudget() {
                 const available = this.calculateAvailableBudget();
                 if (available === null) return null;
@@ -3118,9 +3068,11 @@
                 const weekly = daily * 7;
                 return Math.min(weekly, available);
             },
+
             calculateMonthlyBudget() {
                 return this.calculateAvailableBudget();
             },
+
             getRemainingDays() {
                 const daysUntilSalary = this.getRemainingDaysUntilSalary();
                 if (daysUntilSalary !== null && daysUntilSalary > 0) return daysUntilSalary;
@@ -3128,6 +3080,7 @@
                 const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
                 return daysInMonth - now.getDate() + 1;
             },
+
             getWeeklyBudgetLabel() {
                 const daysUntilSalary = this.getRemainingDaysUntilSalary();
                 if (daysUntilSalary === null || daysUntilSalary < 7) {
@@ -3135,6 +3088,7 @@
                 }
                 return 'ميزانية الأسبوع';
             },
+
             getFinancialStatus() {
                 const salary = this._getValidatedSalary();
                 const reserved = this.calculateReservedMoney();
@@ -3161,6 +3115,8 @@
                     reserved: reserved, paid: paid, salary: salary, details: { salary: salary,
                         reserved: reserved, paid: paid, difference: null } };
             },
+
+            // ===== BUDGET ITEMS CRUD =====
             addBudgetItem(data) {
                 const items = this.getBudgetItems();
                 const item = {
@@ -3175,6 +3131,7 @@
                     color: data.color || '#2E7DB5',
                     notes: data.notes || '',
                     isAutoCreated: data.isAutoCreated || false,
+                    // تاريخ انتهاء اختياري (مفيد للالتزامات المحدودة المدة مثل تمارا/تابي أو أي اشتراك له عدد أقساط معروف)
                     endDate: data.endDate || null,
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString()
@@ -3184,12 +3141,14 @@
                 this.refreshAll();
                 return item;
             },
+
             updateBudgetItem(id, data) {
                 let items = this.getBudgetItems();
                 const index = items.findIndex(item => item.id === id);
                 if (index === -1) return null;
                 const item = items[index];
                 Object.assign(item, data);
+                // إذا عدّل المستخدم البند يدوياً، نزيل علامة التلقائي
                 item.isAutoCreated = false;
                 item.updatedAt = new Date().toISOString();
                 items[index] = item;
@@ -3197,25 +3156,38 @@
                 this.refreshAll();
                 return item;
             },
+
             deleteBudgetItem(id) {
                 let items = this.getBudgetItems();
                 items = items.filter(item => item.id !== id);
                 Storage.setBudgetItems(items);
                 this.refreshAll();
             },
+
+            // ===== 🔥 التعديل الرئيسي: الإنشاء التلقائي للبنود =====
             syncBudgetItemsSpent() {
                 let items = this.getBudgetItems();
                 const monthExp = this.getMonthExpenses();
+
+                // 1. إعادة تعيين spent
                 items.forEach(item => { item.spent = 0; });
+
+                // 2. حساب المصروفات حسب التصنيف للشهر الحالي
                 const catMap = {};
                 monthExp.forEach(e => {
                     const cat = e.category || 'أخرى';
                     catMap[cat] = (catMap[cat] || 0) + (parseFloat(e.amount) || 0);
                 });
+
+                // 3. الحصول على التصنيفات الموجودة حالياً في بنود الميزانية
                 const existingCategories = new Set(items.map(i => i.category));
+
+                // 4. إنشاء بنود جديدة للتصنيفات المفقودة (مع ميزانية تقديرية)
                 for (const [cat, spentAmount] of Object.entries(catMap)) {
                     if (!existingCategories.has(cat)) {
-                        const estimatedBudget = Math.ceil(spentAmount * 1.2) || 10;
+                        // الميزانية التقديرية = المصروف الحالي + 20% (لتجنب التجاوز الفوري)
+                        const estimatedBudget = Math.ceil(spentAmount * 1.2) || 10; // حد أدنى 10 ريال
+
                         const newItem = {
                             id: Utils.generateId(),
                             name: cat,
@@ -3235,26 +3207,40 @@
                         existingCategories.add(cat);
                     }
                 }
+
+                // 5. تحديث spent للبنود الموجودة (بما فيها القديمة والجديدة)
                 items.forEach(item => {
                     item.spent = catMap[item.category] || 0;
                 });
+
                 Storage.setBudgetItems(items);
             },
+
+            // ===== 🧹 التنظيف التلقائي: حذف البنود التلقائية غير المستخدمة =====
             cleanupAutoCreatedItems() {
                 let items = this.getBudgetItems();
                 const twoMonthsAgo = new Date(WorldTime.now());
                 twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+
                 const kept = items.filter(item => {
+                    // احتفظ بالبنود التي ليست تلقائية، أو التي تم استخدامها خلال شهرين
                     if (!item.isAutoCreated) return true;
+                    // إذا كان لديه spent > 0 في أي وقت (نحتفظ به)
                     if (item.spent > 0) return true;
+                    // إذا كان تاريخ الإنشاء منذ أقل من شهرين (يعطي فرصة)
                     const createdDate = new Date(item.createdAt);
                     if (createdDate > twoMonthsAgo) return true;
+                    // غير ذلك: احذفه
                     return false;
                 });
+
                 if (kept.length !== items.length) {
                     Storage.setBudgetItems(kept);
+                    console.log(`🧹 تم حذف ${items.length - kept.length} بنداً تلقائياً غير مستخدم.`);
                 }
             },
+
+            // ===== BUDGET OVERRIDE SYSTEM =====
             findSurplusCategories(excludeCategory) {
                 const items = this.getBudgetItems();
                 const result = [];
@@ -3273,6 +3259,7 @@
                 result.sort((a, b) => b.surplus - a.surplus);
                 return result;
             },
+
             transferBudget(sourceCategory, targetCategory, amount) {
                 const items = this.getBudgetItems();
                 const source = items.find(i => i.category === sourceCategory);
@@ -3284,17 +3271,20 @@
                 target.budget = target.budget + amount;
                 source.updatedAt = new Date().toISOString();
                 target.updatedAt = new Date().toISOString();
+                // إذا كان الهدف تلقائياً، نزيل العلامة لأن المستخدم تفاعل معه
                 target.isAutoCreated = false;
                 Storage.setBudgetItems(items);
                 this.refreshAll();
                 return true;
             },
+
             isCategoryOverBudget(category) {
                 const items = this.getBudgetItems();
                 const item = items.find(i => i.category === category);
                 if (!item) return false;
                 return item.spent > item.budget && item.budget > 0;
             },
+
             getCategoryStatus(category) {
                 const items = this.getBudgetItems();
                 const item = items.find(i => i.category === category);
@@ -3310,14 +3300,17 @@
                     isAutoCreated: item.isAutoCreated || false
                 };
             },
+
             refreshAll() {
                 this.syncBudgetItemsSpent();
+                // نقوم بالتنظيف كل مرة يتم فيها التحديث (يمكن تفعيله بشكل دوري)
                 this.cleanupAutoCreatedItems();
                 if (typeof UI !== 'undefined') {
                     UI.refreshContext();
                     UI.renderAll();
                 }
             },
+
             resetApp() {
                 const keysToKeep = ['gemini_keys', 'gemini_model', 'gemini_key_index', 'migrated_v2'];
                 const allKeys = Object.keys(localStorage);
@@ -3360,6 +3353,7 @@
             }
         };
 
+        // ---- Migration from old categoryBudgets to Budget Items ----
         function migrateToBudgetItems() {
             if (Storage.isMigrated()) return;
             const settings = Storage.getSettings();
@@ -3513,6 +3507,8 @@
                 });
 
                 const goalProgress = savingsGoal > 0 && available !== null ? Math.min(100, (available / savingsGoal) * 100) : 0;
+                // متوسط الصرف اليومي الدقيق: نافذة متحركة من 30 يوماً عبر كل المصروفات (وليس فقط الشهر التقويمي الحالي)
+                // هذا أدق وأكثر استقراراً من "إجمالي الشهر ÷ يوم اليوم من الشهر"، الذي يهتز بشدة أول أيام الشهر
                 const allExpForAvg = (typeof allExpenses !== 'undefined' && allExpenses) ? allExpenses : expenses;
                 const todayDateForAvg = WorldTime.now();
                 const windowStartDate = new Date(todayDateForAvg);
@@ -3635,6 +3631,7 @@
                 result.highestSpendingDays = sortedDays.slice(0, 3).map(d => d[0]);
                 result.lowestSpendingDays = sortedDays.slice(-3).map(d => d[0]);
                 const savingsRate = indicators.savingsRate || 0;
+                // مقياس واحد وواضح مرتب من الأقل صرفاً إلى الأكثر صرفاً، بناءً على نسبة الادخار من الدخل
                 if (savingsRate >= 30) result.profile = 'Saver';
                 else if (savingsRate >= 15) result.profile = 'Economical';
                 else if (savingsRate >= 0) result.profile = 'Balanced';
@@ -3721,13 +3718,17 @@
                 });
                 const items = FinancialEngine.getBudgetItems();
                 const atRisk = [];
+                // بنود الالتزامات الثابتة (إيجار/أقساط) تُدفع عادة دفعة واحدة شهرياً وليست معدل يومي،
+                // ولذلك لا يصح إسقاطها بمعدل يومي — تُستثنى من هذا التوقع (تُحسب كالتزامات ثابتة في مكان آخر)
                 const excludedFromProjection = ['الإيجار', 'الأقساط'];
                 const daysPassed = Math.max(1, WorldTime.now().getDate());
                 items.forEach(item => {
                     const budget = item.budget || 0;
                     const spent = catMap[item.category] || 0;
                     if (excludedFromProjection.includes(item.category)) return;
+                    // إذا لم يُصرف شيء في هذا البند بعد، لا توجد بيانات فعلية لبناء توقع منه — نتجاهله بدل افتراض معدل عام
                     if (budget > 0 && spent > 0) {
+                        // معدل الصرف اليومي الخاص بهذا التصنيف تحديداً (وليس معدل كل التصنيفات مجتمعة)
                         const categoryDailyRate = spent / daysPassed;
                         const projected = spent + (categoryDailyRate * daysLeft);
                         if (projected > budget) {
@@ -4014,276 +4015,90 @@
         };
 
         // ============================================================
-        // 6. EXPENSE PARSER - ENHANCED SMART CLASSIFIER (EXPANDED)
+        // 6. EXPENSE PARSER - ENHANCED SMART CLASSIFIER
         // ============================================================
         const ExpenseParser = {
             classifyWithKeywords(text) {
                 const fullText = (text || '').toLowerCase();
-
-                // ============================================================
-                // 1. التصنيفات الأساسية (الأكثر تحديداً)
-                // ============================================================
-
-                // --- الإيجار والسكن ---
-                if (['إيجار', 'سكن', 'شقة', 'منزل', 'فيلا', 'دفعة إيجار', 'عقار', 'مكتب', 'محل', 'سكني', 'استئجار', 'إيجارية', 'أجار', 'مسكن', 'غرفة', 'استوديو', 'سكن طلاب', 'سكن موظفين', 'إيجار شهري', 'دفعة سكن'].some(k => fullText.includes(k)))
-                    return { category: 'الإيجار والسكن', subCategory: 'إيجار' };
-
-                // --- الأقساط والتمويل ---
-                if (['قسط', 'قرض', 'دين', 'سداد', 'تمويل', 'مرابحة', 'تقسيط', 'سيارة', 'عقار', 'رهن', 'ضمان', 'كفالة', 'بنك', 'مصرف', 'أقساط', 'التزام', 'دفعة شهرية', 'تمارا', 'تابي', 'تقسيط', 'تأجير منتهي بالتمليك', 'قرض شخصي', 'قرض عقاري', 'بطاقة ائتمان', 'دين مستحق', 'سداد قرض', 'دفعة قسط', 'تمويل شخصي', 'تمويل عقاري', 'تمويل سيارات', 'دفعة شهرية'].some(k => fullText.includes(k)))
-                    return { category: 'الأقساط والتمويل', subCategory: 'أقساط' };
-
-                // --- الفواتير والخدمات ---
-                if (['كهرباء', 'ماء', 'إنترنت', 'جوال', 'فواتير', 'فاتورة', 'سداد', 'خدمات', 'نت', 'واي فاي', 'ألياف', 'بصري', 'كهرب', 'مياه', 'صيانة', 'فني', 'موبايلي', 'زين', 'سوا', 'جوي', 'سكاي', 'آيس', 'اتصالات', 'خدمة', 'قيمة مضافة', 'ضريبة', 'توصيل', 'شحن', 'تجديد', 'اشتراك شهري', 'فاتورة كهرباء', 'فاتورة ماء', 'فاتورة إنترنت', 'فاتورة جوال', 'خدمات منزلية', 'كهرباء منزل'].some(k => fullText.includes(k)))
-                    return { category: 'الفواتير والخدمات', subCategory: 'فواتير' };
-
-                // --- التأمين ---
-                if (['تأمين', 'تأمين صحي', 'تأمين سيارة', 'تأمين سفر', 'تأمين على الحياة', 'ضمان', 'بوليصة', 'مطالبة', 'تعويض', 'تغطية', 'دفعة تأمين', 'تأمين طبي', 'تأمين مركبات', 'تأمين ممتلكات'].some(k => fullText.includes(k)))
-                    return { category: 'التأمين', subCategory: 'تأمين' };
-
-                // ============================================================
-                // 2. الطعام والشراب
-                // ============================================================
-
-                // --- المطاعم والمقاهي (الوجبات الجاهزة) ---
-                if (['مطعم', 'وجبة', 'فطور', 'عشاء', 'غداء', 'برجر', 'شاورما', 'بيتزا', 'باستا', 'مشاوي', 'مندي', 'كبسة', 'برياني', 'مقلوبة', 'صينية', 'وجبات سريعة', 'فاست فود', 'ماكدونالدز', 'هرفي', 'كودو', 'بيتزا هت', 'دومينوز', 'كنتاكي', 'هارديز', 'ون تو ثري', 'تاون', 'برجر كينج', 'ديري كوين', 'باسكن روبنز', 'سنبون', 'مقهى', 'كوفي', 'كافيه', 'ستاربكس', 'دانكن', 'كابتشينو', 'لاتيه', 'موكا', 'اسبريسو', 'قهوة', 'شاي', 'عصير طازج', 'سموذي', 'ميلك شيك', 'كرواسان', 'دونات', 'كيك', 'حلويات', 'مخبوزات', 'معجنات', 'فطائر', 'سناك', 'وجبة خفيفة', 'عشاء خارجي', 'غداء خارجي'].some(k => fullText.includes(k)))
-                    return { category: 'المطاعم والمقاهي', subCategory: 'وجبات جاهزة' };
-
-                // --- المواد الغذائية (البقالة والتموين) ---
-                if (['بقالة', 'سوبرماركت', 'تموين', 'مواد غذائية', 'أكل', 'طعام', 'مأكولات', 'خضار', 'فواكه', 'لحم', 'دجاج', 'سمك', 'بيض', 'حليب', 'جبن', 'زبادي', 'خبز', 'رز', 'أرز', 'زيت', 'سكر', 'طحين', 'مكرونة', 'بقوليات', 'بهارات', 'توابل', 'معلبات', 'عصائر', 'مياه', 'ماء', 'شاي', 'قهوة', 'بن', 'نسكافيه', 'تمر', 'عسل', 'دقيق', 'حبوب', 'شوفان', 'فطور', 'سناك', 'مكسرات', 'شيبس', 'بطاطس', 'بسكويت', 'حلويات', 'شوكولاتة', 'سناكس', 'مربى', 'زبدة', 'سمن', 'كريمة', 'لبن', 'زبادي', 'لحوم', 'دواجن', 'أسماك', 'جمبري', 'ربيان', 'فطائر', 'معجنات', 'بيتزا مجمدة', 'وجبات مجمدة', 'أكل مجمد'].some(k => fullText.includes(k)))
-                    return { category: 'المواد الغذائية', subCategory: 'بقالة' };
-
-                // --- توصيل طلبات ---
-                if (['توصيل طلبات', 'توصيل', 'طلب توصيل', 'هنقرستيشن', 'جوفي', 'مرسول', 'توصيل طعام', 'توصيل مطعم', 'توصيل مشتريات', 'توصيل بقالة', 'خدمة توصيل'].some(k => fullText.includes(k)))
-                    return { category: 'المطاعم والمقاهي', subCategory: 'توصيل طلبات' };
-
-                // ============================================================
-                // 3. المواصلات والتنقل
-                // ============================================================
-
-                // --- البنزين والوقود ---
-                if (['بنزين', 'بترول', 'ديزل', 'وقود', 'محطة وقود', 'بترومين', 'الدريس', 'تعبئة', 'تموين', 'سوبر', 'كاز', 'محروقات', 'تزود بالوقود', 'وقود سيارات', 'ديزل سيارات'].some(k => fullText.includes(k)))
-                    return { category: 'البنزين والوقود', subCategory: 'وقود' };
-
-                // --- المواصلات العامة والأجرة ---
-                if (['مواصلات', 'أجرة', 'تاكسي', 'أوبر', 'كريم', 'باص', 'حافلة', 'مترو', 'قطار', 'تذكرة', 'سفر', 'تنقل', 'سيارة أجرة', 'ليموزين', 'توصيل', 'ركوب', 'تنقلات', 'مواصلات عامة', 'حافلة مدرسية', 'حافلة جامعية', 'تاكسي مشترك', 'سائق خاص'].some(k => fullText.includes(k)))
-                    return { category: 'المواصلات العامة', subCategory: 'أجرة' };
-
-                // --- صيانة وإصلاح السيارات ---
-                if (['صيانة سيارة', 'إصلاح سيارة', 'قطع غيار', 'زيت', 'إطارات', 'تأمين سيارة', 'رخصة', 'تسجيل', 'فحص دوري', 'غسيل سيارة', 'مواعين', 'فرامل', 'بطارية', 'ميكانيكي', 'كهربائي سيارات', 'سمكرة', 'دهان', 'تلميع', 'محرك', 'علبة تروس', 'دينمو', 'شحن بطارية', 'تبديل زيت', 'تبديل إطارات', 'توازن إطارات', 'فحص سيارات', 'صيانة دورية'].some(k => fullText.includes(k)))
-                    return { category: 'المواصلات العامة', subCategory: 'صيانة سيارات' };
-
-                // --- تأجير سيارات ---
-                if (['تأجير سيارة', 'استئجار سيارة', 'إيجار سيارة', 'سيارة مستأجرة', 'تأجير يومي', 'تأجير شهري', 'سيارة إيجار'].some(k => fullText.includes(k)))
-                    return { category: 'المواصلات العامة', subCategory: 'تأجير سيارات' };
-
-                // ============================================================
-                // 4. الصحة والرعاية الطبية
-                // ============================================================
-
-                // --- المستشفيات والعيادات ---
-                if (['مستشفى', 'عيادة', 'طبيب', 'كشف', 'علاج', 'جراحة', 'فحص', 'مختبر', 'أشعة', 'تطعيم', 'لقاح', 'إسعاف', 'طوارئ', 'استشارة طبية', 'علاج طبيعي', 'تأهيل', 'رعاية صحية', 'تنويم', 'عملية جراحية', 'منظار', 'رنين مغناطيسي', 'مسح', 'تخطيط قلب', 'قسطرة', 'غسيل كلى', 'علاج كيماوي', 'علاج إشعاعي', 'طب نفسي', 'علاج نفسي'].some(k => fullText.includes(k)))
-                    return { category: 'الصحة والرعاية', subCategory: 'مستشفيات وعيادات' };
-
-                // --- الصيدليات والأدوية ---
-                if (['صيدلية', 'دواء', 'أدوية', 'حبوب', 'مرهم', 'شراب دواء', 'فيتامين', 'مكملات غذائية', 'مسكن', 'ألم', 'مضاد حيوي', 'مسكن ألم', 'خافض حرارة', 'قطرة عين', 'قطرة أذن', 'بخاخ', 'كريم', 'مرهم', 'حبوب منع الحمل', 'علاج حساسية', 'علاج ضغط', 'علاج سكري', 'علاج كوليسترول', 'مكمل غذائي', 'بروتين', 'فيتامينات'].some(k => fullText.includes(k)))
-                    return { category: 'الصحة والرعاية', subCategory: 'أدوية وصيدليات' };
-
-                // --- النظارات والعدسات ---
-                if (['نظارات', 'عدسات', 'نظارة', 'عدسات لاصقة', 'نظارة طبية', 'نظارة شمسية', 'فحص نظر', 'طبيب عيون', 'عيون'].some(k => fullText.includes(k)))
-                    return { category: 'الصحة والرعاية', subCategory: 'نظارات وعدسات' };
-
-                // --- الأسنان ---
-                if (['أسنان', 'طبيب أسنان', 'علاج أسنان', 'تنظيف أسنان', 'حشو', 'تقويم', 'جسر أسنان', 'تركيبات', 'خلع أسنان', 'تجميل أسنان', 'تبييض أسنان', 'زراعة أسنان', 'معجون أسنان', 'فرشاة أسنان', 'خيط أسنان'].some(k => fullText.includes(k)))
-                    return { category: 'الصحة والرعاية', subCategory: 'أسنان' };
-
-                // ============================================================
-                // 5. التعليم والتدريب
-                // ============================================================
-
-                // --- المدارس والجامعات ---
-                if (['مدرسة', 'جامعة', 'كلية', 'رسوم دراسية', 'منهج', 'دراسة', 'اختبار', 'معلم', 'معهد', 'مركز تدريب', 'محاضرات', 'تعليم عن بعد', 'تعليم إلكتروني', 'منصة تعليمية', 'شهادة', 'مؤهل', 'منحة', 'رسوم تسجيل', 'رسوم فصل', 'رسوم ترم', 'رسوم جامعية', 'رسوم مدرسية', 'كتب مدرسية', 'أدوات مدرسية', 'قرطاسية', 'دفتر', 'قلم', 'ألوان', 'حقيبة مدرسية', 'زي مدرسي', 'مواصلات مدرسية'].some(k => fullText.includes(k)))
-                    return { category: 'التعليم', subCategory: 'رسوم دراسية' };
-
-                // --- الدورات التدريبية ---
-                if (['دورة', 'تدريب', 'دورات تدريبية', 'ورشة عمل', 'ندوة', 'مؤتمر', 'تدريب مهني', 'دورة تدريبية', 'دورة أونلاين', 'دورة حضورية', 'شهادة مهنية', 'تطوير مهني', 'تطوير ذاتي', 'دورة لغة', 'دورة حاسوب', 'دورة إدارة', 'دورة تسويق', 'دورة برمجة', 'دورة تصميم', 'دورة محاسبة'].some(k => fullText.includes(k)))
-                    return { category: 'التعليم', subCategory: 'دورات تدريبية' };
-
-                // --- الكتب والقرطاسية ---
-                if (['كتاب', 'كتب', 'مكتبة', 'قرطاسية', 'دفتر', 'قلم', 'ألوان', 'ممحاة', 'مسطرة', 'آلة حاسبة', 'قاموس', 'مرجع', 'موسوعة', 'رواية', 'قصة', 'مجلة', 'صحيفة', 'قراءة'].some(k => fullText.includes(k)))
-                    return { category: 'التعليم', subCategory: 'كتب وقرطاسية' };
-
-                // ============================================================
-                // 6. الترفيه والتسلية
-                // ============================================================
-
-                // --- السينما والمسارح ---
-                if (['سينما', 'مسرح', 'فيلم', 'تذكرة سينما', 'تذكرة مسرح', 'أفلام', 'سينما منزلية', 'عرض', 'مسرحية', 'حفلة', 'حفلات', 'مهرجان', 'مهرجانات', 'فعالية', 'فعاليات'].some(k => fullText.includes(k)))
-                    return { category: 'الترفيه', subCategory: 'سينما ومسرح' };
-
-                // --- الألعاب والإلكترونيات الترفيهية ---
-                if (['ألعاب', 'فيديو', 'بلاي ستيشن', 'إكس بوكس', 'نينتندو', 'ستيم', 'ألعاب فيديو', 'بلاي ستيشن ستور', 'ألعاب كمبيوتر', 'ألعاب موبايل', 'ألعاب إلكترونية', 'بلاي ستيشن بلس', 'إكس بوكس غيم باس', 'اشتراك ألعاب', 'تحميل ألعاب', 'ألعاب أطفال', 'ألعاب لوحية'].some(k => fullText.includes(k)))
-                    return { category: 'الترفيه', subCategory: 'ألعاب إلكترونية' };
-
-                // --- الأنشطة الرياضية ---
-                if (['نادي رياضي', 'جيم', 'لياقة بدنية', 'تمارين', 'رياضة', 'تدريب رياضي', 'مدرب رياضي', 'اشتراك نادي', 'كرة قدم', 'كرة سلة', 'كرة طائرة', 'سباحة', 'جري', 'مشي', 'دراجة', 'تنس', 'اسكواش', 'يوجا', 'بيلاتس', 'جمباز', 'فنون قتالية'].some(k => fullText.includes(k)))
-                    return { category: 'الترفيه', subCategory: 'أنشطة رياضية' };
-
-                // --- الفعاليات والمناسبات ---
-                if (['حفلة', 'مناسبة', 'وليمة', 'عشاء', 'غداء', 'حفل', 'احتفال', 'عيد', 'زواج', 'خطوبة', 'تخرج', 'حفلة ميلاد', 'حفلة أطفال', 'مناسبات', 'فعالية عائلية', 'لقاء', 'تجمع'].some(k => fullText.includes(k)))
-                    return { category: 'الترفيه', subCategory: 'فعاليات ومناسبات' };
-
-                // --- الاشتراكات الترفيهية ---
-                if (['نتفلكس', 'شاهد', 'أمازون برايم', 'سبوتيفاي', 'أنغامي', 'تكت', 'ديزني بلس', 'آبل ميوزك', 'يوتيوب بريميوم', 'منصة', 'بث مباشر', 'تلفزيون', 'قنوات', 'باقة', 'تجديد اشتراك', 'اشتراك شهري', 'اشتراك سنوي', 'خدمة بث'].some(k => fullText.includes(k)))
-                    return { category: 'الاشتراكات', subCategory: 'ترفيه' };
-
-                // ============================================================
-                // 7. التسوق والملابس
-                // ============================================================
-
-                // --- الملابس والأزياء ---
-                if (['ملابس', 'ثياب', 'عباية', 'ثوب', 'شماغ', 'غترة', 'عقال', 'جاكيت', 'معطف', 'بنطلون', 'قميص', 'فستان', 'تنورة', 'جينز', 'تي شيرت', 'بلوزة', 'سروال', 'حذاء', 'أحذية', 'شنط', 'حقيبة', 'محفظة', 'حزام', 'ربطة عنق', 'جورب', 'ملابس داخلية', 'بيجامة', 'ملابس نوم', 'ملابس رياضية', 'ملابس سباحة', 'ملابس أطفال'].some(k => fullText.includes(k)))
-                    return { category: 'التسوق', subCategory: 'ملابس وأزياء' };
-
-                // --- الإكسسوارات والمجوهرات ---
-                if (['إكسسوارات', 'مجوهرات', 'ذهب', 'فضة', 'ساعة', 'ساعة يد', 'نظارة شمسية', 'نظارة', 'حزام', 'ربطة', 'بوكيه', 'دبوس', 'بروش', 'خاتم', 'قلادة', 'سوار', 'خاتم خطوبة', 'خاتم زواج', 'أقراط', 'تاج'].some(k => fullText.includes(k)))
-                    return { category: 'التسوق', subCategory: 'إكسسوارات ومجوهرات' };
-
-                // --- الإلكترونيات والأجهزة ---
-                if (['جوال', 'لابتوب', 'تابلت', 'سماعة', 'ساعة', 'إلكترونيات', 'جهاز', 'تلفزيون', 'شاشة', 'مكبر صوت', 'كاميرا', 'طابعة', 'ماسح', 'راوتر', 'مودم', 'شاحن', 'بطارية', 'سماعة رأس', 'سماعة أذن', 'جهاز لوحي', 'حاسوب', 'كمبيوتر', 'هارد', 'ذاكرة', 'بطارية خارجية', 'محول', 'كابل', 'قاعدة شحن'].some(k => fullText.includes(k)))
-                    return { category: 'التسوق', subCategory: 'إلكترونيات' };
-
-                // --- الأثاث والديكور ---
-                if (['أثاث', 'ديكور', 'تحف', 'سجاد', 'ستائر', 'مفروشات', 'كنبة', 'كرسي', 'طاولة', 'خزانة', 'دولاب', 'سرير', 'مرتبة', 'وسادة', 'بطانية', 'شرشف', 'غرفة نوم', 'غرفة جلوس', 'مطبخ', 'حمام', 'مكتب منزل', 'رف', 'ساعة حائط', 'مرآة', 'سلة', 'زرع منزلي', 'إضاءة', 'أباجورة'].some(k => fullText.includes(k)))
-                    return { category: 'التسوق', subCategory: 'أثاث وديكور' };
-
-                // --- مستلزمات المنزل ---
-                if (['منظف', 'مناديل', 'ورق حمام', 'معطر جو', 'ملمع أثاث', 'اسفنج', 'قطعة قماش', 'صابون غسيل', 'منظف أرضيات', 'مبيض', 'كلور', 'جلو', 'ريموت', 'جهاز تحكم', 'شاحن', 'بطارية', 'لمبة', 'مصباح', 'سلك', 'محول', 'مفتاح كهرباء', 'فيش', 'طقم أدوات', 'مفك', 'مسامير', 'غراء', 'شريط لاصق', 'علاقة ملابس', 'شماعة', 'سلة مهملات', 'فرشاة تنظيف', 'مكنسة', 'ممسحة', 'دلو', 'قفازات', 'كمامات', 'مناديل مبللة', 'معقم', 'مطهر'].some(k => fullText.includes(k)))
-                    return { category: 'مستلزمات المنزل', subCategory: 'منظفات ولوازم' };
-
-                // ============================================================
-                // 8. العناية الشخصية والتجميل
-                // ============================================================
-
-                // --- العناية الشخصية ---
-                if (['شامبو', 'صابون', 'مزيل عرق', 'معجون أسنان', 'فرشاة أسنان', 'كريم', 'عطر', 'مستحضرات تجميل', 'مزيل شعر', 'مرطب', 'لوشن', 'مكياج', 'أحمر شفاه', 'طلاء أظافر', 'جل استحمام', 'بخاخ', 'بلسم', 'زيوت', 'ماسك', 'مقشر', 'حلاقة', 'ماكينة حلاقة', 'شفرة حلاقة', 'كريم حلاقة', 'مزيل عرق', 'بودرة', 'فاونديشن', 'كونسيلر', 'ماسكارا', 'أيلاينر', 'ظلال عيون', 'أحمر خدود', 'منظف بشرة', 'تونر', 'سيروم', 'واقي شمس', 'كريم ليلي'].some(k => fullText.includes(k)))
-                    return { category: 'العناية الشخصية', subCategory: 'عناية وتجميل' };
-
-                // --- الحلاقة والتجميل (رجالي) ---
-                if (['حلاقة', 'ماكينة حلاقة', 'شفرة حلاقة', 'كريم حلاقة', 'مزيل عرق', 'عطر', 'دهن عود', 'بخور', 'مستلزمات حلاقة', 'حلاق', 'مصفف شعر', 'قص شعر', 'تسريحة', 'دقن', 'لحية'].some(k => fullText.includes(k)))
-                    return { category: 'العناية الشخصية', subCategory: 'حلاقة ورجالية' };
-
-                // ============================================================
-                // 9. الأطفال والعائلة
-                // ============================================================
-
-                // --- مستلزمات الأطفال ---
-                if (['أطفال', 'طفل', 'رضيع', 'حفاضات', 'حليب أطفال', 'ملابس أطفال', 'ألعاب أطفال', 'مدرسة أطفال', 'روضة', 'مربية', 'حضانة', 'مستلزمات أطفال', 'عربة أطفال', 'مقعد سيارة', 'غذاء أطفال', 'علاج أطفال', 'حفاضات أطفال', 'مناديل أطفال', 'كريم أطفال', 'شامبو أطفال', 'زجاجة رضاعة', 'لهاية', 'حفاضة ليلية', 'حفاضة نهارية', 'ألعاب تعليمية', 'قصص أطفال'].some(k => fullText.includes(k)))
-                    return { category: 'الأطفال والعائلة', subCategory: 'مستلزمات أطفال' };
-
-                // --- العناية بالطفل (مربية، حضانة) ---
-                if (['مربية', 'حضانة', 'جليسة', 'دار رعاية', 'روضة أطفال', 'معلمة أطفال', 'مشرفة أطفال', 'رعاية نهارية', 'مركز رعاية'].some(k => fullText.includes(k)))
-                    return { category: 'الأطفال والعائلة', subCategory: 'رعاية أطفال' };
-
-                // ============================================================
-                // 10. الحيوانات الأليفة
-                // ============================================================
-
-                if (['حيوان', 'قطة', 'كلب', 'طعام حيوانات', 'مستلزمات حيوانات', 'بيطري', 'عيادة بيطرية', 'أدوية حيوانات', 'عناية حيوانات', 'مستلزمات قطط', 'مستلزمات كلاب', 'قفص', 'ألعاب حيوانات', 'تنظيف حيوانات', 'رعاية حيوانات', 'فيتامينات حيوانات', 'طعام قطط', 'طعام كلاب', 'رمل قطط', 'مشط حيوانات', 'شامبو حيوانات', 'مقص حيوانات'].some(k => fullText.includes(k)))
-                    return { category: 'الحيوانات الأليفة', subCategory: 'رعاية حيوانات' };
-
-                // ============================================================
-                // 11. الاستثمار والادخار والتحويلات
-                // ============================================================
-
-                // --- الاستثمار والادخار ---
-                if (['استثمار', 'ادخار', 'صندوق', 'أسهم', 'سندات', 'محفظة', 'تداول', 'بورصة', 'ذهب', 'فضة', 'عملات', 'تحويل', 'حوالة', 'وديعة', 'شهادة', 'أرباح', 'عوائد', 'تنويع', 'محفظة استثمارية', 'صكوك', 'صناديق استثمارية', 'محفظة أسهم', 'تداول يومي', 'استثمار طويل', 'استثمار قصير', 'دخل سلبي', 'عائد استثماري', 'صندوق تقاعد', 'ادخار تقاعد'].some(k => fullText.includes(k)))
-                    return { category: 'الاستثمار والادخار', subCategory: 'استثمار' };
-
-                // --- التحويلات المالية ---
-                if (['تحويل', 'حوالة', 'إيداع', 'سحب', 'تحويل بنكي', 'أونلاين', 'محفظة رقمية', 'آبل باي', 'ستارباي', 'بطاقة مسبقة الدفع', 'شحن رصيد', 'مصرفية إلكترونية', 'تحويل فوري', 'حوالة خارجية', 'تحويل دولي', 'سريع', 'ويسترن يونيون', 'ماني غرام'].some(k => fullText.includes(k)))
-                    return { category: 'التحويلات المالية', subCategory: 'تحويلات' };
-
-                // ============================================================
-                // 12. الضرائب والرسوم الحكومية
-                // ============================================================
-
-                if (['ضريبة', 'رسوم', 'جمارك', 'جوازات', 'أحوال', 'مرور', 'بلدية', 'وزارة', 'حكومي', 'تصريح', 'رخصة', 'تسجيل', 'غرامة', 'مخالفة', 'تأخير', 'رسوم خدمة', 'ضريبة القيمة المضافة', 'ضريبة الدخل', 'ضريبة الأرباح', 'ضريبة عقارية', 'ضريبة سيارة', 'تأمين اجتماعي', 'اشتراكات التأمينات', 'رسوم تحديث', 'رسوم تجديد'].some(k => fullText.includes(k)))
-                    return { category: 'الرسوم الحكومية', subCategory: 'ضرائب ورسوم' };
-
-                // ============================================================
-                // 13. المناسبات والهدايا
-                // ============================================================
-
-                // --- الهدايا ---
-                if (['هدية', 'هدايا', 'عطية', 'حفلة', 'مناسبة', 'عيدية', 'عريس', 'عروس', 'زواج', 'مولود', 'ذكرى', 'مناسبة خاصة', 'هدية زواج', 'هدية عيد', 'هدية عيد ميلاد', 'هدية خطوبة', 'هدية تخرج', 'هدية مولود'].some(k => fullText.includes(k)))
-                    return { category: 'الهدايا والمناسبات', subCategory: 'هدايا' };
-
-                // --- المناسبات العائلية ---
-                if (['وليمة', 'عشاء عائلي', 'غداء عائلي', 'لقاء عائلي', 'عزيمة', 'وليمة عرس', 'وليمة عشاء', 'مناسبة عائلية', 'تجمع عائلي', 'إفطار', 'سحور', 'رمضان', 'عيد فطر', 'عيد أضحى', 'مأدبة'].some(k => fullText.includes(k)))
-                    return { category: 'الهدايا والمناسبات', subCategory: 'مناسبات عائلية' };
-
-                // ============================================================
-                // 14. الصيانة والإصلاحات
-                // ============================================================
-
-                // --- صيانة المنزل ---
-                if (['صيانة', 'إصلاح', 'سباك', 'كهربائي', 'بناء', 'ترميم', 'دهان', 'نجار', 'حداد', 'مبلط', 'مكيف', 'تكييف', 'ثلاجة', 'غسالة', 'مجفف', 'مطبخ', 'حمام', 'سباكة', 'كهرباء منزل', 'صيانة مكيف', 'صيانة ثلاجة', 'صيانة غسالة', 'صيانة سخان', 'سباك منزل', 'كهربائي منزل', 'دهان منزل', 'نجار منزل'].some(k => fullText.includes(k)))
-                    return { category: 'الصيانة والإصلاحات', subCategory: 'صيانة منزل' };
-
-                // --- صيانة الأجهزة ---
-                if (['صيانة جوال', 'صيانة لابتوب', 'تصليح جوال', 'تصليح لابتوب', 'إصلاح جوال', 'إصلاح لابتوب', 'شاشة جوال', 'بطارية جوال', 'شاحن جوال', 'صيانة أجهزة', 'فني أجهزة', 'مركز صيانة'].some(k => fullText.includes(k)))
-                    return { category: 'الصيانة والإصلاحات', subCategory: 'صيانة أجهزة' };
-
-                // ============================================================
-                // 15. السفر والسياحة
-                // ============================================================
-
-                // --- تذاكر السفر ---
-                if (['تذكرة طيران', 'طيران', 'طائرة', 'سفر', 'رحلة', 'سفرة', 'درجة', 'خطوط جوية', 'حجز طيران', 'تذكرة سفر', 'سفر خارجي', 'سفر داخلي', 'طيران داخلي', 'طيران دولي', 'درجة أولى', 'درجة رجال أعمال', 'درجة اقتصادية', 'خطوط السعودية', 'الخطوط السعودية', 'طيران ناس', 'فلاي ناس', 'طيران أديل', 'طيران الخليج', 'الامارات', 'الاتحاد', 'قطر'].some(k => fullText.includes(k)))
-                    return { category: 'السفر والسياحة', subCategory: 'تذاكر سفر' };
-
-                // --- الفنادق والإقامة ---
-                if (['فندق', 'نزل', 'شقة فندقية', 'إقامة', 'حجز فندق', 'غرفة فندق', 'منتجع', 'استراحة', 'شاليه', 'بيت ضيافة', 'أجنحة فندقية', 'إقامة فندقية', 'فندق 5 نجوم', 'فندق 4 نجوم', 'فندق 3 نجوم', 'بوتيك', 'ريزدنس'].some(k => fullText.includes(k)))
-                    return { category: 'السفر والسياحة', subCategory: 'فنادق وإقامة' };
-
-                // --- السياحة والترفيه أثناء السفر ---
-                if (['سياحة', 'جولة', 'رحلة سياحية', 'زيارة', 'معلم سياحي', 'جولة سياحية', 'دليل سياحي', 'فعاليات سياحية', 'مهرجان سياحي', 'أنشطة سياحية', 'متاحف', 'آثار', 'معالم', 'مدينة سياحية'].some(k => fullText.includes(k)))
-                    return { category: 'السفر والسياحة', subCategory: 'سياحة وترفيه' };
-
-                // ============================================================
-                // 16. الدعم والصدقات
-                // ============================================================
-
-                if (['صدقة', 'زكاة', 'تبرع', 'كفالة', 'إحسان', 'خير', 'جمعية خيرية', 'منظمة خيرية', 'وقف', 'صدقة جارية', 'زكاة المال', 'زكاة الفطر', 'فطرة', 'إفطار صائم', 'كسوة', 'إغاثة', 'مساعدات', 'مساعدة', 'دعم', 'كفالة يتيم', 'كفالة أرملة', 'دعم محتاج'].some(k => fullText.includes(k)))
-                    return { category: 'الدعم والصدقات', subCategory: 'صدقات وتبرعات' };
-
-                // ============================================================
-                // 17. الاشتراكات والخدمات الرقمية
-                // ============================================================
-
-                // --- اشتراكات تقنية ---
-                if (['اشتراك', 'عضوية', 'خدمة شهرية', 'منصة', 'بث مباشر', 'تطبيق', 'تجديد اشتراك', 'باقة', 'خطة شهرية', 'خطة سنوية', 'خدمة سحابية', 'تخزين سحابي', 'جوجل درايف', 'آي كلاود', 'مايكروسوفت 365', 'أوفيس 365', 'أدوبي', 'فوتوشوب', 'خدمات برمجية'].some(k => fullText.includes(k)))
-                    return { category: 'الاشتراكات', subCategory: 'خدمات رقمية' };
-
-                // --- اشتراكات اتصالات ---
-                if (['باقة اتصالات', 'اشتراك جوال', 'شحن جوال', 'تجديد باقة', 'باقة مكالمات', 'باقة إنترنت', 'باقة دولية', 'باقة أسبوعية', 'باقة شهرية', 'باقة سنوية', 'خدمات اتصال', 'تجديد اشتراك جوال'].some(k => fullText.includes(k)))
-                    return { category: 'الاشتراكات', subCategory: 'اتصالات' };
-
-                // ============================================================
-                // 18. أخرى (فقط بعد فشل جميع التصنيفات)
-                // ============================================================
-
-                // إذا لم يتطابق مع أي شيء، نصنف كـ "أخرى" فقط بعد فشل جميع المحاولات
-                return { category: 'أخرى', subCategory: 'غير مصنف' };
+                const foodKeywords = [
+                    'ليز', 'شيبس', 'بطاطس', 'بريجلز', 'دوريتوس', 'تاكو', 'تشيتوس', 'بسكويت', 'كيك', 'حلويات', 'شوكولاتة',
+                    'سناكس', 'مكسرات', 'تمر', 'عسل', 'خضار', 'فواكه', 'لحم', 'دجاج', 'سمك', 'بيض', 'حليب', 'جبن', 'زبادي',
+                    'خبز', 'رز', 'زيت', 'سكر', 'طحين', 'مكرونة', 'بقوليات', 'بهارات', 'توابل', 'معلبات', 'عصائر', 'مياه',
+                    'مشروبات غازية', 'بيبسي', 'كوكاكولا', 'سفن اب', 'ريد بول', 'مويه', 'ماء', 'شاي', 'قهوة', 'نسكافيه',
+                    'كابتشينو', 'موكا', 'لاتيه', 'اسبريسو', 'عصير', 'تمر', 'عسل', 'دقيق'
+                ];
+                const restaurantKeywords = [
+                    'مطعم', 'وجبة', 'فطور', 'عشاء', 'غداء', 'سناك', 'برجر', 'شاورما', 'بيتزا', 'باستا', 'مشاوي', 'مندي',
+                    'كبسة', 'برياني', 'مقلوبة', 'صينية', 'ماكدونالدز', 'هرفي', 'كودو', 'بيتزا هت', 'دومينوز', 'كنتاكي',
+                    'هارديز', 'ون تو ثري', 'تاون', 'كافيه', 'مقهى', 'كوفي'
+                ];
+                const personalCareKeywords = [
+                    'شامبو', 'صابون', 'مزيل عرق', 'معجون أسنان', 'فرشاة أسنان', 'كريم', 'عطر', 'مستحضرات تجميل',
+                    'مزيل شعر', 'مرطب', 'لوشن', 'مكياج', 'أحمر شفاه', 'طلاء أظافر', 'جل استحمام', 'بخاخ'
+                ];
+                const homeSuppliesKeywords = [
+                    'منظف', 'مناديل', 'ورق حمام', 'معطر جو', 'ملمع أثاث', 'اسفنج', 'قطعة قماش', 'صابون غسيل',
+                    'منظف أرضيات', 'مبيض', 'كلور', 'جلو', 'ريموت', 'جهاز تحكم', 'شاحن', 'بطارية', 'لمبة',
+                    'مصباح', 'سلك', 'محول', 'مفتاح كهرباء', 'فيش', 'طقم أدوات', 'مفك', 'مسامير', 'غراء', 'شريط لاصق',
+                    'علاقة ملابس', 'شماعة', 'سلة مهملات', 'فرشاة تنظيف', 'مكنسة', 'ممسحة', 'دلو'
+                ];
+                const entertainmentKeywords = [
+                    'ترفيه', 'سينما', 'مسرح', 'حفلة', 'فعالية', 'مهرجان', 'مدينة ألعاب', 'بولينج', 'بلياردو',
+                    'ألعاب', 'فيديو', 'بلاي ستيشن', 'نتفلكس', 'شاهد', 'أمازون برايم', 'سبوتيفاي', 'أنغامي', 'تكت'
+                ];
+                const shoppingKeywords = [
+                    'تسوق', 'ملابس', 'أحذية', 'شنط', 'إلكترونيات', 'جوال', 'لابتوب', 'تابلت', 'سماعة', 'ساعة',
+                    'هدايا', 'إكسسوارات', 'أثاث', 'ديكور', 'تحف', 'سجاد', 'ستائر', 'أجهزة كهربائية'
+                ];
+                const educationKeywords = [
+                    'تعليم', 'مدرسة', 'جامعة', 'كلية', 'دورة', 'تدريب', 'كتاب', 'قرطاسية', 'مكتبة', 'معلم',
+                    'منهج', 'دراسة', 'اختبار', 'رسوم دراسية'
+                ];
+                const healthKeywords = [
+                    'صحي', 'صحة', 'مستشفى', 'عيادة', 'طبيب', 'دواء', 'صيدلية', 'كشف', 'علاج', 'أسنان', 'عيون',
+                    'جراحة', 'فحص', 'مختبر', 'أشعة', 'تطعيم', 'لقاح', 'إسعاف', 'طوارئ', 'نظارات', 'عدسات',
+                    'مسكن', 'ألم', 'حبوب', 'مرهم', 'شراب دواء', 'فيتامين'
+                ];
+                const fuelKeywords = [
+                    'بنزين', 'بترول', 'ديزل', 'وقود', 'محطة وقود', 'بترومين', 'الدريس', 'تعبئة', 'تموين'
+                ];
+                const billsKeywords = [
+                    'كهرباء', 'ماء', 'إنترنت', 'جوال', 'فواتير', 'فاتورة', 'سداد', 'خدمات', 'صيانة', 'نت',
+                    'واي فاي', 'آيس', 'موبايلي', 'زين', 'سوا', 'جوي', 'سكاي', 'ألياف', 'بصري', 'كهرب', 'مياه'
+                ];
+                const rentKeywords = [
+                    'إيجار', 'سكن', 'شقة', 'منزل', 'فيلا', 'دفعة', 'عقار', 'مكتب', 'محل', 'سكني', 'استئجار'
+                ];
+                const installmentsKeywords = [
+                    'قسط', 'قرض', 'دين', 'سداد', 'تمويل', 'مرابحة', 'تقسيط', 'سيارة', 'عقار', 'رهن', 'ضمان',
+                    'كفالة', 'بنك', 'مصرف', 'أقساط', 'التزام'
+                ];
+
+                if (rentKeywords.some(k => fullText.includes(k))) return { category: 'الإيجار' };
+                if (installmentsKeywords.some(k => fullText.includes(k))) return { category: 'الأقساط' };
+                if (fuelKeywords.some(k => fullText.includes(k))) return { category: 'البنزين' };
+                if (billsKeywords.some(k => fullText.includes(k))) return { category: 'الكهرباء' };
+                if (educationKeywords.some(k => fullText.includes(k))) return { category: 'التعليم' };
+                if (healthKeywords.some(k => fullText.includes(k))) return { category: 'الصحة' };
+                if (restaurantKeywords.some(k => fullText.includes(k))) return { category: 'المطاعم' };
+                if (entertainmentKeywords.some(k => fullText.includes(k))) return { category: 'الترفيه' };
+                if (shoppingKeywords.some(k => fullText.includes(k))) return { category: 'التسوق' };
+                if (personalCareKeywords.some(k => fullText.includes(k))) return { category: 'العناية الشخصية' };
+                if (homeSuppliesKeywords.some(k => fullText.includes(k))) return { category: 'مستلزمات المنزل' };
+                if (foodKeywords.some(k => fullText.includes(k))) return { category: 'المواد الغذائية' };
+                return { category: 'أخرى' };
             },
 
+            // يحوّل الأرقام العربية (٠-٩) إلى أرقام إنجليزية عادية حتى تعمل معها تعابير regex القياسية
             normalizeDigits(str) {
                 const map = { '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4', '٥': '5', '٦': '6', '٧': '7',
                     '٨': '8', '٩': '9' };
                 return (str || '').replace(/[٠-٩]/g, d => map[d]);
             },
 
+            // يحاول استخراج تاريخ رقمي من سطر واحد (بأي صيغة فواصل شائعة) ويرجع التاريخ + النص بعد إزالته
             extractDateFromLine(line) {
+                // صيغة كاملة: سنة-شهر-يوم (مثل 2026-07-01 أو 2026/7/1)
                 let m = line.match(/\b(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})\b/);
                 if (m) {
                     const y = m[1],
@@ -4293,6 +4108,7 @@
                         return { match: m[0], date: `${y}-${mo}-${d}` };
                     }
                 }
+                // صيغة: يوم/شهر/سنة (سنة كاملة أو مختصرة)
                 m = line.match(/\b(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})\b/);
                 if (m) {
                     let d = m[1],
@@ -4304,6 +4120,7 @@
                         mo = tmp; }
                     return { match: m[0], date: `${y}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}` };
                 }
+                // صيغة: يوم/شهر بدون سنة (نفترض السنة الحالية)
                 m = line.match(/\b(\d{1,2})[\/\-\.](\d{1,2})\b(?!\d)/);
                 if (m) {
                     let d = m[1],
@@ -4329,6 +4146,7 @@
                 if (dateMatch) result.date = dateMatch[1];
                 for (const line of lines) {
                     let cleaned = line.replace(/,/g, '');
+                    // نحاول استخراج تاريخ خاص بهذا السطر تحديداً (أقرب تاريخ لهذه العملية)
                     let lineDate = null;
                     const dateInfo = this.extractDateFromLine(cleaned);
                     if (dateInfo) {
@@ -4342,10 +4160,8 @@
                         const desc = matchColon[1].trim();
                         const amount = parseFloat(matchColon[2]);
                         if (!isNaN(amount) && amount > 0) {
-                            const classified = this.classifyWithKeywords(desc + ' ' + (result.merchant || ''));
                             result.transactions.push({ description: desc || 'مصروف', amount: amount, merchant: result
-                                    .merchant || '', date: effectiveDate, category: classified.category,
-                                subCategory: classified.subCategory });
+                                    .merchant || '', date: effectiveDate });
                             continue;
                         }
                     }
@@ -4355,10 +4171,8 @@
                         const desc = match[1].trim();
                         const amount = parseFloat(match[2]);
                         if (!isNaN(amount) && amount > 0) {
-                            const classified = this.classifyWithKeywords(desc + ' ' + (result.merchant || ''));
                             result.transactions.push({ description: desc || 'مصروف', amount: amount, merchant: result
-                                    .merchant || '', date: effectiveDate, category: classified.category,
-                                subCategory: classified.subCategory });
+                                    .merchant || '', date: effectiveDate });
                             continue;
                         }
                     }
@@ -4368,10 +4182,8 @@
                         const amount = parseFloat(match2[1]);
                         const desc = match2[2].trim();
                         if (!isNaN(amount) && amount > 0) {
-                            const classified = this.classifyWithKeywords(desc + ' ' + (result.merchant || ''));
                             result.transactions.push({ description: desc || 'مصروف', amount: amount, merchant: result
-                                    .merchant || '', date: effectiveDate, category: classified.category,
-                                subCategory: classified.subCategory });
+                                    .merchant || '', date: effectiveDate });
                             continue;
                         }
                     }
@@ -4381,10 +4193,8 @@
                         const desc = match3[1].trim();
                         const amount = parseFloat(match3[2]);
                         if (!isNaN(amount) && amount > 0 && amount < 1000000) {
-                            const classified = this.classifyWithKeywords(desc + ' ' + (result.merchant || ''));
                             result.transactions.push({ description: desc || 'مصروف', amount: amount, merchant: result
-                                    .merchant || '', date: effectiveDate, category: classified.category,
-                                subCategory: classified.subCategory });
+                                    .merchant || '', date: effectiveDate });
                             continue;
                         }
                     }
@@ -4392,23 +4202,24 @@
                     if (numbers.length === 1 && numbers[0] > 0 && numbers[0] < 1000000) {
                         const desc = cleaned.replace(/[\d.]+/g, '').trim();
                         if (desc && desc.length > 1) {
-                            const classified = this.classifyWithKeywords(desc + ' ' + (result.merchant || ''));
                             result.transactions.push({ description: desc, amount: numbers[0], merchant: result
-                                    .merchant || '', date: effectiveDate, category: classified.category,
-                                subCategory: classified.subCategory });
+                                    .merchant || '', date: effectiveDate });
                         }
                     }
                 }
                 if (result.transactions.length === 0) {
                     const allNumbers = Utils.extractAllNumbers(text);
                     if (allNumbers.length === 1) {
-                        const desc = text.replace(/[\d.]+/g, '').trim() || 'مصروف';
-                        const classified = this.classifyWithKeywords(desc + ' ' + (result.merchant || ''));
-                        result.transactions.push({ description: desc, amount: allNumbers[0], merchant: result
-                                .merchant || '', date: result.date || Utils.today(), category: classified
-                                .category, subCategory: classified.subCategory });
+                        result.transactions.push({ description: text.replace(/[\d.]+/g, '').trim() || 'مصروف',
+                            amount: allNumbers[0], merchant: result.merchant || '', date: result.date || Utils
+                                .today() });
                     }
                 }
+                result.transactions = result.transactions.map(t => {
+                    const fullText = (t.description || '') + ' ' + (t.merchant || '');
+                    const classified = ExpenseParser.classifyWithKeywords(fullText);
+                    return { ...t, category: classified.category };
+                });
                 return result;
             },
 
@@ -4428,7 +4239,7 @@
         };
 
         // ============================================================
-        // 7. GEMINI (modified to include subCategory)
+        // 7. GEMINI (محسّن مع استغلال المفاتيح الـ12 وتحليل النص)
         // ============================================================
         const Gemini = {
             getKeys() { return Storage.getGeminiKeys(); },
@@ -4483,6 +4294,7 @@
                 }
             },
 
+            // يتحقق أن التاريخ بصيغة YYYY-MM-DD صحيحة وواقعية (ليس بعيداً جداً في الماضي أو المستقبل)
             isValidExpenseDate(dateStr) {
                 if (!dateStr || typeof dateStr !== 'string') return false;
                 if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
@@ -4490,13 +4302,13 @@
                 if (isNaN(d.getTime())) return false;
                 const today = new Date(Utils.today() + 'T00:00:00');
                 const diffDays = Math.abs((today - d) / 86400000);
+                // نرفض أي تاريخ يبعد أكثر من سنة عن اليوم الفعلي (غالباً تخمين خاطئ من النموذج)
                 return diffDays <= 366;
             },
 
             async parseExpense(text) {
                 try {
                     const categories = Utils.defaultCategories();
-                    const subCategories = Utils.defaultSubCategories();
                     const todayStr = Utils.today();
                     const todayHijri = new Date(todayStr + 'T00:00:00').toLocaleDateString('ar-SA-u-ca-islamic', {
                         year: 'numeric', month: 'long', day: 'numeric' });
@@ -4504,15 +4316,13 @@
                     استخرج من النص التالي المعلومات المطلوبة بدقة:
                     النص: "${text}"
 
-                    التصنيفات الرئيسية المتاحة: ${categories.join('، ')}
-                    التصنيفات الفرعية المتاحة: ${subCategories.join('، ')}
+                    ${this.dateExtractionRules(todayStr, todayHijri)}
 
                     أخرج النتيجة بتنسيق JSON صالح فقط، بدون أي نص إضافي، بالهيكل التالي:
                     {
                         "amount": رقم (المبلغ بالريال),
                         "description": "نص وصف المصروف",
-                        "category": "أحد التصنيفات الرئيسية أعلاه",
-                        "subCategory": "أحد التصنيفات الفرعية أعلاه أو فارغ إن لم ينطبق",
+                        "category": "أحد التصنيفات التالية: ${categories.join('، ')}",
                         "merchant": "اسم التاجر إن وُجد وإلا خالي",
                         "date": "تاريخ المصروف بصيغة YYYY-MM-DD ميلادي بعد التحويل، أو ${todayStr} إذا لم يُذكر تاريخ"
                     }
@@ -4525,7 +4335,6 @@
                             if (!categories.includes(data.category)) {
                                 const fallback = ExpenseParser.classifyWithKeywords(text);
                                 data.category = fallback.category || 'أخرى';
-                                data.subCategory = fallback.subCategory || '';
                             }
                             if (!this.isValidExpenseDate(data.date)) {
                                 data.date = todayStr;
@@ -4544,7 +4353,6 @@
                             amount: t.amount,
                             description: t.description,
                             category: t.category || 'أخرى',
-                            subCategory: t.subCategory || '',
                             merchant: t.merchant || '',
                             date: fallbackDate
                         };
@@ -4553,9 +4361,9 @@
                 }
             },
 
+            // يستخرج عدة مصروفات دفعة واحدة من نص واحد (سطر لكل مصروف عادةً) ويرجع مصفوفة
             async parseMultipleExpenses(text) {
                 const categories = Utils.defaultCategories();
-                const subCategories = Utils.defaultSubCategories();
                 const todayStr = Utils.today();
                 const todayHijri = new Date(todayStr + 'T00:00:00').toLocaleDateString('ar-SA-u-ca-islamic', {
                     year: 'numeric', month: 'long', day: 'numeric' });
@@ -4564,7 +4372,6 @@
                         const fallback = ExpenseParser.classifyWithKeywords((item.description || '') + ' ' + (item
                             .merchant || ''));
                         item.category = fallback.category || 'أخرى';
-                        item.subCategory = fallback.subCategory || '';
                     }
                     if (!this.isValidExpenseDate(item.date)) {
                         item.date = todayStr;
@@ -4584,20 +4391,30 @@
                     ${text}
                     """
 
-                    التصنيفات الرئيسية المتاحة: ${categories.join('، ')}
-                    التصنيفات الفرعية المتاحة: ${subCategories.join('، ')}
+                    ${this.dateExtractionRules(todayStr, todayHijri)}
+
+                    قواعد عامة لاستخراج المصروفات:
+                    - استخرج جميع المصروفات الموجودة في النص مهما كان عددها، ولا تتجاهل أي عملية يمكن استنتاجها بثقة عالية.
+                    - لا تعتمد على ترتيب الكلمات داخل السطر (قد يأتي المبلغ قبل الوصف أو بعده أو التاريخ في أي موضع).
+                    - التاريخ حقل اختياري دائماً؛ إذا لم يُذكر أي تاريخ لعملية معينة استخدم ${todayStr} بالضبط.
+                    - إذا احتوى النص على عدة تواريخ وعدة عمليات، استخدم التاريخ الأقرب لكل عملية على حدة (وليس تاريخاً واحداً للجميع).
+                    - في رسائل البنوك (مدى، Visa، Mastercard، Apple Pay، STC Pay، المحافظ الرقمية): تجاهل رقم البطاقة، الرصيد، الرقم المرجعي، ورقم العملية تماماً — هذه ليست مصروفات.
+                    - المبلغ قد يُكتب بأي صيغة: قبل أو بعد كلمة (ريال، ر.س، SAR، SR)، بأرقام عربية أو إنجليزية، مسبوقاً بـ"بـ" أو ":" أو "=" أو بدون أي رمز عملة.
+                    - اسم المصروف هو النص المتبقي بعد إزالة التاريخ والمبلغ والعملة (اسم منتج، خدمة، متجر، اشتراك، أو فاتورة).
+                    - إذا كان النص من OCR وغير مرتب أو مكسور الكلمات، حاول إعادة ترتيب البيانات منطقياً قبل الاستخراج.
+                    - تجاهل أي عملية لا يمكن استخراج مبلغ لها بثقة عالية.
 
                     أخرج النتيجة بتنسيق JSON صالح فقط على شكل مصفوفة (Array) بدون أي نص إضافي قبلها أو بعدها، بهذا الهيكل تماماً:
                     [
                       {
                         "amount": رقم (المبلغ بالريال),
                         "description": "نص وصف المصروف",
-                        "category": "أحد التصنيفات الرئيسية أعلاه",
-                        "subCategory": "أحد التصنيفات الفرعية أعلاه أو فارغ إن لم ينطبق",
+                        "category": "أحد التصنيفات التالية بالضبط: ${categories.join('، ')}",
                         "merchant": "اسم التاجر إن وُجد وإلا خالي",
                         "date": "تاريخ المصروف بصيغة YYYY-MM-DD ميلادي بعد التحويل، أو ${todayStr} إذا لم يُذكر تاريخ"
                       }
-                    ]`;
+                    ]
+                    قاعدة أخيرة مهمة: أخرج كل عملية كعنصر منفصل في المصفوفة حتى لو تشابهت الأصناف أو التواريخ، لا تدمج عمليات مختلفة معاً، وتأكد أن كل تصنيف مطابق تماماً لأحد التصنيفات المذكورة أعلاه.`;
                     const response = await this.sendRequest(prompt);
                     const jsonMatch = response.match(/\[[\s\S]*\]/);
                     if (jsonMatch) {
@@ -4618,7 +4435,6 @@
                             amount: t.amount,
                             description: t.description,
                             category: t.category || 'أخرى',
-                            subCategory: t.subCategory || '',
                             merchant: t.merchant || '',
                             date: t.date || todayStr
                         }));
@@ -4627,45 +4443,60 @@
                 }
             },
 
+            // القواعد المشتركة لاستخراج التاريخ (تُستخدم في كل من parseExpense و parseMultipleExpenses)
+            dateExtractionRules(todayStr, todayHijri) {
+                return `قواعد استخراج التاريخ (طبّقها بدقة تامة):
+                - التاريخ قد يظهر في بداية السطر، وسطه، نهايته، أو داخل جملة كاملة.
+                - إذا وُجد أكثر من تاريخ في النص، استخدم التاريخ الأقرب فعلياً لكل عملية على حدة.
+                - صيغ رقمية مدعومة: 01/07 أو 1/7 أو 01-07 أو 1-7 أو 01.07 أو 1.7 أو 2026/07/01 أو 2026-07-01 أو 2026.07.01 أو 01/07/2026 أو 1/7/26 أو 07/01 (قد يعني يوم/شهر أو شهر/يوم حسب السياق، افترض يوم/شهر ما لم يكن الرقم الأول أكبر من 12) أو 2026-7-1.
+                - أرقام عربية (٠-٩) مدعومة بنفس صيغ الأرقام الإنجليزية، مثل ٠١/٠٧ أو ١٥/٠٧/٢٠٢٦.
+                - تواريخ مكتوبة بالكلمات مدعومة: "الأول من يوليو"، "1 يوليو"، "٥ أغسطس"، "10 سبتمبر"، وبأي شهر ميلادي بالعربية (يناير...ديسمبر) أو الإنجليزية (January/Jan...December/Dec).
+                - تواريخ هجرية مدعومة (مثل "١ رمضان"، "10 شوال"، "15 صفر"، "1 محرم"، "20 رجب"، "15 ذو القعدة"، "10 ذو الحجة") — حوّلها تقريبياً إلى تاريخ ميلادي مقابل بالاستعانة بأن اليوم الحالي ${todayStr} يوافق ${todayHijri} هجرياً كنقطة مرجعية.
+                - عبارات زمنية طبيعية مدعومة: اليوم، أمس، قبل أمس، غداً، بعد غد، هذا الأسبوع، الأسبوع الماضي، الأسبوع القادم، بداية الشهر، منتصف الشهر، نهاية الشهر — احسبها بالنسبة لتاريخ اليوم الفعلي أعلاه.
+                - إذا ورد وقت مع التاريخ يمكن تجاهله (النظام لا يحتاج الوقت).
+                - إذا لم يُذكر أي تاريخ لعملية، استخدم تاريخ اليوم الفعلي بالضبط دون تخمين.`;
+            },
+
+            // يحلل مصروفات بند "أخرى" ويقترح تصنيفاً أدق لكل واحد منها من قائمة التصنيفات المعروفة
             async reclassifyOtherExpenses(expenses) {
                 if (!expenses || expenses.length === 0) return [];
                 const categories = Utils.defaultCategories().filter(c => c !== 'أخرى');
-                const subCategories = Utils.defaultSubCategories();
                 const todayStr = Utils.today();
                 const list = expenses.map(e => ({ id: e.id, description: e.description || '', merchant: e
                         .merchant || '', amount: e.amount }));
                 try {
                     const prompt = `أنت مساعد مالي ذكي. لديك قائمة مصروفات مصنّفة حالياً تحت تصنيف "أخرى" (تصنيف عام غير دقيق). حلل وصف كل مصروف واقترح له تصنيفاً أدق من القائمة التالية فقط:
-                    التصنيفات الرئيسية: ${categories.join('، ')}
-                    التصنيفات الفرعية: ${subCategories.join('، ')}
+                    ${categories.join('، ')}
 
                     قائمة المصروفات (بصيغة JSON):
                     ${JSON.stringify(list)}
 
-                    أخرج النتيجة بتنسيق JSON صالح فقط (مصفوفة)، بدون أي نص إضافي، بهذا الهيكل تماماً:
+                    أخرج النتيجة بتنسيق JSON صالح فقط (مصفوفة)، بدون أي نص إضافي، بهذا الهيكل تماماً، وبنفس عدد وترتيب العناصر المُدخلة:
                     [
-                      { "id": "نفس المعرف المُدخل", "suggestedCategory": "أحد التصنيفات الرئيسية أعلاه بالضبط", "suggestedSubCategory": "أحد التصنيفات الفرعية أعلاه أو فارغ", "confidence": "high|medium|low" }
-                    ]`;
+                      { "id": "نفس المعرف المُدخل", "suggestedCategory": "أحد التصنيفات أعلاه بالضبط", "confidence": "high|medium|low" }
+                    ]
+
+                    إذا لم يكن أي تصنيف من القائمة مناسباً فعلاً لمصروف معين، اجعل suggestedCategory يساوي "أخرى" وconfidence يساوي "low" لذلك العنصر فقط.`;
                     const response = await this.sendRequest(prompt);
                     const jsonMatch = response.match(/\[[\s\S]*\]/);
                     if (jsonMatch) {
                         const data = JSON.parse(jsonMatch[0]);
                         if (Array.isArray(data)) {
                             return data.filter(d => d && d.id && categories.includes(d.suggestedCategory)).map(
-                                d => ({ id: d.id, suggestedCategory: d.suggestedCategory,
-                                    suggestedSubCategory: d.suggestedSubCategory || '', confidence: d
+                                d => ({ id: d.id, suggestedCategory: d.suggestedCategory, confidence: d
                                     .confidence || 'medium' }));
                         }
                     }
                     throw new Error('تعذر تحليل الرد');
                 } catch (e) {
                     console.warn('فشل Gemini في إعادة التصنيف:', e.message);
+                    // بديل احتياطي: نستخدم نفس المصنّف بالكلمات المفتاحية المستخدم في تحليل المصروفات
                     return expenses.map(e => {
                         const classified = ExpenseParser.classifyWithKeywords((e.description || '') + ' ' + (e
                             .merchant || ''));
                         return { id: e.id, suggestedCategory: classified.category !== 'أخرى' ? classified
-                                .category : 'أخرى', suggestedSubCategory: classified.subCategory || '',
-                            confidence: classified.category !== 'أخرى' ? 'medium' : 'low' };
+                                .category : 'أخرى', confidence: classified.category !== 'أخرى' ? 'medium' :
+                                'low' };
                     });
                 }
             },
@@ -4699,9 +4530,11 @@
                 last6Months.forEach(e => {
                     const cat = e.category || 'أخرى';
                     catMap6Months[cat] = (catMap6Months[cat] || 0) + (parseFloat(e.amount) || 0);
-                    if (e.date) monthsPresent.add(e.date.slice(0, 7));
+                    if (e.date) monthsPresent.add(e.date.slice(0, 7)); // "YYYY-MM"
                 });
                 const avg6Months = {};
+                // نستخدم العدد الحقيقي للأشهر التي توجد بها بيانات فعلية (بحد أدنى شهر واحد)
+                // بدل افتراض 6 أشهر دائماً، حتى لا تكون المتوسطات مضللة لمستخدم جديد لم يكمل 6 أشهر بعد
                 const monthsCount = Math.max(1, monthsPresent.size);
                 for (const [cat, total] of Object.entries(catMap6Months)) {
                     avg6Months[cat] = total / monthsCount;
@@ -4812,20 +4645,86 @@
                     ${contextStr}
 
                     **تعليمات بناء خطة الشهر القادم:**
-                    1. الميزانية من الصفر
-                    2. صافي المعيشة: الراتب - الالتزامات - هدف الادخار - الأموال المحجوزة = ميزانية المعيشة
-                    3. ميزانية اليوم: اقسم ميزانية المعيشة على عدد أيام الشهر القادم
-                    4. ميزانية الأسبوع: بناءً على عادات الإنفاق
-                    5. التوزيع الذكي: حسب البيانات الفعلية
-                    6. خطة الادخار: أسبوعية أو يومية
-                    7. خطة الطوارئ
-                    8. خطة تقليل المصروفات: نسب محددة
-                    9. الجدول الزمني: لكل أسبوع
-                    10. الأولويات
-                    11. السيناريوهات: 3 سيناريوهات
-                    12. التقرير النهائي
 
-                    أجب باللغة العربية الفصحى بتنسيق JSON صالح فقط.`;
+                    1. **الميزانية من الصفر**: لا تنسخ ميزانية الشهر الحالي. قم ببناء ميزانية جديدة بالكامل.
+
+                    2. **صافي المعيشة**: احسب باستخدام المعادلة:
+                       الراتب - الالتزامات (ثابت + فواتير) - هدف الادخار - الأموال المحجوزة = ميزانية المعيشة
+
+                    3. **ميزانية اليوم**: اقسم ميزانية المعيشة على عدد أيام الشهر القادم (استخدم عدد الأيام الحقيقي 28/30/31).
+
+                    4. **ميزانية الأسبوع**: لا تحسبها كـ Daily × 7 فقط. استخدم عادات الإنفاق:
+                       - إذا كان المستخدم يصرف أكثر يوم الخميس والجمعة، أعطهما ميزانية أكبر.
+                       - إذا كان يصرف قليلاً أيام العمل، أعطه ميزانية أقل.
+
+                    5. **التوزيع الذكي**: وزع الميزانية حسب البيانات الفعلية المتوفرة في سجل المستخدم أعلاه فقط (قد تكون البيانات المتوفرة أقل من 6 أشهر إذا كان مستخدماً جديداً — لا تفترض وجود 6 أشهر من البيانات إطلاقاً، واذكر في الأسباب المدة الحقيقية للبيانات المتوفرة).
+                       - الطعام، الوقود، المنزل، الترفيه، الطوارئ.
+                       - لا تستخدم نسباً ثابتة، اعتمد على تاريخ المستخدم الحقيقي المتوفر فقط.
+
+                    6. **خطة الادخار**: قدم خطة أسبوعية أو يومية لتحقيق هدف الادخار.
+
+                    7. **خطة الطوارئ**: إذا لم يكن لدى المستخدم صندوق طوارئ، اقترح إنشاء واحد.
+
+                    8. **خطة تقليل المصروفات**: قدم نسب محددة لكل تصنيف (مطاعم -20%، قهوة -15%، إلخ).
+
+                    9. **الجدول الزمني**: خطة تنفيذية لكل أسبوع من الشهر القادم (4 أسابيع).
+
+                    10. **الأولويات**: رتب الأهداف المالية (الادخار، سداد القرض، تقليل المطاعم، إلخ).
+
+                    11. **السيناريوهات**: 3 سيناريوهات:
+                        - إذا التزمت بالخطة → النتيجة المتوقعة.
+                        - إذا تجاوزت الميزانية اليومية → النتيجة.
+                        - إذا خفضت المطاعم → التوفير المتوقع.
+
+                    12. **التقرير النهائي**: تقرير تحليلي من الذكاء الاصطناعي بأسلوب استشاري.
+
+                    أجب باللغة العربية الفصحى بتنسيق JSON صالح فقط، بدون أي نص إضافي، باستخدام الهيكل التالي:
+
+                    {
+                        "summary": {
+                            "netLivingBudget": number,
+                            "dailyBudget": number,
+                            "dailyBudgetReason": string,
+                            "weeklyBudget": number,
+                            "weeklyBudgetReason": string,
+                            "daysInMonth": number,
+                            "monthName": string,
+                            "monthsOfDataLabel": "جملة قصيرة تذكر المدة الحقيقية للبيانات المستخدمة (مثال: 'خلال الشهر الحالي' أو 'خلال آخر شهرين فعليين'), لا تفترض 6 أشهر إذا لم تكن متوفرة"
+                        },
+                        "distribution": [
+                            { "category": string, "amount": number, "reason": string }
+                        ],
+                        "savingsPlan": {
+                            "goal": number,
+                            "weeklyAmount": number,
+                            "dailyAmount": number,
+                            "strategy": string
+                        },
+                        "emergencyPlan": {
+                            "suggested": boolean,
+                            "amount": number,
+                            "reason": string
+                        },
+                        "reductionPlan": [
+                            { "category": string, "reduction": number, "reason": string }
+                        ],
+                        "timeline": [
+                            { "week": number, "actions": [string] }
+                        ],
+                        "priorities": [string],
+                        "scenarios": [
+                            { "title": string, "impact": string, "type": "positive"|"negative" }
+                        ],
+                        "report": string
+                    }
+
+                    تأكد من أن جميع الأرقام دقيقة ومبنية على البيانات المقدمة. ولا تعرض أبداً:
+                    - الراتب المتوقع (فقط في summary كنقطة مرجعية)
+                    - المتاح الحالي
+                    - ميزانية اليوم الحالية
+                    - ميزانية الأسبوع الحالية
+
+                    هذه الخطة يجب أن تكون خطة مستقبلية للشهر القادم فقط.`;
 
                     try {
                         const response = await this.sendRequest(prompt);
@@ -4848,7 +4747,43 @@
                     - استخدم الميزانية المتاحة والمصروفات الفعلية.
                     - قدم توصيات فورية قابلة للتنفيذ.
 
-                    أجب باللغة العربية الفصحى بتنسيق JSON صالح فقط.`;
+                    أجب باللغة العربية الفصحى بتنسيق JSON صالح فقط، بدون أي نص إضافي، باستخدام الهيكل التالي:
+
+                    {
+                        "summary": {
+                            "salary": number,
+                            "reserved": number,
+                            "paidExpenses": number,
+                            "availableBudget": number,
+                            "remainingDays": number,
+                            "dailyBudget": number,
+                            "weeklyBudget": number,
+                            "weeklyLabel": string,
+                            "savingsGoal": number
+                        },
+                        "distribution": [
+                            { "category": string, "amount": number, "percent": number }
+                        ],
+                        "forecast": {
+                            "willMeetSavingsGoal": boolean,
+                            "willEndWithDeficit": boolean,
+                            "projectedEndBalance": number,
+                            "categoriesAtRisk": [string]
+                        },
+                        "scenarios": [
+                            { "title": string, "description": string, "impact": number, "impactType": "positive"|"negative" }
+                        ],
+                        "improvements": [string],
+                        "opportunities": [
+                            { "text": string, "value": string }
+                        ],
+                        "risks": [
+                            { "text": string, "suggestion": string }
+                        ],
+                        "dailyTips": [string]
+                    }
+
+                    تأكد من أن جميع الأرقام دقيقة ومبنية على البيانات المقدمة.`;
 
                     try {
                         const response = await this.sendRequest(prompt);
@@ -4876,7 +4811,7 @@
                 const savingsGoal = f.goalProgress || 0;
                 const health = f.financialHealthScore || 0;
 
-                const categories = Utils.defaultCategories();
+                const categories = ['المواد الغذائية', 'البنزين', 'الكهرباء', 'الماء', 'الإنترنت', 'الإيجار', 'الأقساط', 'المطاعم', 'المقاهي', 'الصحة', 'الترفيه', 'التسوق', 'التعليم', 'السيارة', 'مصروف شخصي', 'أخرى'];
                 const distribution = categories.map(cat => {
                     const spent = FinancialEngine.getCategoryTotal(FinancialEngine.getMonthExpenses(), cat);
                     const percent = paid > 0 ? (spent / paid) * 100 : 0;
@@ -4907,7 +4842,7 @@
                     },
                     scenarios: [
                         { title: 'زيادة الراتب بنسبة 10%', description: 'إذا زاد راتبك بنسبة 10%', impact: salary * 0.1, impactType: 'positive' },
-                        { title: 'تقليل المطاعم بنسبة 20%', description: 'إذا خفضت إنفاق المطاعم بنسبة 20%', impact: (distribution.find(d => d.category === 'المطاعم والمقاهي')?.amount || 0) * 0.2, impactType: 'positive' }
+                        { title: 'تقليل المطاعم بنسبة 20%', description: 'إذا خفضت إنفاق المطاعم بنسبة 20%', impact: (distribution.find(d => d.category === 'المطاعم')?.amount || 0) * 0.2, impactType: 'positive' }
                     ],
                     improvements: [
                         'مراجعة الاشتراكات الشهرية وإلغاء غير الضرورية',
@@ -4987,7 +4922,8 @@
                 const dailySavings = savingsGoal / daysInNextMonth;
 
                 const reductionPlan = [
-                    { category: 'المطاعم والمقاهي', reduction: 20, reason: 'أكبر تصنيف يمكن تقليله حسب تاريخك' },
+                    { category: 'المطاعم', reduction: 20, reason: 'أكبر تصنيف يمكن تقليله حسب تاريخك' },
+                    { category: 'المقاهي', reduction: 15, reason: 'ثاني أكبر تصنيف للترفيه' },
                     { category: 'الترفيه', reduction: 10, reason: 'يمكن تقليله أسبوعياً' }
                 ];
 
@@ -5008,7 +4944,7 @@
                 const scenarios = [
                     { title: 'إذا التزمت بالخطة', impact: `ستحقق هدف الادخار (${Utils.formatCurrency(savingsGoal)}) مع بقاء ${Utils.formatCurrency(netLivingBudget * 0.05)} احتياطي`, type: 'positive' },
                     { title: 'إذا تجاوزت الميزانية اليومية', impact: `سينتهي الشهر بعجز قدره ${Utils.formatCurrency(dailyBudget * 5)}`, type: 'negative' },
-                    { title: 'إذا خفضت المطاعم 20%', impact: `ستوفر ${Utils.formatCurrency((distribution.find(d => d.category === 'المطاعم والمقاهي')?.amount || 0) * 0.2)} إضافية`, type: 'positive' }
+                    { title: 'إذا خفضت المطاعم 20%', impact: `ستوفر ${Utils.formatCurrency((distribution.find(d => d.category === 'المطاعم')?.amount || 0) * 0.2)} إضافية`, type: 'positive' }
                 ];
 
                 const report = `بعد تحليل بياناتك الفعلية (${monthsLabelPlan})، تبين أن أكبر سبب لاستنزاف ميزانيتك هو ${topCats[0]?.[0] || 'التصنيفات غير المحددة'}. الخطة المقترحة للشهر القادم (${monthName}) تركز على تحسين توزيع الميزانية وتقليل المصروفات الكمالية. إذا التزمت بالخطة، ستتمكن من تحقيق هدف الادخار بالكامل مع بناء احتياطي للطوارئ.`;
@@ -5056,16 +4992,62 @@
                 - احذف أي جملة لا تضيف قيمة حقيقية. لا مقدمات، لا حشو، لا تكرار للفكرة نفسها بصياغة أخرى.
                 - رتّب المعلومات من الأكثر تأثيراً على وضع المستخدم المالي إلى الأقل.
                 - كل نصيحة تحتاج سبباً واضحاً مبنياً على رقم حقيقي من بياناته يوضح لماذا قُدّمت.
-                - أي رقم مالي تذكره اربطه فوراً بمعناه وتأثيره.
-                - لا تستخدم عبارات تحفيزية مبالغاً فيها أو لغة تسويقية ولا أسلوباً نمطياً يكشف أن النص مولّد آلياً.
+                - أي رقم مالي تذكره اربطه فوراً بمعناه وتأثيره (مثال: ليس "المصروف 800 ريال" فقط، بل "800 ريال أي 40% من ميزانية هذا البند").
+                - لا تستخدم عبارات تحفيزية مبالغاً فيها أو لغة تسويقية ("أنت قادر!"، "المستقبل المشرق"، إلخ) ولا أسلوباً نمطياً يكشف أن النص مولّد آلياً.
                 - لا تذكر أي معلومة أو استنتاج لا تدعمه البيانات المتوفرة أعلاه.
                 - اجعل الانتقال بين الأفكار منطقياً ومباشراً، وفقرات قصيرة تناسب شاشة الجوال.
 
-                تعليمات الرد الإضافية:
+                تعليمات الرد الإضافية (مهمة جداً):
+
                 1. لا تقم بأي عمليات حسابية — كل الأرقام والمؤشرات جاهزة أعلاه.
-                2. لا تكرر البيانات.
+                2. لا تكرر البيانات — لا تعيد الراتب، المتبقي، إجمالي المصروفات، درجة الصحة، إلا إذا كان ضرورياً لشرح القرار.
                 3. ركز على القرارات، ليس تقارير. كن مختصراً جداً دائماً.
-                4. لا تستخدم إطلاقاً علامة ** أو أي رموز ماركداون أخرى.
+                4. لا تستخدم إطلاقاً علامة ** أو أي رموز ماركداون أخرى (##, ---, إلخ). اكتب نصاً عادياً، وابدأ كل نقطة بـ "•" فقط.
+                5. إذا طلب المستخدم حلاً أو خطة عامة، اتبع هذا الهيكل المختصر بالضبط (لا يتجاوز 10 أسطر إجمالاً):
+
+                --- الهيكل للحلول ---
+                خلاصة المشكلة: جملة واحدة فقط.
+                أهم 3 إجراءات: كل إجراء سطر واحد فقط بصيغة "• الإجراء — يوفر تقريباً X ريال".
+                إجراء اليوم: سطر واحد.
+                تحفيز: جملة واحدة قصيرة.
+
+                --- إذا طلب المستخدم خطة مفصلة لكل بند/تصنيف من الميزانية ---
+                لا تكتب فقرة منفصلة لكل بند. استخدم سطراً واحداً مضغوطاً لكل بند بالضبط بهذه الصيغة:
+                "• التصنيف: الميزانية X، الصرف Y، (ضمن الميزانية/متجاوز بمقدار Z) — نصيحة عملية قصيرة جداً (أقل من 10 كلمات)"
+                لا تشرح كل بند في عدة أسطر. إذا كان أحد البنود يحتوي على رقم غير منطقي في البيانات أعلاه (مثل صرف صفر مع توقع تجاوز، أو التزام ثابت كالإيجار يظهر له تجاوز)، فتجاهل ذكر ذلك التجاوز ولا تعتمد عليه بدل إرباك المستخدم.
+
+                --- الهيكل للأسئلة العادية ---
+                أجب بشكل مباشر، مختصر جداً (2-4 أسطر كحد أقصى)، عملي.
+                استخدم البيانات المالية لتقديم إجابة مخصصة.
+                قدم نصيحة قابلة للتنفيذ.
+
+                --- تنفيذ الإجراءات ---
+                إذا طلب المستخدم إجراءً (إضافة، حذف، تعديل)، أرفق كتلة json-actions في نهاية الرد:
+
+                \`\`\`json-actions
+                [
+                  { "type": "add_expense", "amount": 50, "description": "قهوة", "category": "المقاهي" },
+                  { "type": "delete_expense", "id": "abc123" }
+                ]
+                \`\`\`
+
+                أنواع الإجراءات المدعومة:
+                - add_expense (amount, description, category, date, merchant)
+                - delete_expense (id)
+                - set_salary (amount)
+                - set_salary_date (date)
+                - set_savings_goal (amount)
+                - set_budget_item (id, budget) — لتعديل ميزانية بند موجود مسبقاً فقط (استخدم id من بنود الميزانية أعلاه)
+                - add_budget_item (name, category, budget, isReserved, endDate) — لإنشاء بند ميزانية جديد بالكامل (مثال: "دفع تمارا"، "دفع تابي"، أو أي بند مستقبلي يذكره المستخدم). اجعل category بنفس اسم name إذا لم يوجد تصنيف قياسي مناسب. isReserved=true يعني أن مبلغ هذا البند يُحجز تلقائياً من "المتاح للصرف" تماماً مثل الإيجار والأقساط (استخدمها إذا طلب المستخدم "حجز" البند أو ذكر أنه التزام ثابت كالأقساط). endDate اختياري بصيغة YYYY-MM-DD: إذا ذكر المستخدم عدد أقساط متبقية أو تاريخ انتهاء الالتزام (مثال: "تمارا لمدة 6 أشهر")، احسب التاريخ التقريبي لنهاية آخر قسط وضعه هنا حتى يتم تنبيه المستخدم وإزالة البند تلقائياً بعد انتهائه.
+                - delete_budget_item (id أو name)
+                - set_daily_budget (amount)
+                - set_weekly_budget (amount)
+                - set_monthly_budget (amount)
+                - transfer_budget (sourceCategory, targetCategory, amount)
+
+                ملاحظة: إذا طلب المستخدم إضافة أكثر من بند في نفس الرسالة (مثال: "أضف بند تمارا وبند تابي")، أضف كل بند كعنصر منفصل في نفس مصفوفة json-actions بنفس الرسالة، ولا تطلب منه تكرار الطلب لكل بند على حدة.
+
+                ${query.includes('حل') || query.includes('ساعدني') || query.includes('وش أسوي') ? 'هام: المستخدم يطلب حلاً، استخدم هيكل الحلول.' : 'قدم إجابة مباشرة ومفيدة.'}
 
                 طلب المستخدم: ${query}
 
@@ -5178,6 +5160,7 @@
                 4. خطة عمل مقترحة للشهر القادم.
                 5. توصيات لتحسين درجة الصحة المالية.
 
+                معايير الجودة: اكتب كمستشار مالي محترف حقيقي وليس كنموذج ذكاء اصطناعي. كل جملة تعتمد على بيانات المستخدم أعلاه فقط، بدون عبارات عامة أو حشو أو تحفيز مبالغ فيه. رتّب حسب الأهمية للمستخدم. كل رقم مصحوب بمعناه وتأثيره. لا تستخدم ** أو أي رموز ماركداون، واستخدم "•" فقط للنقاط. فقرات قصيرة تناسب شاشة الجوال.
                 أجب بشكل مختصر ومفيد، باللغة العربية الفصحى.`;
 
                 try {
@@ -5196,10 +5179,17 @@
 
                 السؤال: ${question}
 
-                قواعد الرد:
-                - اكتب كمستشار مالي محترف حقيقي.
-                - كل جملة تعتمد على بيانات المستخدم الفعلية أعلاه فقط.
-                - كن مختصراً جداً ودقيقاً.
+                قواعد الرد (مهمة جداً):
+                - اكتب كمستشار مالي محترف حقيقي وليس كنموذج ذكاء اصطناعي؛ بدون مقدمات أو عبارات إنشائية أو تحفيز مبالغ فيه.
+                - كل جملة تعتمد على بيانات المستخدم الفعلية أعلاه فقط، ولا تذكر استنتاجاً لا تدعمه البيانات.
+                - لا تستخدم إطلاقاً علامة ** أو أي رموز ماركداون (##, ---, إلخ). اكتب نصاً عادياً فقط.
+                - كن مختصراً جداً ودقيقاً؛ لا تكرر شرح الأرقام أو الوضع المالي، اذهب مباشرة للإجابة.
+                - إن كان السؤال عن كيفية توفير مبلغ معين، أجب بهذا الترتيب بالضبط وبدون أي إطالة:
+                  1) سطر واحد يذكر المبلغ المطلوب وما يعادله يومياً حتى نهاية الشهر.
+                  2) 2-4 بنود إنفاق فعلية (وليست افتراضية) من بياناته أعلاه يمكن تخفيضها — استثنِ الإيجار والأقساط دائماً — كل بند بصيغة: "التصنيف: تخفيض X ريال (Y%)".
+                  3) سطر أخير واحد يلخص خطة تنفيذ بسيطة (مثال: قلل كذا هذا الأسبوع وحوّل الفرق لحساب التوفير).
+                  لا تكتب أكثر من 6 أسطر إجمالاً لهذا النوع من الأسئلة.
+                - لغيرها من الأسئلة: أجب بشكل مباشر وعملي في 2-4 أسطر كحد أقصى، واستخدم الأرقام من السياق لتخصيص الإجابة، وكل رقم مصحوب بمعناه وتأثيره.
                 أجب باللغة العربية الفصحى.`;
 
                 try {
@@ -5211,11 +5201,11 @@
                     const reserved = context?.reservedMoney || 0;
                     const available = context?.availableBudget || 0;
                     const status = context?.financialStatus || {};
-
+                    
                     if (status.status === 'no_income') {
                         return '📊 يرجى إدخال راتبك الشهري أولاً من خلال صفحة الإعدادات لتفعيل جميع الحسابات المالية.';
                     }
-
+                    
                     if (question.includes('كم أستطيع أن أصرف اليوم')) {
                         return `📊 بناءً على بياناتك:\n\nالأموال المحجوزة: ${Utils.formatCurrency(reserved)}\nالميزانية المتاحة: ${Utils.formatCurrency(available)}\nالمتبقي اليومي: ${Utils.formatCurrency(daily > 0 ? daily : 0)}\n\n💡 يمكنك أن تصرف اليوم ${Utils.formatCurrency(daily > 0 ? daily : 0)} ريال. هذا المبلغ يحافظ على استمراريتك حتى نزول الراتب القادم.`;
                     }
@@ -5253,7 +5243,7 @@
         };
 
         // ============================================================
-        // 8. COMMAND EXECUTOR
+        // 8. COMMAND EXECUTOR (updated with transfer_budget)
         // ============================================================
         const Commands = {
             extract(text) {
@@ -5272,22 +5262,13 @@
                 actions.forEach(a => {
                     try {
                         switch (a.type) {
-                            case 'add_expense': {
-                                const classified = ExpenseParser.classifyWithKeywords(a.description || a.desc || 'مصروف');
-                                const e = Budget.addExpense({
-                                    amount: a.amount,
-                                    description: a.description || a.desc || 'مصروف',
-                                    category: a.category || classified.category || 'أخرى',
-                                    subCategory: a.subCategory || classified.subCategory || '',
-                                    date: a.date || Utils.today(),
-                                    merchant: a.merchant || '',
-                                    notes: a.notes || '',
-                                    paymentMethod: a.paymentMethod || ''
-                                });
+                            case 'add_expense': { const e = Budget.addExpense({ amount: a.amount,
+                                    description: a.description || a.desc || 'مصروف', category: a.category ||
+                                    'أخرى', date: a.date || Utils.today(), merchant: a.merchant || '',
+                                    notes: a.notes || '', subCategory: a.subCategory || '',
+                                    paymentMethod: a.paymentMethod || '' });
                                 log.push('✅ أُضيف مصروف: ' + e.description + ' بمبلغ ' + Utils.formatCurrency(e
-                                    .amount) + ' (' + e.category + (e.subCategory ? ' - ' + e.subCategory : '') + ')');
-                                break;
-                            }
+                                    .amount) + ' (' + e.category + ')'); break; }
                             case 'delete_expense': { Budget.deleteExpense(a.id);
                                 log.push('🗑️ تم حذف المصروف'); break; }
                             case 'set_salary': { const s = Storage.getSettings();
@@ -5452,6 +5433,7 @@
                 const maxVal = Math.max(...allValues, 1);
                 const stepX = labels.length > 1 ? chartWidth / (labels.length - 1) : 0;
 
+                // خطوط الشبكة الأفقية
                 ctx.strokeStyle = 'rgba(148,163,184,0.15)';
                 ctx.lineWidth = 1;
                 for (let g = 0; g <= 3; g++) {
@@ -5483,6 +5465,7 @@
                     });
                 });
 
+                // تسميات المحور الأفقي (الأشهر)
                 ctx.fillStyle = '#94A3B8';
                 ctx.font = '9px Cairo';
                 ctx.textAlign = 'center';
@@ -5491,6 +5474,7 @@
                     ctx.fillText(label, x, padding.top + chartHeight + 14);
                 });
 
+                // مفتاح الألوان (Legend)
                 let legendX = padding.left;
                 let legendY = padding.top + chartHeight + 30;
                 ctx.font = '9px Cairo';
@@ -5625,13 +5609,12 @@
                 FinancialEngine.refreshAll(); },
             addExpense(data) {
                 const exp = this.getExpenses();
-                const classified = ExpenseParser.classifyWithKeywords(data.description || '');
                 const entry = {
                     id: Utils.generateId(),
                     amount: parseFloat(data.amount) || 0,
                     description: data.description || '',
-                    category: data.category || classified.category || 'أخرى',
-                    subCategory: data.subCategory || classified.subCategory || '',
+                    category: data.category || 'أخرى',
+                    subCategory: data.subCategory || '',
                     date: data.date || Utils.today(),
                     paymentMethod: data.paymentMethod || '',
                     merchant: data.merchant || '',
@@ -5647,14 +5630,14 @@
                 };
                 exp.push(entry);
                 this.saveExpenses(exp);
-
+                
                 const category = entry.category;
                 if (FinancialEngine.isCategoryOverBudget(category)) {
                     setTimeout(() => {
                         UI.showBudgetOverride(category);
                     }, 300);
                 }
-
+                
                 return entry;
             },
             deleteExpense(id) { let exp = this.getExpenses();
@@ -5684,6 +5667,7 @@
             getMonthlyTotals(expenses) { const map = {};
                 expenses.forEach(e => { const m = e.date.substring(0, 7);
                     map[m] = (map[m] || 0) + (parseFloat(e.amount) || 0); }); return map; },
+            
             calculateReservedMoney() { return FinancialEngine.calculateReservedMoney(); },
             calculateAvailableBudget() { return FinancialEngine.calculateAvailableBudget(); },
             getRemaining() {
@@ -5772,6 +5756,7 @@
 
             init() {
                 migrateToBudgetItems();
+                // أول تنظيف للبنود التلقائية عند بدء التشغيل
                 FinancialEngine.cleanupAutoCreatedItems();
                 FinancialEngine.syncBudgetItemsSpent();
 
@@ -5802,7 +5787,7 @@
                 this.setupCoach();
                 this.setupIncomePage();
                 this.setupBudgetOverride();
-                this.setupRefreshButton();
+                this.setupRefreshButton(); // <-- إضافة زر التحديث
                 this.setupFloatingAdvisor();
                 this.renderAll();
                 WorldTime.init().then(() => { this.setupDate();
@@ -5816,7 +5801,7 @@
                         const remaining = ctx.indicators?.remainingBudget;
                         const reserved = ctx.reservedMoney || 0;
                         const status = ctx.financialStatus || {};
-
+                        
                         if (status.status === 'no_income') {
                             welcome += `📊 يرجى إدخال راتبك الشهري من خلال صفحة "الدخل والأهداف" لتفعيل جميع الحسابات المالية.`;
                         } else if (health >= 70) {
@@ -5921,16 +5906,13 @@
             setupNavigation() {
                 const links = Utils.qsa('.nav-link');
                 const pages = { dashboard: Utils.id('page-dashboard'), expenses: Utils.id('page-expenses'),
-                    budget: Utils.id('page-budget'), coach: Utils.id('page-coach'), reports: Utils.id('page-reports'),
+                    budget: Utils.id('page-budget'), coach: Utils.id('page-coach'), reports: Utils.id('page-reports'), 
                     analytics: Utils.id('page-analytics'), income: Utils.id('page-income'),
                     settings: Utils.id('page-settings'), travel: Utils.id('page-travel'), temp: Utils.id('page-temp'),
                     chat: Utils.id('page-chat') };
                 const titles = { dashboard: 'الرئيسية', expenses: 'المصروفات', budget: 'تنظيم الميزانية',
                     coach: 'المدرب المالي', reports: 'التقارير', analytics: 'التحليلات', income: 'الدخل والأهداف',
                     settings: 'الإعدادات', travel: 'ميزانية السفر', temp: 'ميزانية مؤقتة', chat: 'المستشار المالي' };
-                const headerAdvisorBtn = Utils.id('headerAdvisorBtn');
-                const fabAdvisor = Utils.id('financialAdvisorFab');
-
                 links.forEach(link => {
                     Utils.on(link, 'click', (e) => {
                         e.preventDefault();
@@ -5940,19 +5922,6 @@
                         Object.entries(pages).forEach(([key, el]) => { el.classList.toggle('active', key ===
                                 page); });
                         Utils.id('pageTitle').textContent = titles[page] || page;
-
-                        // التحكم في زر المستشار
-                        if (page === 'dashboard') {
-                            if (headerAdvisorBtn) headerAdvisorBtn.style.display = 'flex';
-                            if (fabAdvisor) fabAdvisor.classList.add('fab-hidden');
-                        } else if (page === 'chat') {
-                            if (headerAdvisorBtn) headerAdvisorBtn.style.display = 'none';
-                            if (fabAdvisor) fabAdvisor.classList.add('fab-hidden');
-                        } else {
-                            if (headerAdvisorBtn) headerAdvisorBtn.style.display = 'none';
-                            if (fabAdvisor) fabAdvisor.classList.remove('fab-hidden');
-                        }
-
                         const sidebar = Utils.id('sidebar');
                         if (window.innerWidth <= 768) sidebar.classList.remove('open');
                         if (page === 'reports') this.renderReports();
@@ -5965,29 +5934,15 @@
                         if (page === 'travel') this.renderTravel();
                         if (page === 'temp') this.renderTemp();
                         if (page === 'chat') { setTimeout(() => Utils.id('chatInput').focus(), 200); }
+                        const fab = Utils.id('financialAdvisorFab');
+                        if (fab) fab.classList.toggle('fab-hidden', page === 'chat');
                     });
                 });
-
-                if (headerAdvisorBtn) {
-                    Utils.on(headerAdvisorBtn, 'click', () => {
-                        const chatLink = Utils.qs('.nav-link[data-page="chat"]');
-                        if (chatLink) chatLink.click();
-                    });
-                }
-
-                if (fabAdvisor) {
-                    Utils.on(fabAdvisor, 'click', (e) => {
-                        if (fabAdvisor.classList.contains('dragging')) return;
-                        const chatLink = Utils.qs('.nav-link[data-page="chat"]');
-                        if (chatLink) chatLink.click();
-                    });
-                }
-
-                // الحالة الافتراضية
-                if (headerAdvisorBtn) headerAdvisorBtn.style.display = 'flex';
-                if (fabAdvisor) fabAdvisor.classList.add('fab-hidden');
+                Utils.on(Utils.id('chatToggleBtn'), 'click', () => { const chatLink = Utils.qs(
+                        '.nav-link[data-page="chat"]'); if (chatLink) chatLink.click(); });
             },
 
+            // زر المستشار المالي العائم: قابل للسحب لأي جهة (يمين/يسار/أعلى/أسفل)، يحفظ موضعه، ويفتح المحادثة عند الضغط عليه بدون سحب
             setupFloatingAdvisor() {
                 const fab = Utils.id('financialAdvisorFab');
                 if (!fab) return;
@@ -6020,15 +5975,13 @@
                 if (saved && typeof saved.x === 'number' && typeof saved.y === 'number') {
                     applyPosition(saved.x, saved.y);
                 } else {
+                    // موضع افتراضي: أسفل يمين الشاشة، بعيداً عن أي عناصر أخرى
                     applyPosition(window.innerWidth - defaultW - 20, window.innerHeight - defaultH - 110);
                 }
 
                 let dragging = false;
                 let moved = false;
-                let startX = 0,
-                    startY = 0,
-                    originX = 0,
-                    originY = 0;
+                let startX = 0, startY = 0, originX = 0, originY = 0;
 
                 const onPointerDown = (e) => {
                     dragging = true;
@@ -6056,10 +6009,17 @@
                     fab.classList.remove('dragging');
                     const rect = fab.getBoundingClientRect();
                     const { w } = getSize();
+                    // إلصاق الزر بأقرب حافة (يمين أو يسار) لمظهر أكثر احترافية بعد ترك السحب
                     const snapToRight = (rect.left + w / 2) > (window.innerWidth / 2);
                     const finalX = snapToRight ? window.innerWidth - w - margin : margin;
                     const pos = applyPosition(finalX, rect.top);
                     Storage.set('advisor_fab_position', pos);
+
+                    if (!moved) {
+                        // ضغطة عادية (بدون سحب): افتح صفحة المستشار المالي
+                        const chatLink = Utils.qs('.nav-link[data-page="chat"]');
+                        if (chatLink) chatLink.click();
+                    }
                 };
 
                 Utils.on(fab, 'pointerdown', onPointerDown);
@@ -6067,6 +6027,7 @@
                 Utils.on(fab, 'pointerup', onPointerUp);
                 Utils.on(fab, 'pointercancel', onPointerUp);
 
+                // عند تغيير حجم الشاشة (مثل تدوير الجهاز) نعيد ضبط الموضع حتى لا يخرج الزر عن حدود الشاشة
                 window.addEventListener('resize', () => {
                     const rect = fab.getBoundingClientRect();
                     const pos = applyPosition(rect.left, rect.top);
@@ -6119,10 +6080,10 @@
                     Utils.formatDateFull(expense.date) +
                     '</span></div><div class="detail-item"><span class="label">التصنيف</span><span class="value">' +
                     (expense.category || 'أخرى') +
-                    '</span></div><div class="detail-item"><span class="label">التصنيف الفرعي</span><span class="value">' +
-                    (expense.subCategory || '—') +
                     '</span></div><div class="detail-item"><span class="label">نوع الشراء</span><span class="value">' +
                     (purchaseTypeLabels[expense.purchaseType] || expense.purchaseType || 'غير مصنف') +
+                    '</span></div><div class="detail-item"><span class="label">التصنيف الفرعي</span><span class="value">' +
+                    (expense.subCategory || '—') +
                     '</span></div><div class="detail-item"><span class="label">التاجر</span><span class="value">' +
                     (expense.merchant || '—') +
                     '</span></div><div class="detail-item"><span class="label">طريقة الدفع</span><span class="value">' +
@@ -6178,7 +6139,6 @@
                     listEl.innerHTML = others.map(e => {
                         const s = suggestionMap[e.id];
                         const suggested = s ? s.suggestedCategory : 'أخرى';
-                        const suggestedSub = s ? s.suggestedSubCategory : '';
                         const confidence = s ? s.confidence : 'low';
                         const confidenceBadge = confidence === 'high' ?
                             '<span style="color:var(--success);font-size:0.75rem;">ثقة عالية</span>' :
@@ -6196,7 +6156,6 @@
                                 <option value="أخرى" ${suggested === 'أخرى' ? 'selected' : ''}>أخرى (بدون تغيير)</option>
                                 ${categories.map(c => `<option value="${c}" ${c === suggested ? 'selected' : ''}>${c}</option>`).join('')}
                             </select>
-                            <input type="text" class="form-input reclassify-sub" data-id="${e.id}" placeholder="تصنيف فرعي" value="${suggestedSub}" style="max-width:120px;min-height:36px;" />
                         </div>`;
                     }).join('');
                 });
@@ -6207,10 +6166,8 @@
                     rows.forEach(sel => {
                         const id = sel.dataset.id;
                         const checkbox = Utils.qs(`.reclassify-check[data-id="${id}"]`);
-                        const subInput = Utils.qs(`.reclassify-sub[data-id="${id}"]`);
                         if (checkbox && checkbox.checked && sel.value !== 'أخرى') {
-                            Budget.updateExpense(id, { category: sel.value, subCategory: subInput ? subInput
-                                    .value : '' });
+                            Budget.updateExpense(id, { category: sel.value });
                             count++;
                         }
                     });
@@ -6262,7 +6219,7 @@
                         <div class="parse-bulk-item" data-idx="${idx}" style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px dashed var(--bg-glass-border);">
                             <div style="flex:1;min-width:0;">
                                 <div style="font-weight:600;">${it.description}</div>
-                                <div style="font-size:0.8rem;color:var(--text-secondary);">${it.category}${it.subCategory ? ' - ' + it.subCategory : ''} • ${Utils.formatDate(it.date)}${it.merchant ? ' • ' + it.merchant : ''}</div>
+                                <div style="font-size:0.8rem;color:var(--text-secondary);">${it.category} • ${Utils.formatDate(it.date)}${it.merchant ? ' • ' + it.merchant : ''}</div>
                             </div>
                             <div style="font-weight:600;white-space:nowrap;">${it.amount.toFixed(2)} ريال</div>
                             <button type="button" class="remove-parse-item btn-secondary" data-idx="${idx}" title="حذف من القائمة" style="padding:4px 10px;"><i class="fas fa-times"></i></button>
@@ -6299,7 +6256,6 @@
                             Utils.id('manualAmount').value = item.amount;
                             Utils.id('manualDescription').value = item.description;
                             Utils.id('manualCategory').value = item.category || 'أخرى';
-                            Utils.id('manualSubCategory').value = item.subCategory || '';
                             Utils.id('manualDate').value = item.date || Utils.today();
                             Utils.id('manualMerchant').value = item.merchant || '';
                             saveBtn.style.display = 'inline-flex';
@@ -6316,9 +6272,9 @@
                                 amount: item.amount,
                                 description: item.description,
                                 category: item.category || 'أخرى',
-                                subCategory: item.subCategory || '',
                                 date: item.date || Utils.today(),
                                 merchant: item.merchant || '',
+                                subCategory: '',
                                 paymentMethod: '',
                                 notes: ''
                             });
@@ -6350,27 +6306,22 @@
                 Utils.on(saveBtn, 'click', () => {
                     const amount = parseFloat(Utils.id('manualAmount').value);
                     if (!amount || amount <= 0) { alert('الرجاء إدخال مبلغ صحيح'); return; }
-                    const classified = ExpenseParser.classifyWithKeywords(Utils.id('manualDescription').value || 'مصروف يدوي');
-                    const data = {
-                        amount,
-                        description: Utils.id('manualDescription').value || 'مصروف يدوي',
-                        category: Utils.id('manualCategory').value || classified.category || 'أخرى',
-                        subCategory: Utils.id('manualSubCategory').value || classified.subCategory || '',
-                        date: Utils.id('manualDate').value || Utils.today(),
-                        paymentMethod: Utils.id('manualPaymentMethod').value || '',
-                        merchant: Utils.id('manualMerchant').value || '',
-                        notes: Utils.id('manualNotes').value || ''
-                    };
+                    const data = { amount, description: Utils.id('manualDescription').value || 'مصروف يدوي',
+                        category: Utils.id('manualCategory').value || 'أخرى', subCategory: Utils.id(
+                            'manualSubCategory').value || '', date: Utils.id('manualDate').value || Utils
+                            .today(), paymentMethod: Utils.id('manualPaymentMethod').value || '',
+                        merchant: Utils.id('manualMerchant').value || '', notes: Utils.id('manualNotes')
+                            .value || '' };
                     Budget.addExpense(data);
                     this.closeModal(modalId);
                     this.renderAll();
                 });
             },
 
-            populateCategorySelect(select, selected) {
+            populateCategorySelect(select, selected) { 
                 const cats = Utils.defaultCategories();
                 select.innerHTML = cats.map(c => '<option value="' + c + '" ' + (c === selected ? 'selected' : '') +
-                    '>' + c + '</option>').join('');
+                    '>' + c + '</option>').join(''); 
             },
 
             quickExpenseTarget: null,
@@ -6786,8 +6737,7 @@
                 });
             },
 
-            installmentFlow: null,
-
+            // يطرح على المستخدم سؤال عدد الدفعات المناسب لمزود الدفع (تابي: 1-4 دفعات، تمارا: 3/4 دفعات أو 6/9/12/24 شهراً)
             askInstallmentCount() {
                 const flow = this.installmentFlow;
                 if (!flow) return;
@@ -6825,7 +6775,7 @@
                 const existing = FinancialEngine.getBudgetItems().find(i => i.category === providerName);
                 if (existing) {
                     FinancialEngine.updateBudgetItem(existing.id, { budget: monthly, isReserved: true, endDate:
-                            endDateStr, notes });
+                        endDateStr, notes });
                 } else {
                     FinancialEngine.addBudgetItem({ name: providerName, category: providerName, budget: monthly,
                         isReserved: true, endDate: endDateStr, notes });
@@ -6846,6 +6796,7 @@
                     const text = input.value.trim();
                     if (!text) return;
 
+                    // إذا كنا في منتصف تدفق إعداد تابي/تمارا وننتظر مبلغ المشتريات، عالج الرد هنا مباشرة
                     if (this.installmentFlow && this.installmentFlow.step === 'awaiting_amount') {
                         const amountMatch = text.match(/[\d.]+/);
                         this.addChatMessage(text, 'user');
@@ -6866,6 +6817,7 @@
                     input.value = '';
                     input.style.height = 'auto';
 
+                    // كشف نية إضافة بند تابي/تمارا لبدء تدفق تحديد المبلغ وعدد الدفعات
                     const mentionsTabi = /تابي|tabby/i.test(text);
                     const mentionsTamara = /تمارا|tamara/i.test(text);
                     if ((mentionsTabi || mentionsTamara) && !this.installmentFlow) {
@@ -6873,6 +6825,7 @@
                         const amountMatch = text.match(/[\d.]+/);
                         this.installmentFlow = { provider, amount: amountMatch ? parseFloat(amountMatch[0]) :
                             null, step: null };
+                        // إذا ذكر المستخدم عدد الدفعات/الأشهر صراحةً في نفس الرسالة، لا داعي لسؤاله مرة أخرى
                         let detectedCount = null;
                         if (/دفعتين/.test(text)) detectedCount = 2;
                         else if (/دفعة\s*واحدة/.test(text)) detectedCount = 1;
@@ -6957,10 +6910,11 @@
                 });
             },
 
+            // ===== BUDGET OVERRIDE SYSTEM =====
             setupBudgetOverride() {
                 const modalId = 'budgetOverrideModal';
                 this.setupModalClose(modalId, 'closeOverrideModal', 'cancelOverrideBtn');
-
+                
                 const confirmBtn = Utils.id('confirmOverrideBtn');
                 Utils.on(confirmBtn, 'click', () => {
                     if (!this.overrideData) return;
@@ -6972,7 +6926,7 @@
                     const sourceCategory = selected.dataset.category;
                     const amount = parseFloat(selected.dataset.amount);
                     const targetCategory = this.overrideData.targetCategory;
-
+                    
                     const success = FinancialEngine.transferBudget(sourceCategory, targetCategory, amount);
                     if (success) {
                         this.closeModal(modalId);
@@ -6988,7 +6942,7 @@
             showBudgetOverride(category) {
                 const status = FinancialEngine.getCategoryStatus(category);
                 if (!status || !status.isOver) return;
-
+                
                 const surplus = FinancialEngine.findSurplusCategories(category);
                 if (surplus.length === 0) {
                     this.addChatMessage(`⚠️ لقد تجاوزت ميزانية "${category}" بمقدار ${Utils.formatCurrency(Math.abs(status.remaining))}، ولا توجد فئات أخرى بها فائض لتغطية النقص.`, 'assistant');
@@ -7049,15 +7003,22 @@
                 this.openModal('budgetOverrideModal');
             },
 
+            // ===== 🔄 زر التحديث اليدوي =====
             setupRefreshButton() {
                 const refreshBtn = Utils.id('refreshBtn');
                 Utils.on(refreshBtn, 'click', () => {
+                    // إعادة حساب كل شيء
                     FinancialEngine.refreshAll();
+                    // تحديث التاريخ المعروض
                     this.setupDate();
+                    // إعادة رسم جميع الصفحات
                     this.renderAll();
+                    // رسالة تأكيد
                     alert('✅ تم تحديث البيانات بنجاح!');
                 });
             },
+
+            // ===== RENDER METHODS =====
 
             renderCoach: async function(ctx) {
                 ctx = ctx || this.getContext();
@@ -7371,9 +7332,12 @@
                     items.forEach(item => {
                         const spent = item.spent || 0;
                         const pct = item.budget > 0 ? (spent / item.budget) * 100 : 0;
+                        // تنبيه "قريب من الحد" له معنى فقط لبند محجوز (التزام ثابت) أو عندما يكون تنظيم الميزانية مفعّلاً
+                        // (لأن سقف البند التقديري التلقائي ليس التزاماً حقيقياً من المستخدم عند إيقاف الميزانية)
                         if (item.budget > 0 && pct >= 80 && pct < 100 && (item.isReserved || orgEnabled)) {
                             alerts.push({ key: `nearlimit-${item.id}-${Math.floor(pct / 10)}`, type: 'warning', text: `🔶 بند "${item.name}" وصل ${Math.round(pct)}% من ميزانيته (${Utils.formatCurrency(spent)} من ${Utils.formatCurrency(item.budget)})` });
                         }
+                        // تنبيهات انتهاء الالتزام تظهر دائماً بغض النظر عن تفعيل تنظيم الميزانية
                         if (item.endDate) {
                             const daysToEnd = Math.round((new Date(item.endDate) - new Date(todayStr)) / 86400000);
                             if (daysToEnd < 0) {
@@ -7406,7 +7370,7 @@
                         });
                     }
                 }
-
+                
                 const salary = FinancialEngine.getSalary();
                 const reserved = FinancialEngine.calculateReservedMoney();
                 const paid = FinancialEngine.calculatePaidExpenses();
@@ -7416,7 +7380,7 @@
                 const weeklyLabel = FinancialEngine.getWeeklyBudgetLabel();
                 const daysUntilSalary = FinancialEngine.getRemainingDaysUntilSalary();
                 const savingsGoal = FinancialEngine.getSavingsGoal();
-
+                
                 let healthScore = 0;
                 if (available !== null && salary > 0) {
                     const savingsRate = (available / salary) * 100;
@@ -7428,7 +7392,7 @@
                         (100 - Math.min(100, stressIndex)) * 0.3
                     ));
                 }
-
+                
                 let riskLevel = 'منخفض';
                 if (healthScore < 30) riskLevel = 'مرتفع جداً';
                 else if (healthScore < 50) riskLevel = 'مرتفع';
@@ -7482,11 +7446,11 @@
                 const recs = ctx.recommendations || [];
                 if (recs.length > 0 && status.status !== 'no_income') {
                     const topRec = recs[0];
-                    cards.push({
-                        icon: 'fa-lightbulb',
-                        label: 'أولوية',
-                        value: topRec.action.length > 25 ? topRec.action.substring(0, 25) + '...' : topRec.action,
-                        cls: topRec.priority === 'Critical' ? 'negative' : 'accent'
+                    cards.push({ 
+                        icon: 'fa-lightbulb', 
+                        label: 'أولوية', 
+                        value: topRec.action.length > 25 ? topRec.action.substring(0, 25) + '...' : topRec.action, 
+                        cls: topRec.priority === 'Critical' ? 'negative' : 'accent' 
                     });
                 }
 
@@ -7539,21 +7503,21 @@
                     const travelBudget = Storage.getTravelBudget();
                     if (travelBudget.enabled && (travelBudget.totalBudget > 0 || Storage.getTravelExpenses().length > 0)) {
                         const travelRemaining = Budget.getTravelRemaining();
-                        extraCards.push({
-                            icon: 'fa-plane',
-                            label: 'متبقي ميزانية السفر' + (travelBudget.tripName ? ' - ' + travelBudget.tripName : ''),
-                            value: Utils.formatCurrency(travelRemaining),
-                            cls: travelRemaining >= 0 ? 'positive' : 'negative'
+                        extraCards.push({ 
+                            icon: 'fa-plane', 
+                            label: 'متبقي ميزانية السفر' + (travelBudget.tripName ? ' - ' + travelBudget.tripName : ''), 
+                            value: Utils.formatCurrency(travelRemaining), 
+                            cls: travelRemaining >= 0 ? 'positive' : 'negative' 
                         });
                     }
                     const tempBudget = Storage.getTempBudget();
                     if (tempBudget.totalBudget > 0 || Storage.getTempExpenses().length > 0) {
                         const tempRemaining = Budget.getTempRemaining();
-                        extraCards.push({
-                            icon: 'fa-umbrella-beach',
-                            label: 'متبقي الميزانية المؤقتة',
-                            value: Utils.formatCurrency(tempRemaining),
-                            cls: tempRemaining >= 0 ? 'positive' : 'negative'
+                        extraCards.push({ 
+                            icon: 'fa-umbrella-beach', 
+                            label: 'متبقي الميزانية المؤقتة', 
+                            value: Utils.formatCurrency(tempRemaining), 
+                            cls: tempRemaining >= 0 ? 'positive' : 'negative' 
                         });
                     }
                     extraContainer.innerHTML = extraCards.map(c =>
@@ -7562,6 +7526,7 @@
                 }
             },
 
+            // ===== 🔥 عرض البنود مع تمييز التلقائي =====
             buildBudgetItemCardHtml(item, todayStr) {
                 const spent = item.spent || 0;
                 const remaining = item.budget - spent;
@@ -7657,6 +7622,7 @@
                 const settings = Storage.getSettings();
                 const orgEnabled = settings.budgetOrganizationEnabled === true;
 
+                // ===== الالتزامات الثابتة (تظهر دائماً بغض النظر عن تفعيل تنظيم الميزانية) =====
                 const fixedList = Utils.id('fixedItemsList');
                 if (fixedList) {
                     fixedList.innerHTML = fixedItems.length === 0 ?
@@ -7665,6 +7631,7 @@
                     this.bindBudgetItemCardEvents(fixedList);
                 }
 
+                // ===== زر/مفتاح تفعيل تنظيم الميزانية =====
                 const toggleBox = Utils.id('budgetOrgToggleBox');
                 if (toggleBox) {
                     toggleBox.innerHTML = `<div class="settings-container glass" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
@@ -7691,6 +7658,7 @@
                     });
                 }
 
+                // ===== بنود تنظيم الميزانية التفصيلية (تصنيفات اختيارية، تظهر فقط عند التفعيل) =====
                 const orgList = Utils.id('budgetOrgList');
                 const orgSetupBtnBox = Utils.id('budgetOrgSetupBtnBox');
                 if (orgList) {
@@ -7710,6 +7678,7 @@
                 }
             },
 
+            // تُستدعى عند تفعيل تنظيم الميزانية: تحفظ الإعداد وتفتح مباشرة دليل الإعداد لتحديد ميزانية كل التصنيفات
             enableBudgetOrganization() {
                 const s = Storage.getSettings();
                 s.budgetOrganizationEnabled = true;
@@ -7789,7 +7758,7 @@
                         expenses.map(e => `<div class="expense-item glass">
                             <div class="expense-info">
                                 <div class="desc">${e.description || '—'}</div>
-                                <div class="meta"><span>${Utils.formatDate(e.date)}</span><span>${e.category || 'أخرى'}</span>${e.subCategory ? `<span>${e.subCategory}</span>` : ''}</div>
+                                <div class="meta"><span>${Utils.formatDate(e.date)}</span><span>${e.category || 'أخرى'}</span></div>
                             </div>
                             <div class="amount">${Utils.formatCurrency(e.amount)}</div>
                         </div>`).join('');
@@ -7986,17 +7955,14 @@
                 const list = Utils.id('expensesList');
                 const search = Utils.id('expenseSearch');
                 const filter = Utils.id('expenseCategoryFilter');
-                const subFilter = Utils.id('expenseSubCategoryFilter');
                 const render = () => {
                     let expenses = Budget.getExpenses().sort((a, b) => b.date.localeCompare(a.date) || b.id
                         .localeCompare(a.id));
                     const query = search.value.toLowerCase();
                     const catFilter = filter.value;
-                    const subCatFilter = subFilter.value;
                     if (query) { expenses = expenses.filter(e => e.description.toLowerCase().includes(query) || (
                             e.merchant && e.merchant.toLowerCase().includes(query))); }
                     if (catFilter !== 'all') { expenses = expenses.filter(e => e.category === catFilter); }
-                    if (subCatFilter !== 'all') { expenses = expenses.filter(e => e.subCategory === subCatFilter); }
                     if (expenses.length === 0) { list.innerHTML =
                             '<div class="empty-state glass"><i class="fas fa-receipt"></i><p>لا توجد مصروفات</p></div>'; return; }
                     const purchaseTypeLabels = { 'Essential': 'أساسي', 'Important': 'مهم', 'Optional': 'اختياري',
@@ -8005,10 +7971,9 @@
                         '<div class="expense-item glass" data-id="' + e.id +
                         '"><div class="expense-info"><div class="desc">' + e.description +
                         '</div><div class="meta"><span><i class="fas fa-tag"></i> ' + e.category +
-                        '</span>' + (e.subCategory ? '<span><i class="fas fa-tag"></i> ' + e.subCategory +
-                            '</span>' : '') + (e.merchant ? '<span><i class="fas fa-store"></i> ' + e
-                            .merchant + '</span>' : '') + '<span><i class="fas fa-calendar"></i> ' + Utils
-                            .formatDate(e.date) + '</span>' + (e.paymentMethod ?
+                        '</span>' + (e.merchant ? '<span><i class="fas fa-store"></i> ' + e.merchant +
+                            '</span>' : '') + '<span><i class="fas fa-calendar"></i> ' + Utils.formatDate(e
+                            .date) + '</span>' + (e.paymentMethod ?
                             '<span><i class="fas fa-credit-card"></i> ' + e.paymentMethod + '</span>' :
                             '') + (e.purchaseType ?
                             '<span><i class="fas fa-tag"></i> ' + (purchaseTypeLabels[e.purchaseType] || e
@@ -8039,22 +8004,14 @@
                 render();
                 Utils.on(search, 'input', render);
                 Utils.on(filter, 'change', render);
-                Utils.on(subFilter, 'change', render);
             },
 
             updateCategoryFilters() {
                 const select = Utils.id('expenseCategoryFilter');
-                const subSelect = Utils.id('expenseSubCategoryFilter');
                 const cats = Utils.defaultCategories();
                 const current = select.value;
                 select.innerHTML = '<option value="all">جميع التصنيفات</option>' + cats.map(c =>
                     '<option value="' + c + '" ' + (c === current ? 'selected' : '') + '>' + c +
-                    '</option>').join('');
-
-                const subCats = Utils.defaultSubCategories();
-                const currentSub = subSelect.value;
-                subSelect.innerHTML = '<option value="all">جميع التصنيفات الفرعية</option>' + subCats.map(c =>
-                    '<option value="' + c + '" ' + (c === currentSub ? 'selected' : '') + '>' + c +
                     '</option>').join('');
             },
 
@@ -8091,9 +8048,10 @@
                         displayReserved, displaySalary
                     ], ['#1F7A5C', '#B3452A', '#C98A2E', '#123C57'], 'المتاح');
 
+                // ===== أكثر أسابيع الشهر صرفاً (لتتبع الأيام التي يرتفع فيها الإنفاق) =====
                 const weeklyCanvas = Utils.id('weeklyPatternChart');
                 if (weeklyCanvas) {
-                    const weekTotals = [0, 0, 0, 0, 0];
+                    const weekTotals = [0, 0, 0, 0, 0]; // الأسبوع 1-5 من الشهر
                     monthExp.forEach(e => {
                         if (!e.date) return;
                         const day = parseInt(e.date.split('-')[2], 10);
@@ -8101,6 +8059,7 @@
                         const weekIdx = Math.min(4, Math.floor((day - 1) / 7));
                         weekTotals[weekIdx] += parseFloat(e.amount) || 0;
                     });
+                    // إخفاء الأسبوع الخامس إذا كان صفراً ولا يوجد يوم 29+ فعلي هذا الشهر (لتفادي عمود فارغ مضلل)
                     const range = Utils.getMonthRange();
                     const daysInThisMonth = Math.round((new Date(range.end) - new Date(range.start)) / 86400000) + 1;
                     const weekLabelsAll = ['الأسبوع 1 (١-٧)', 'الأسبوع 2 (٨-١٤)', 'الأسبوع 3 (١٥-٢١)', 'الأسبوع 4 (٢٢-٢٨)', 'الأسبوع 5 (٢٩+)'];
@@ -8110,6 +8069,7 @@
                     Charts.drawBar(weeklyCtx, weekLabels, weekData, ['#1F5C87', '#4FA3D1', '#123C57', '#7FC1E3', '#2C7DA0'], 'أسبوع');
                 }
 
+                // ===== اتجاه الإنفاق عبر الأشهر =====
                 const trendSelect = Utils.id('trendCategoryFilter');
                 const trendCanvas = Utils.id('trendChart');
                 if (trendSelect && trendCanvas) {
@@ -8159,6 +8119,7 @@
                 Utils.on(trendSelect, 'change', () => this.renderReports());
             },
 
+            // ===== NEW: Income Page =====
             setupIncomePage() {
                 const form = Utils.id('incomeForm');
                 const salaryInput = Utils.id('incomeSalary');
