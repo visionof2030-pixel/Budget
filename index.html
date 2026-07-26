@@ -1902,6 +1902,98 @@
             transition: all var(--transition);
             cursor: pointer;
         }
+        .budget-group {
+            margin-bottom: 12px;
+            border: 1px solid var(--bg-glass-border);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+        .budget-group-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 12px 16px;
+            background: var(--bg-glass);
+            cursor: pointer;
+            flex-wrap: wrap;
+        }
+        .budget-group-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+        .budget-group-total {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+        .budget-group-total .toggle-icon {
+            transition: transform var(--transition);
+        }
+        .budget-group.collapsed .budget-group-total .toggle-icon {
+            transform: rotate(-90deg);
+        }
+        .budget-group-members {
+            padding: 10px 12px 2px;
+        }
+        .budget-group.collapsed .budget-group-members {
+            display: none;
+        }
+        .budget-group-members .budget-item-card {
+            margin-right: 0;
+        }
+        .payment-status-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+            font-size: 0.8rem;
+        }
+        .payment-log-btn {
+            background: var(--accent-gradient);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 6px 12px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: var(--font);
+        }
+        .payment-paid-badge {
+            color: var(--success);
+            font-weight: 700;
+        }
+        .payment-undo-btn, .payment-history-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            text-decoration: underline;
+            font-size: 0.75rem;
+            cursor: pointer;
+            font-family: var(--font);
+            padding: 0;
+        }
+        .installment-fields {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 12px;
+            background: var(--bg-glass);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--bg-glass-border);
+            margin-top: 8px;
+        }
+        .installment-summary {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            padding: 8px 10px;
+            background: var(--bg-card);
+            border-radius: var(--radius-sm);
+        }
         .budget-item-card:hover {
             box-shadow: var(--shadow-hover);
             border-color: var(--accent-light);
@@ -2705,7 +2797,8 @@
                 <form id="budgetItemForm" class="settings-form">
                     <div class="form-group"><label>الاسم</label><input type="text" id="budgetItemName" class="form-input" placeholder="مثال: بنزين" required /></div>
                     <div class="form-group"><label>التصنيف</label><select id="budgetItemCategory" class="form-input"></select></div>
-                    <div class="form-group"><label>الميزانية (ريال)</label><input type="number" id="budgetItemBudget" class="form-input" min="0" step="0.01" required /></div>
+                    <div class="form-group"><label>المجموعة (اختياري)</label><input type="text" id="budgetItemGroup" class="form-input" list="budgetGroupsList" placeholder="مثال: الأقساط" /><datalist id="budgetGroupsList"></datalist><span style="font-size:0.75rem; color:var(--text-muted);">اكتب نفس الاسم لعدة بنود لتجميعها معاً (مثال: كل قروضك تحت "الأقساط")، وسيظهر إجمالي المجموعة تلقائياً دون أي تكرار في أرقام البنود نفسها.</span></div>
+                    <div class="form-group"><label>الميزانية (ريال)</label><input type="number" id="budgetItemBudget" class="form-input" min="0" step="0.01" /></div>
                     <div class="form-group"><label>الأولوية</label><select id="budgetItemPriority" class="form-input"><option value="Critical">حرجة</option><option value="High" selected>عالية</option><option value="Medium">متوسطة</option><option value="Low">منخفضة</option></select></div>
                     <div class="form-group"><label>ملاحظات</label><textarea id="budgetItemNotes" class="form-textarea" rows="2" placeholder="اختياري"></textarea></div>
                     <div class="form-group" style="flex-direction:row; align-items:center; gap:10px;">
@@ -2713,12 +2806,53 @@
                         <input type="checkbox" id="budgetItemReserved" style="width:20px; height:20px; accent-color:var(--accent);" />
                         <span style="font-size:0.8rem; color:var(--text-muted);">(يُحجز المبلغ ولا يُحتسب ضمن المتاح للصرف)</span>
                     </div>
-                    <div class="form-group"><label>تاريخ انتهاء الالتزام (اختياري)</label><input type="date" id="budgetItemEndDate" class="form-input" /><span style="font-size:0.75rem; color:var(--text-muted);">مفيد لالتزامات محدودة المدة مثل تمارا/تابي — ستُنبَّه عند اقتراب الانتهاء</span></div>
+                    <div class="form-group" style="flex-direction:row; align-items:center; gap:10px;">
+                        <label style="font-weight:600; font-size:0.9rem;">التزام أقساط (تابي/تمارا/آخر)</label>
+                        <input type="checkbox" id="budgetItemIsInstallment" style="width:20px; height:20px; accent-color:var(--accent);" />
+                    </div>
+                    <div class="installment-fields" id="installmentFieldsBox" style="display:none;">
+                        <div class="form-group"><label>المزود</label><select id="installmentProvider" class="form-input">
+                            <option value="تابي">تابي</option>
+                            <option value="تمارا">تمارا</option>
+                            <option value="آخر">تقسيط آخر</option>
+                        </select></div>
+                        <div class="form-group"><label>المبلغ الإجمالي للمشتريات (ريال)</label><input type="number" id="installmentTotalAmount" class="form-input" min="0" step="0.01" /></div>
+                        <div class="form-group"><label>عدد الدفعات الكلي</label><input type="number" id="installmentTotalCount" class="form-input" min="1" step="1" /></div>
+                        <div class="form-group"><label>عدد الدفعات المدفوعة مسبقاً (اختياري)</label><input type="number" id="installmentPaidCount" class="form-input" min="0" step="1" value="0" /><span style="font-size:0.75rem; color:var(--text-muted);">إذا كان لديك التزام سبق أن سددت منه دفعة أو أكثر، أدخل عددها هنا وسيُحسب الجدول بناءً على المتبقي فقط.</span></div>
+                        <div class="installment-summary" id="installmentSummaryBox">أدخل البيانات أعلاه لعرض ملخص الدفعة الشهرية وتاريخ الانتهاء.</div>
+                    </div>
+                    <div class="form-group"><label>تاريخ انتهاء الالتزام (اختياري)</label><input type="date" id="budgetItemEndDate" class="form-input" /><span style="font-size:0.75rem; color:var(--text-muted);">مفيد لالتزامات محدودة المدة — ستُنبَّه عند اقتراب الانتهاء (يُحسب تلقائياً إذا فعّلت التزام الأقساط أعلاه)</span></div>
                     <div class="modal-actions" style="border-top:none; padding-top:0;">
                         <button type="button" class="btn-secondary" id="cancelBudgetItemBtn">إلغاء</button>
                         <button type="submit" class="btn-primary">حفظ</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="paymentLogModal" class="modal">
+        <div class="modal-content glass">
+            <div class="modal-header"><h2 id="paymentLogModalTitle">تسجيل دفعة</h2><button class="modal-close" id="closePaymentLogModal">&times;</button></div>
+            <div class="modal-body">
+                <form id="paymentLogForm" class="settings-form">
+                    <div class="form-group"><label>تاريخ الدفع</label><input type="date" id="paymentLogDate" class="form-input" required /></div>
+                    <div class="form-group"><label>المبلغ (ريال)</label><input type="number" id="paymentLogAmount" class="form-input" min="0" step="0.01" required /></div>
+                    <span style="font-size:0.75rem; color:var(--text-muted);">هذا التسجيل توثيقي فقط لتتبع تاريخ الدفع، ولا يُخصم من المتاح للصرف مرة إضافية (البند المحجوز أصلاً محسوب ضمن الأموال المحجوزة).</span>
+                    <div class="modal-actions" style="border-top:none; padding-top:0;">
+                        <button type="button" class="btn-secondary" id="cancelPaymentLogBtn">إلغاء</button>
+                        <button type="submit" class="btn-primary">تأكيد التسجيل</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="paymentHistoryModal" class="modal">
+        <div class="modal-content glass">
+            <div class="modal-header"><h2 id="paymentHistoryModalTitle">سجل الدفعات</h2><button class="modal-close" id="closePaymentHistoryModal">&times;</button></div>
+            <div class="modal-body">
+                <div id="paymentHistoryContent"></div>
             </div>
         </div>
     </div>
@@ -3229,6 +3363,7 @@
                     id: Utils.generateId(),
                     name: data.name || 'بند جديد',
                     category: data.category || 'أخرى',
+                    group: data.group || null,
                     budget: parseFloat(data.budget) || 0,
                     spent: 0,
                     isReserved: data.isReserved === true,
@@ -3238,6 +3373,7 @@
                     notes: data.notes || '',
                     isAutoCreated: data.isAutoCreated || false,
                     endDate: data.endDate || null,
+                    paymentHistory: [],
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString()
                 };
@@ -3306,10 +3442,48 @@
                 }
 
                 items.forEach(item => {
-                    item.spent = catMap[item.category] || 0;
+                    if (item.isReserved) {
+                        // بند محجوز = التزام ثابت يُدفع بالكامل كل شهر، لا يعتمد على مطابقة التصنيف
+                        item.spent = item.budget;
+                    } else {
+                        item.spent = catMap[item.category] || 0;
+                    }
                 });
 
                 Storage.setBudgetItems(items);
+            },
+
+            recordItemPayment(id, date, amount) {
+                let items = this.getBudgetItems();
+                const item = items.find(i => i.id === id);
+                if (!item) return null;
+                if (!Array.isArray(item.paymentHistory)) item.paymentHistory = [];
+                item.paymentHistory.push({ date, amount: parseFloat(amount) || item.budget });
+                item.paymentHistory.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+                Storage.setBudgetItems(items);
+                return item;
+            },
+
+            undoLastPaymentThisMonth(id) {
+                let items = this.getBudgetItems();
+                const item = items.find(i => i.id === id);
+                if (!item || !Array.isArray(item.paymentHistory)) return null;
+                const monthPrefix = Utils.today().slice(0, 7);
+                const idx = [...item.paymentHistory].reverse().findIndex(p => (p.date || '').startsWith(
+                    monthPrefix));
+                if (idx === -1) return null;
+                const realIdx = item.paymentHistory.length - 1 - idx;
+                item.paymentHistory.splice(realIdx, 1);
+                Storage.setBudgetItems(items);
+                return item;
+            },
+
+            getPaymentThisMonth(item) {
+                if (!item || !Array.isArray(item.paymentHistory)) return null;
+                const monthPrefix = Utils.today().slice(0, 7);
+                const monthPayments = item.paymentHistory.filter(p => (p.date || '').startsWith(monthPrefix));
+                if (monthPayments.length === 0) return null;
+                return monthPayments[monthPayments.length - 1];
             },
 
             cleanupAutoCreatedItems() {
@@ -4339,14 +4513,21 @@
                 Storage.setGeminiKeyIndex(newIndex);
                 return keys[newIndex];
             },
-            async sendRequest(prompt) {
+            async sendRequest(prompt, history) {
                 const key = this.getCurrentKey();
                 if (!key) throw new Error('لا يوجد مفتاح Gemini نشط. أضف مفتاحاً من خلال النقر على "Gemini AI v2" في الفوتر.');
                 const model = this.getModel();
                 const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' +
                     key;
+                const contents = [];
+                if (Array.isArray(history) && history.length > 0) {
+                    history.forEach(turn => {
+                        contents.push({ role: turn.role === 'user' ? 'user' : 'model', parts: [{ text: turn.text }] });
+                    });
+                }
+                contents.push({ role: 'user', parts: [{ text: prompt }] });
                 const payload = {
-                    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                    contents: contents,
                     generationConfig: { temperature: 0.5, maxOutputTokens: 2048, topP: 0.95 }
                 };
                 try {
@@ -4655,10 +4836,19 @@
                 items.forEach(item => {
                     const status2 = item.isReserved ? '🔒 محجوز' : '🔓 غير محجوز';
                     const spent = item.spent || 0;
-                    const remaining = item.budget - spent;
                     const autoTag = item.isAutoCreated ? ' 🤖 (تلقائي)' : '';
-                    str += `${item.name}${autoTag} (${item.category}): ميزانية ${Utils.formatCurrency(item.budget)}, صرف ${Utils.formatCurrency(spent)}, متبقي ${Utils.formatCurrency(remaining)}, ${status2}\n`;
+                    const hasBudget = item.budget && item.budget > 0;
+                    let budgetLine;
+                    if (!hasBudget) {
+                        budgetLine = `لا توجد ميزانية محددة لهذا البند بعد (صرف حتى الآن ${Utils.formatCurrency(spent)})`;
+                    } else {
+                        const remaining = item.budget - spent;
+                        const state = remaining >= 0 ? `ضمن الميزانية (متبقي ${Utils.formatCurrency(remaining)})` : `متجاوز فعلياً بمقدار ${Utils.formatCurrency(Math.abs(remaining))}`;
+                        budgetLine = `ميزانية ${Utils.formatCurrency(item.budget)}, صرف ${Utils.formatCurrency(spent)}, ${state}`;
+                    }
+                    str += `${item.name}${autoTag} (${item.category}): ${budgetLine}, ${status2}\n`;
                 });
+                str += `ملاحظة: أي بند مكتوب "لا توجد ميزانية محددة" فهذا يعني المستخدم لم يخصص له مبلغاً بعد — لا تصفه بأنه "متجاوز" إطلاقاً، فقط اذكر أنه بلا ميزانية واقترح تحديد واحدة إن كان مناسباً.\n`;
 
                 str += `\n--- عادات الإنفاق ---\n`;
                 const highestDays = behavior.highestSpendingDays || [];
@@ -5102,9 +5292,71 @@
                 };
             },
 
-            async thinkAndDecide(query, context) {
+            classifyIntent(query) {
+                const q = (query || '').trim();
+                if (/الساعة\s*كم|كم\s*الساعة|وش\s*التاريخ|التاريخ\s*اليوم|أي\s*يوم\s*اليوم|كم\s*التاريخ/.test(q)) {
+                    return 'utility';
+                }
+                if (/^(كيف حالك|كيفك|شخبارك|شلونك|هلا|هلا والله|مرحبا|مرحباً|السلام عليكم|صباح الخير|مساء الخير|شكرا|شكراً|تسلم|يعطيك العافية|مين انت|منو انت|وش اسمك)/.test(q)) {
+                    return 'social';
+                }
+                if (/خطتي|تقترح علي|رايك|رأيك|وش أسوي اليوم|كيف حالي|وضعي (مناسب|كويس|زين|صعب)|هل انا|ايش تنصحني|توصيني بشي|متضايق|متوتر|قلقان/.test(q)) {
+                    return 'personal';
+                }
+                return 'precise';
+            },
+
+            advisorPersona: `أنت "المستشار المالي" — مستشار شخصي واحد ثابت لهذا العميل تحديداً، ولست نموذج ذكاء اصطناعي عام ولا أداة توليد تقارير. أسلوبك دافئ وصريح ومباشر مثل إنسان حقيقي يعرف عميله ويتابع وضعه باستمرار. لا تبدأ ردودك المتتالية بنفس الصياغة أو الافتتاحية؛ نوّع أسلوبك من رد لآخر. إن كانت بياناته غير كافية للجزم بشيء، قل ذلك بصراحة بدل التخمين أو اختلاق تفاصيل غير موجودة.`,
+
+            async thinkAndDecide(query, context, history) {
+                const intent = this.classifyIntent(query);
+                const persona = this.advisorPersona;
+
+                if (intent === 'utility') {
+                    const now = new Date();
+                    const timeStr = now.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+                    const dateStr = now.toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                    return `الساعة الآن ${timeStr}، واليوم ${dateStr}.`;
+                }
+
+                if (intent === 'social') {
+                    const prompt = `${persona}
+
+                هذه رسالة من المستخدم هي كلام عام أو تحية وليست سؤالاً مالياً مباشراً: "${query}"
+
+                رد بشكل طبيعي وودود وقصير جداً (سطر إلى سطرين كحد أقصى)، مثل إنسان حقيقي يرد على تحية. لا تذكر أي رقم أو بيانات مالية إطلاقاً في هذا الرد، ولا تحوّل الحديث لتقرير مالي. يمكنك أن تسأله بشكل خفيف وطبيعي عن وضعه المالي هذه الأيام إذا كان يناسب سياق الحديث، بدون إلزام.
+                أجب باللغة العربية الفصحى، بأسلوب إنساني حقيقي.`;
+                    try {
+                        return await this.sendRequest(prompt, history);
+                    } catch (e) {
+                        return 'أهلاً بك! تمام الحمد لله، كيف أقدر أساعدك اليوم؟';
+                    }
+                }
+
                 const contextStr = this.buildContextString(context);
-                const prompt = `أنت مستشار مالي شخصي خبير. أنت مدير تدفق نقدي، محلل سلوك مالي، ومخطط مالي محترف.
+
+                if (intent === 'personal') {
+                    const prompt = `${persona}
+
+                ${contextStr}
+
+                هذا سؤال شخصي/تأملي من المستخدم يحتاج بياناته الفعلية أعلاه ليُجاب بدقة، لكن يجب أن يكون الرد بأسلوب حديث طبيعي متصل (من جملتين إلى 5 جمل)، وليس نقاطاً أو قالباً جدولياً، وبدون أي عنوان أو هيكل رسمي.
+                إن شعرت أن حالته المزاجية أو صياغة سؤاله تستحق اعترافاً بسيطاً بمشاعره، ابدأ بجملة قصيرة تعترف بذلك (بدون مبالغة) قبل الانتقال للنصيحة.
+                اربط كل رقم تذكره بمعنى ملموس من حياته اليومية، لا نسبة مجردة فقط (مثال: بدل "40% من الميزانية"، اربطها بما يعادلها من أيام أو شيء محسوس).
+                لا تختلق أي رقم أو استنتاج لا تدعمه البيانات أعلاه؛ لو البيانات ناقصة صرّح بذلك بصراحة.
+                لا تستخدم علامة ** أو أي رموز ماركداون.
+
+                طلب المستخدم: ${query}
+
+                أجب باللغة العربية الفصحى، بأسلوب دافئ ومباشر.`;
+                    try {
+                        return await this.sendRequest(prompt, history);
+                    } catch (e) {
+                        return this.generateFallback(query, context);
+                    }
+                }
+
+                const prompt = `${persona} أنت أيضاً مدير تدفق نقدي، محلل سلوك مالي، ومخطط مالي محترف.
 
                 ${contextStr}
 
@@ -5193,7 +5445,7 @@
                 أجب باللغة العربية الفصحى، بأسلوب مهني ودود، ومركز على القرارات.`;
 
                 try {
-                    const response = await this.sendRequest(prompt);
+                    const response = await this.sendRequest(prompt, history);
                     return response;
                 } catch (e) {
                     return this.generateFallback(query, context);
@@ -5910,7 +6162,6 @@
             financialContext: null,
             selectedPreset: null,
             overrideData: null,
-            installmentFlow: null,
 
             init() {
                 migrateToBudgetItems();
@@ -5939,6 +6190,7 @@
                 this.setupModalClose('reservedMoneyModal', 'closeReservedMoneyModal', null);
                 this.setupModalClose('monthExpensesModal', 'closeMonthExpensesModal', null);
                 this.setupBudgetItems();
+                this.setupPaymentLogModal();
                 this.setupResetApp();
                 this.setupBackup();
                 this.setupCoach();
@@ -6012,6 +6264,17 @@
                         minute: '2-digit' }) + '</div>';
                 this.chatMessages.appendChild(div);
                 this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+
+                if (role === 'user' || role === 'financial-advisor') {
+                    if (!this.chatHistory) this.chatHistory = [];
+                    const mappedRole = role === 'user' ? 'user' : 'model';
+                    if (mappedRole === 'model' && this.chatHistory.length === 0) {
+                        // تجاهل رسائل الترحيب التلقائية قبل أول رسالة من المستخدم
+                    } else {
+                        this.chatHistory.push({ role: mappedRole, text: text });
+                        if (this.chatHistory.length > 8) this.chatHistory = this.chatHistory.slice(-8);
+                    }
+                }
             },
 
             openModal(id) {
@@ -7006,62 +7269,6 @@
                 });
             },
 
-            askInstallmentCount() {
-                const flow = this.installmentFlow;
-                if (!flow) return;
-                const isTabi = flow.provider === 'tabi';
-                const options = isTabi ? [
-                    { label: 'دفعة واحدة', count: 1 },
-                    { label: 'دفعتين', count: 2 },
-                    { label: '3 دفعات', count: 3 },
-                    { label: '4 دفعات', count: 4 }
-                ] : [
-                    { label: '3 دفعات', count: 3 },
-                    { label: '4 دفعات', count: 4 },
-                    { label: '6 أشهر', count: 6 },
-                    { label: '9 أشهر', count: 9 },
-                    { label: '12 شهر', count: 12 },
-                    { label: '24 شهر', count: 24 }
-                ];
-                this.addChatQuickReplies(
-                    `كم عدد الدفعات المناسبة لك؟ (المبلغ الإجمالي: ${Utils.formatCurrency(flow.amount)})`,
-                    options,
-                    (opt) => this.finalizeInstallmentFlow(opt.count)
-                );
-            },
-
-            finalizeInstallmentFlow(count) {
-                const flow = this.installmentFlow;
-                if (!flow) return;
-                const isTabi = flow.provider === 'tabi';
-                const baseName = isTabi ? 'دفع تابي' : 'دفع تمارا';
-                const monthly = Math.round((flow.amount / count) * 100) / 100;
-                const endDate = new Date(WorldTime.now());
-                endDate.setMonth(endDate.getMonth() + count);
-                const endDateStr = endDate.toISOString().split('T')[0];
-                const notes = `إجمالي ${Utils.formatCurrency(flow.amount)} مقسّم على ${count} ${isTabi ? 'دفعة' : 'دفعة/شهر'}`;
-
-                const existingItems = FinancialEngine.getBudgetItems();
-                const sameProviderItems = existingItems.filter(i => i.category === baseName || i.category.startsWith(
-                    baseName + ' ('));
-                let finalName = baseName;
-                if (sameProviderItems.length > 0) {
-                    let n = 2;
-                    while (sameProviderItems.some(i => i.category === `${baseName} (${n})`)) n++;
-                    finalName = `${baseName} (${n})`;
-                }
-                FinancialEngine.addBudgetItem({ name: finalName, category: finalName, budget: monthly,
-                    isReserved: true, endDate: endDateStr, notes });
-                this.addChatMessage(
-                    `✅ تم إضافة طلب جديد "${finalName}": دفعة شهرية ${Utils.formatCurrency(monthly)} لمدة ${count} ${isTabi ? 'دفعات' : 'أشهر'}، تنتهي في ${Utils.formatDate(endDateStr)}. تم حجزها تلقائياً من المتاح للصرف.` +
-                    (sameProviderItems.length > 0 ?
-                        `\nملاحظة: لديك ${sameProviderItems.length} طلب/طلبات سابقة بنفس المزود، تقدر تراجعها في صفحة تنظيم الميزانية.` :
-                        ''),
-                    'system');
-                this.installmentFlow = null;
-                this.renderAll();
-            },
-
             setupChat() {
                 const messagesContainer = Utils.id('chatMessages');
                 const input = Utils.id('chatInput');
@@ -7072,52 +7279,9 @@
                     if (!text) return;
                     const normalizedText = ExpenseParser.normalizeDigits(text);
 
-                    if (this.installmentFlow && this.installmentFlow.step === 'awaiting_amount') {
-                        const amountMatch = normalizedText.match(/[\d.]+/);
-                        this.addChatMessage(text, 'user');
-                        input.value = '';
-                        input.style.height = 'auto';
-                        if (amountMatch) {
-                            this.installmentFlow.amount = parseFloat(amountMatch[0]);
-                            this.installmentFlow.step = null;
-                            this.askInstallmentCount();
-                        } else {
-                            this.addChatMessage('لم أفهم المبلغ، الرجاء كتابة رقم المشتريات بالريال فقط.',
-                                'financial-advisor');
-                        }
-                        return;
-                    }
-
                     this.addChatMessage(text, 'user');
                     input.value = '';
                     input.style.height = 'auto';
-
-                    const mentionsTabi = /تابي|tabby/i.test(text);
-                    const mentionsTamara = /تمارا|tamara/i.test(text);
-                    if ((mentionsTabi || mentionsTamara) && !this.installmentFlow) {
-                        const provider = mentionsTabi ? 'tabi' : 'tamara';
-                        const amountMatch = normalizedText.match(/[\d.]+/);
-                        this.installmentFlow = { provider, amount: amountMatch ? parseFloat(amountMatch[0]) :
-                            null, step: null };
-                        let detectedCount = null;
-                        if (/دفعتين/.test(text)) detectedCount = 2;
-                        else if (/دفعة\s*واحدة/.test(text)) detectedCount = 1;
-                        else {
-                            const numMatch = normalizedText.match(/(\d+)\s*(شهر|أشهر|دفعات|دفعة)/);
-                            if (numMatch) detectedCount = parseInt(numMatch[1]);
-                        }
-                        if (this.installmentFlow.amount && detectedCount) {
-                            this.finalizeInstallmentFlow(detectedCount);
-                        } else if (!this.installmentFlow.amount) {
-                            this.installmentFlow.step = 'awaiting_amount';
-                            this.addChatMessage(
-                                `كم قيمة المشتريات التي تريد تقسيمها عبر ${provider === 'tabi' ? 'تابي' : 'تمارا'}؟`,
-                                'financial-advisor');
-                        } else {
-                            this.askInstallmentCount();
-                        }
-                        return;
-                    }
 
                     if (/أخرى/.test(text) && /(اعرض|عرض|وضح|فصل|فصّل|تفاصيل|شو فيها|ايش فيها|إيش فيها)/.test(
                             text)) {
@@ -7180,7 +7344,8 @@
 
                     try {
                         const context = this.getContext();
-                        const rawResponse = await Gemini.thinkAndDecide(text, context);
+                        const recentHistory = (this.chatHistory || []).slice(0, -1);
+                        const rawResponse = await Gemini.thinkAndDecide(text, context, recentHistory);
                         const { cleanText, actions } = Commands.extract(rawResponse);
 
                         typingDiv.remove();
@@ -7885,6 +8050,53 @@
                 }
             },
 
+            buildGroupedItemsHtml(items, todayStr, listPrefix) {
+                const groups = {};
+                const ungrouped = [];
+                items.forEach(item => {
+                    const g = (item.group || '').trim();
+                    if (g) {
+                        if (!groups[g]) groups[g] = [];
+                        groups[g].push(item);
+                    } else {
+                        ungrouped.push(item);
+                    }
+                });
+
+                let html = '';
+                Object.keys(groups).forEach(groupName => {
+                    const members = groups[groupName];
+                    const totalBudget = members.reduce((s, i) => s + (parseFloat(i.budget) || 0), 0);
+                    const totalSpent = members.reduce((s, i) => s + (parseFloat(i.spent) || 0), 0);
+                    const groupSafeId = (listPrefix || 'g') + '_' + groupName.replace(/[^\w\u0600-\u06FF]/g, '_');
+                    html += `<div class="budget-group glass" data-group-name="${groupName}">
+                        <div class="budget-group-header" data-toggle-target="${groupSafeId}">
+                            <div class="budget-group-title"><i class="fas fa-layer-group"></i> ${groupName} <span style="font-size:0.75rem;color:var(--text-muted);font-weight:400;">(${members.length} تصنيف فرعي)</span></div>
+                            <div class="budget-group-total">
+                                <span style="color:var(--accent);">الإجمالي: ${Utils.formatCurrency(totalBudget)}</span>
+                                <span style="color:var(--danger);">صرف: ${Utils.formatCurrency(totalSpent)}</span>
+                                <i class="fas fa-chevron-down toggle-icon"></i>
+                            </div>
+                        </div>
+                        <div class="budget-group-members" id="${groupSafeId}">
+                            ${members.map(m => this.buildBudgetItemCardHtml(m, todayStr)).join('')}
+                        </div>
+                    </div>`;
+                });
+                html += ungrouped.map(item => this.buildBudgetItemCardHtml(item, todayStr)).join('');
+                return html;
+            },
+
+            bindBudgetGroupEvents(container) {
+                if (!container) return;
+                container.querySelectorAll('.budget-group-header').forEach(header => {
+                    Utils.on(header, 'click', () => {
+                        const group = header.closest('.budget-group');
+                        if (group) group.classList.toggle('collapsed');
+                    });
+                });
+            },
+
             buildBudgetItemCardHtml(item, todayStr) {
                 const spent = item.spent || 0;
                 const remaining = item.budget - spent;
@@ -7911,6 +8123,24 @@
                     }
                 }
 
+                let paymentRow = '';
+                if (item.isReserved) {
+                    const paidThisMonth = FinancialEngine.getPaymentThisMonth(item);
+                    const hasHistory = Array.isArray(item.paymentHistory) && item.paymentHistory.length > 0;
+                    if (paidThisMonth) {
+                        paymentRow = `<div class="payment-status-row">
+                            <span class="payment-paid-badge">✅ مدفوع بتاريخ ${Utils.formatDate(paidThisMonth.date)}</span>
+                            <button class="payment-undo-btn" data-id="${item.id}">تراجع</button>
+                            ${hasHistory ? `<button class="payment-history-btn" data-id="${item.id}">📜 السجل</button>` : ''}
+                        </div>`;
+                    } else {
+                        paymentRow = `<div class="payment-status-row">
+                            <button class="payment-log-btn" data-id="${item.id}">📌 تسجيل كمدفوع هذا الشهر</button>
+                            ${hasHistory ? `<button class="payment-history-btn" data-id="${item.id}">📜 السجل</button>` : ''}
+                        </div>`;
+                    }
+                }
+
                 return `<div class="budget-item-card glass ${autoClass}" data-id="${item.id}" style="${isOver || isExpired ? 'border-right: 3px solid var(--danger);' : isNearLimit ? 'border-right: 3px solid var(--warning);' : ''}">
                     <div class="item-info">
                         <div class="item-name">${item.name} ${autoBadge} <span style="font-size:0.7rem; color:var(--text-muted);">(${item.category})</span></div>
@@ -7921,6 +8151,7 @@
                             ${expiryBadge}
                             ${item.notes ? `<span>📝 ${item.notes}</span>` : ''}
                         </div>
+                        ${paymentRow}
                     </div>
                     <div class="item-amounts">
                         <span style="color:${isAuto ? 'var(--text-muted)' : 'var(--accent)'};">الميزانية: ${Utils.formatCurrency(item.budget)} ${estimatedBadge}</span>
@@ -7963,6 +8194,27 @@
                         }
                     });
                 });
+                container.querySelectorAll('.payment-log-btn').forEach(btn => {
+                    Utils.on(btn, 'click', (e) => {
+                        e.stopPropagation();
+                        this.openPaymentLogModal(btn.dataset.id);
+                    });
+                });
+                container.querySelectorAll('.payment-undo-btn').forEach(btn => {
+                    Utils.on(btn, 'click', (e) => {
+                        e.stopPropagation();
+                        if (confirm('هل تريد التراجع عن تسجيل الدفعة لهذا الشهر؟')) {
+                            FinancialEngine.undoLastPaymentThisMonth(btn.dataset.id);
+                            this.renderBudgetItems();
+                        }
+                    });
+                });
+                container.querySelectorAll('.payment-history-btn').forEach(btn => {
+                    Utils.on(btn, 'click', (e) => {
+                        e.stopPropagation();
+                        this.openPaymentHistoryModal(btn.dataset.id);
+                    });
+                });
                 container.querySelectorAll('.budget-item-card').forEach(card => {
                     Utils.on(card, 'click', (e) => {
                         if (e.target.closest('button')) return;
@@ -7984,8 +8236,9 @@
                 if (fixedList) {
                     fixedList.innerHTML = fixedItems.length === 0 ?
                         '<div class="empty-state glass"><i class="fas fa-lock"></i><p>لا توجد التزامات ثابتة (إيجار، أقساط، تمارا/تابي...). أضف بنداً وفعّل خيار "محجوز".</p></div>' :
-                        fixedItems.map(item => this.buildBudgetItemCardHtml(item, todayStr)).join('');
+                        this.buildGroupedItemsHtml(fixedItems, todayStr, 'fixed');
                     this.bindBudgetItemCardEvents(fixedList);
+                    this.bindBudgetGroupEvents(fixedList);
                 }
 
                 const toggleBox = Utils.id('budgetOrgToggleBox');
@@ -8023,8 +8276,9 @@
                     } else {
                         orgList.innerHTML = orgItems.length === 0 ?
                             '<div class="empty-state glass"><i class="fas fa-sliders-h"></i><p>لم تُنشئ أي بند تفصيلي بعد. استخدم دليل الإعداد لتحديد ميزانية كل تصنيف دفعة واحدة.</p></div>' :
-                            orgItems.map(item => this.buildBudgetItemCardHtml(item, todayStr)).join('');
+                            this.buildGroupedItemsHtml(orgItems, todayStr, 'org');
                         this.bindBudgetItemCardEvents(orgList);
+                        this.bindBudgetGroupEvents(orgList);
                         if (orgSetupBtnBox) {
                             orgSetupBtnBox.innerHTML = '<button id="openBudgetWizardBtn" class="btn-secondary" style="width:100%;margin-bottom:12px;"><i class="fas fa-magic"></i> دليل إعداد الميزانية (كل التصنيفات دفعة واحدة)</button>';
                             Utils.on(Utils.id('openBudgetWizardBtn'), 'click', () => this.openBudgetWizard());
@@ -8154,23 +8408,87 @@
                 const modalId = 'budgetItemModal';
                 this.setupModalClose(modalId, 'closeBudgetItemModal', 'cancelBudgetItemBtn');
 
+                const installBox = Utils.id('installmentFieldsBox');
+                const installCheckbox = Utils.id('budgetItemIsInstallment');
+                const providerSelect = Utils.id('installmentProvider');
+                const totalAmountInput = Utils.id('installmentTotalAmount');
+                const totalCountInput = Utils.id('installmentTotalCount');
+                const paidCountInput = Utils.id('installmentPaidCount');
+                const summaryBox = Utils.id('installmentSummaryBox');
+                const groupInput = Utils.id('budgetItemGroup');
+                const endDateInput = Utils.id('budgetItemEndDate');
+                const budgetInput = Utils.id('budgetItemBudget');
+                const nameInput = Utils.id('budgetItemName');
+
+                const computeInstallmentSummary = () => {
+                    const total = parseFloat(totalAmountInput.value) || 0;
+                    const count = parseInt(totalCountInput.value) || 0;
+                    const paid = parseInt(paidCountInput.value) || 0;
+                    if (total <= 0 || count <= 0) {
+                        summaryBox.textContent = 'أدخل البيانات أعلاه لعرض ملخص الدفعة الشهرية وتاريخ الانتهاء.';
+                        return null;
+                    }
+                    const remaining = Math.max(count - paid, 0);
+                    const monthly = Math.round((total / count) * 100) / 100;
+                    if (remaining === 0) {
+                        summaryBox.textContent = 'كل الدفعات مسددة بالفعل حسب العدد المُدخل.';
+                        return { monthly, remaining, endDate: null };
+                    }
+                    const endDate = new Date(WorldTime.now());
+                    endDate.setMonth(endDate.getMonth() + remaining);
+                    const endDateStr = endDate.toISOString().split('T')[0];
+                    summaryBox.textContent = `دفعة شهرية ${Utils.formatCurrency(monthly)}، متبقي ${remaining} من ${count} دفعة، تنتهي تقريباً في ${Utils.formatDate(endDateStr)}.`;
+                    return { monthly, remaining, endDate: endDateStr };
+                };
+
+                Utils.on(installCheckbox, 'change', (e) => {
+                    installBox.style.display = e.target.checked ? 'flex' : 'none';
+                    if (e.target.checked) {
+                        if (!groupInput.value.trim()) groupInput.value = 'الأقساط';
+                        computeInstallmentSummary();
+                    }
+                });
+                [totalAmountInput, totalCountInput, paidCountInput].forEach(inp => {
+                    Utils.on(inp, 'input', computeInstallmentSummary);
+                });
+                Utils.on(providerSelect, 'change', () => {
+                    if (!nameInput.value.trim() || nameInput.dataset.autoFilled === 'true') {
+                        nameInput.value = 'دفع ' + providerSelect.value;
+                        nameInput.dataset.autoFilled = 'true';
+                    }
+                });
+
                 const form = Utils.id('budgetItemForm');
                 Utils.on(form, 'submit', (e) => {
                     e.preventDefault();
-                    const name = Utils.id('budgetItemName').value.trim();
+                    let name = nameInput.value.trim();
                     const category = Utils.id('budgetItemCategory').value;
-                    const budget = parseFloat(Utils.id('budgetItemBudget').value) || 0;
+                    const group = groupInput.value.trim() || null;
+                    let budget = parseFloat(budgetInput.value) || 0;
                     const priority = Utils.id('budgetItemPriority').value;
                     const notes = Utils.id('budgetItemNotes').value.trim();
-                    const isReserved = Utils.id('budgetItemReserved').checked;
-                    const endDate = Utils.id('budgetItemEndDate').value || null;
+                    let isReserved = Utils.id('budgetItemReserved').checked;
+                    let endDate = endDateInput.value || null;
+
+                    if (installCheckbox.checked) {
+                        const summary = computeInstallmentSummary();
+                        if (!summary) { alert('الرجاء إدخال المبلغ الإجمالي وعدد الدفعات الكلي لالتزام الأقساط'); return; }
+                        budget = summary.monthly;
+                        isReserved = true;
+                        endDate = summary.endDate;
+                        if (!name) name = 'دفع ' + providerSelect.value;
+                    } else if (budget <= 0) {
+                        alert('الرجاء إدخال الميزانية');
+                        return;
+                    }
+
                     if (!name) { alert('الرجاء إدخال اسم البند'); return; }
                     const id = form.dataset.editId;
                     if (id) {
-                        FinancialEngine.updateBudgetItem(id, { name, category, budget, priority, notes,
+                        FinancialEngine.updateBudgetItem(id, { name, category, group, budget, priority, notes,
                             isReserved, endDate });
                     } else {
-                        FinancialEngine.addBudgetItem({ name, category, budget, priority, notes, isReserved,
+                        FinancialEngine.addBudgetItem({ name, category, group, budget, priority, notes, isReserved,
                             endDate });
                     }
                     this.closeModal(modalId);
@@ -8187,13 +8505,29 @@
                 const cats = Utils.defaultCategories();
                 catSelect.innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('');
 
+                const allItems = FinancialEngine.getBudgetItems();
+                const groupNames = Array.from(new Set(allItems.map(i => i.group).filter(Boolean)));
+                const groupsList = Utils.id('budgetGroupsList');
+                if (groupsList) groupsList.innerHTML = groupNames.map(g => `<option value="${g}"></option>`).join('');
+
+                const installBox = Utils.id('installmentFieldsBox');
+                const installCheckbox = Utils.id('budgetItemIsInstallment');
+                installCheckbox.checked = false;
+                installBox.style.display = 'none';
+                Utils.id('installmentProvider').value = 'تابي';
+                Utils.id('installmentTotalAmount').value = '';
+                Utils.id('installmentTotalCount').value = '';
+                Utils.id('installmentPaidCount').value = 0;
+                Utils.id('installmentSummaryBox').textContent = 'أدخل البيانات أعلاه لعرض ملخص الدفعة الشهرية وتاريخ الانتهاء.';
+                Utils.id('budgetItemName').dataset.autoFilled = 'false';
+
                 if (id) {
-                    const items = FinancialEngine.getBudgetItems();
-                    const item = items.find(i => i.id === id);
+                    const item = allItems.find(i => i.id === id);
                     if (!item) return;
                     title.textContent = 'تعديل بند: ' + item.name;
                     Utils.id('budgetItemName').value = item.name;
                     catSelect.value = item.category;
+                    Utils.id('budgetItemGroup').value = item.group || '';
                     Utils.id('budgetItemBudget').value = item.budget;
                     Utils.id('budgetItemPriority').value = item.priority || 'Medium';
                     Utils.id('budgetItemNotes').value = item.notes || '';
@@ -8203,6 +8537,7 @@
                 } else {
                     title.textContent = 'إضافة بند ميزانية';
                     Utils.id('budgetItemName').value = '';
+                    Utils.id('budgetItemGroup').value = '';
                     Utils.id('budgetItemBudget').value = '';
                     Utils.id('budgetItemPriority').value = 'Medium';
                     Utils.id('budgetItemNotes').value = '';
@@ -8211,6 +8546,51 @@
                     form.dataset.editId = '';
                 }
                 this.openModal(modalId);
+            },
+
+            openPaymentLogModal(itemId) {
+                const items = FinancialEngine.getBudgetItems();
+                const item = items.find(i => i.id === itemId);
+                if (!item) return;
+                Utils.id('paymentLogModalTitle').textContent = 'تسجيل دفعة: ' + item.name;
+                Utils.id('paymentLogDate').value = Utils.today();
+                Utils.id('paymentLogAmount').value = item.budget;
+                Utils.id('paymentLogForm').dataset.itemId = itemId;
+                this.openModal('paymentLogModal');
+            },
+
+            setupPaymentLogModal() {
+                this.setupModalClose('paymentLogModal', 'closePaymentLogModal', 'cancelPaymentLogBtn');
+                const form = Utils.id('paymentLogForm');
+                Utils.on(form, 'submit', (e) => {
+                    e.preventDefault();
+                    const itemId = form.dataset.itemId;
+                    const date = Utils.id('paymentLogDate').value;
+                    const amount = parseFloat(Utils.id('paymentLogAmount').value) || 0;
+                    if (!date) { alert('الرجاء اختيار تاريخ الدفع'); return; }
+                    FinancialEngine.recordItemPayment(itemId, date, amount);
+                    this.closeModal('paymentLogModal');
+                    this.renderBudgetItems();
+                });
+                this.setupModalClose('paymentHistoryModal', 'closePaymentHistoryModal', null);
+            },
+
+            openPaymentHistoryModal(itemId) {
+                const items = FinancialEngine.getBudgetItems();
+                const item = items.find(i => i.id === itemId);
+                if (!item) return;
+                Utils.id('paymentHistoryModalTitle').textContent = 'سجل الدفعات: ' + item.name;
+                const history = Array.isArray(item.paymentHistory) ? [...item.paymentHistory].reverse() : [];
+                const content = Utils.id('paymentHistoryContent');
+                if (history.length === 0) {
+                    content.innerHTML = '<div class="empty-state glass"><i class="fas fa-receipt"></i><p>لا يوجد سجل دفعات بعد لهذا البند.</p></div>';
+                } else {
+                    content.innerHTML = history.map(p => `<div class="expense-item glass">
+                        <div class="expense-info"><div class="desc">${Utils.formatDate(p.date)}</div></div>
+                        <div class="amount">${Utils.formatCurrency(p.amount)}</div>
+                    </div>`).join('');
+                }
+                this.openModal('paymentHistoryModal');
             },
 
             renderTravel() {
