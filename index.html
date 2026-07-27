@@ -513,6 +513,52 @@
             color: var(--text-muted);
             opacity: 0.6;
         }
+        .daily-dynamic-card {
+            cursor: default;
+        }
+        .daily-dynamic-sub {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+            margin-bottom: 8px;
+        }
+        .daily-progress-track {
+            width: 100%;
+            height: 6px;
+            border-radius: 4px;
+            background: var(--bg-glass-border);
+            overflow: hidden;
+            margin-bottom: 6px;
+        }
+        .daily-progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width var(--transition);
+        }
+        .daily-dynamic-pct {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+        }
+        .savings-goal-card {
+            cursor: default;
+        }
+        .savings-reserve-toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.68rem;
+            color: var(--text-secondary);
+            margin-top: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .savings-reserve-toggle input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+            accent-color: var(--accent);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
         .dash-card .card-icon {
             font-size: 1.5rem;
             margin-bottom: 6px;
@@ -3638,7 +3684,8 @@
                 Economical: 'اقتصادي',
                 Balanced: 'متزن',
                 Consumerist: 'استهلاكي',
-                Impulsive: 'اندفاعي'
+                Impulsive: 'اندفاعي',
+                Behind: 'متأخر'
             }[code] || 'متزن'),
             cleanNumber: (str) => {
                 if (!str) return 0;
@@ -3729,7 +3776,7 @@
             getExpenses() { return this.get('expenses', []); },
             setExpenses(exp) { this.set('expenses', exp); },
             getSettings() {
-                const def = { salary: 0, salaryDate: Utils.today(), savingsGoal: 0, budgetOrganizationEnabled: false };
+                const def = { salary: 0, salaryDate: Utils.today(), savingsGoal: 0, budgetOrganizationEnabled: false, savingsGoalReserved: false };
                 return this.get('settings', def);
             },
             setSettings(s) { this.set('settings', s); },
@@ -3836,8 +3883,12 @@
 
             calculateReservedMoney() {
                 const items = this.getBudgetItems();
-                return items.filter(item => item.isReserved === true)
+                const itemsReserved = items.filter(item => item.isReserved === true)
                     .reduce((sum, item) => sum + (parseFloat(item.budget) || 0), 0);
+                const settings = Storage.getSettings();
+                const savingsGoalReserved = settings.savingsGoalReserved === true ?
+                    (parseFloat(settings.savingsGoal) || 0) : 0;
+                return itemsReserved + savingsGoalReserved;
             },
 
             calculatePaidExpenses() {
@@ -3940,6 +3991,91 @@
 
             calculateMonthlyBudget() {
                 return this.calculateAvailableBudget();
+            },
+
+            // ============================================================
+            // طبقة "الميزانية الديناميكية" — منفصلة تماماً عن منطق الميزانية
+            // العام أعلاه، ولا تُعدّله. تُستخدم فقط لعرض استهلاك اليوم/الأسبوع/
+            // الشهر لحظياً مقابل ما تم صرفه فعلياً بنفس الفترة.
+            // ============================================================
+
+            /** إجمالي المصروفات المسجّلة بتاريخ اليوم فقط */
+            getTodayExpensesTotal() {
+                const today = Utils.today();
+                return this.getExpenses()
+                    .filter(e => e.date === today)
+                    .reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+            },
+
+            /** إجمالي المصروفات المسجّلة خلال الأسبوع الحالي (السبت–الجمعة) فقط */
+            getThisWeekExpensesTotal() {
+                const now = WorldTime.now();
+                const dayIdx = now.getDay(); // 0=الأحد ... 6=السبت
+                const daysSinceSaturday = (dayIdx + 1) % 7;
+                const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysSinceSaturday);
+                const weekStartStr = weekStart.toISOString().split('T')[0];
+                const todayStr = Utils.today();
+                return this.getExpenses()
+                    .filter(e => e.date >= weekStartStr && e.date <= todayStr)
+                    .reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+            },
+
+            /**
+             * ميزانية اليوم الديناميكية: القيمة الأساسية (نفس calculateDailyBudget
+             * الحالية) مطروحاً منها ما صُرف فعلياً اليوم. تتحدّث تلقائياً عند أي
+             * إضافة/تعديل/حذف مصروف أو تغيير تاريخه لأنها تُحسب من جديد كل مرة
+             * (لا حالة محفوظة/cache).
+             */
+            getDynamicDailyBudget() {
+                const base = this.calculateDailyBudget();
+                if (base === null) return null;
+                const spentToday = this.getTodayExpensesTotal();
+                const remaining = base - spentToday;
+                const consumptionPercent = base > 0 ?
+                    Math.round((spentToday / base) * 100) :
+                    (spentToday > 0 ? 100 : 0);
+                return {
+                    base: Math.round(base * 100) / 100,
+                    spentToday: Math.round(spentToday * 100) / 100,
+                    remaining: Math.round(remaining * 100) / 100,
+                    consumptionPercent,
+                    exceeded: remaining < 0
+                };
+            },
+
+            /** نفس الفكرة على مستوى الأسبوع — جاهزة للاستخدام لاحقاً (قابلية التوسع) */
+            getDynamicWeeklyBudget() {
+                const base = this.calculateWeeklyBudget();
+                if (base === null) return null;
+                const spentThisWeek = this.getThisWeekExpensesTotal();
+                const remaining = base - spentThisWeek;
+                const consumptionPercent = base > 0 ?
+                    Math.round((spentThisWeek / base) * 100) :
+                    (spentThisWeek > 0 ? 100 : 0);
+                return {
+                    base: Math.round(base * 100) / 100,
+                    spent: Math.round(spentThisWeek * 100) / 100,
+                    remaining: Math.round(remaining * 100) / 100,
+                    consumptionPercent,
+                    exceeded: remaining < 0
+                };
+            },
+
+            /** نفس الفكرة على مستوى الشهر — جاهزة للاستخدام لاحقاً (قابلية التوسع) */
+            getDynamicMonthlyBudget() {
+                const base = this.calculateAvailableBudget();
+                if (base === null) return null;
+                const spentThisMonth = this.calculatePaidExpenses();
+                const remaining = base; // المتاح للصرف بالأساس = بعد خصم المصروف الفعلي
+                const consumptionPercent = (base + spentThisMonth) > 0 ?
+                    Math.round((spentThisMonth / (base + spentThisMonth)) * 100) : 0;
+                return {
+                    base: Math.round((base + spentThisMonth) * 100) / 100,
+                    spent: Math.round(spentThisMonth * 100) / 100,
+                    remaining: Math.round(remaining * 100) / 100,
+                    consumptionPercent,
+                    exceeded: remaining < 0
+                };
             },
 
             getRemainingDays() {
@@ -4530,6 +4666,22 @@
                 else if (savingsRate >= 0) result.profile = 'Balanced';
                 else if (savingsRate >= -15) result.profile = 'Consumerist';
                 else result.profile = 'Impulsive';
+
+                // ===== تصنيف ديناميكي إضافي: "متأخر" =====
+                // بغض النظر عن نسبة الادخار، إذا كانت وتيرة الصرف الحالية تهدد
+                // بنفاد المتاح للصرف قبل نزول الراتب القادم (يوم 27 مثلاً)، يُصنَّف
+                // النمط "متأخر" لأن الالتزام بالأرقام أهم من نسبة الادخار النظرية.
+                const availableForProfile = indicators.availableBudget;
+                const daysUntilSalaryForProfile = indicators.daysUntilSalary;
+                const avgDailyForProfile = indicators.avgDailySpending || 0;
+                if (availableForProfile !== null && availableForProfile !== undefined &&
+                    daysUntilSalaryForProfile !== null && daysUntilSalaryForProfile !== undefined &&
+                    daysUntilSalaryForProfile > 0) {
+                    const projectedRemaining = availableForProfile - (avgDailyForProfile * daysUntilSalaryForProfile);
+                    if (availableForProfile <= 0 || projectedRemaining < 0) {
+                        result.profile = 'Behind';
+                    }
+                }
                 return result;
             }
         };
@@ -4807,7 +4959,12 @@
                 const filteredRecs = recs.filter(r => r.expectedSavings > 0 || r.action.includes('أدخل راتبك'));
 
                 const priorityOrder = { Critical: 0, High: 1, Medium: 2, Low: 3, Optional: 4 };
-                filteredRecs.sort((a, b) => (priorityOrder[a.priority] || 5) - (priorityOrder[b.priority] || 5));
+                filteredRecs.sort((a, b) => {
+                    const tierDiff = (priorityOrder[a.priority] || 5) - (priorityOrder[b.priority] || 5);
+                    if (tierDiff !== 0) return tierDiff;
+                    // داخل نفس درجة الأولوية، الأكبر أثراً مالياً (توفير/هدر فعلي) يتصدّر
+                    return (b.expectedSavings || 0) - (a.expectedSavings || 0);
+                });
                 return filteredRecs;
             }
         };
@@ -5406,6 +5563,11 @@
                 str += `المتاح للصرف: ${available !== null ? Utils.formatCurrency(available) : '—'}\n`;
                 str += `المتبقي: ${f.remainingBudget !== null ? Utils.formatCurrency(f.remainingBudget) : '—'}\n`;
                 str += `ميزانية اليوم: ${daily !== null ? Utils.formatCurrency(daily) : '—'}\n`;
+                const dynDailyForAI = FinancialEngine.getDynamicDailyBudget();
+                if (dynDailyForAI) {
+                    str += `صُرف اليوم فعلياً: ${Utils.formatCurrency(dynDailyForAI.spentToday)}\n`;
+                    str += `المتبقي فعلياً من ميزانية اليوم: ${Utils.formatCurrency(dynDailyForAI.remaining)} (${dynDailyForAI.consumptionPercent}% مستهلك)${dynDailyForAI.exceeded ? ' — تم تجاوز ميزانية اليوم' : ''}\n`;
+                }
                 str += `ميزانية الأسبوع: ${weekly !== null ? Utils.formatCurrency(weekly) : '—'}\n`;
                 str += `نسبة الادخار: ${f.savingsRate || 0}%\n`;
                 str += `نسبة الديون: ${f.debtRatio || 0}%\n`;
@@ -6320,6 +6482,7 @@ ${styleGuide}${savingAmountAddendum}
 - استخدم تعبيرات طبيعية متنوعة مثل: "لاحظت..."، "بناءً على مصاريفك..."، "أقترح عليك..."، "لو كنت مكانك سأركز على..." دون تكرار نفس العبارة حرفياً في كل رد.
 - اكتب كإنسان يتحدث عن وضع شخص واحد يعرفه جيداً، لا كنموذج يولّد تقريراً عاماً لأي مستخدم.
 - كل جملة تعتمد على بيانات المستخدم الفعلية أعلاه فقط، بدون استنتاج لا تدعمه البيانات ولا تحفيز مبالغ فيه ولا لغة لوم.
+- إذا كان السؤال عن اليوم أو "هل أقدر أصرف كذا الآن"، استخدم رقم "المتبقي فعلياً من ميزانية اليوم" أعلاه (وليس ميزانية اليوم الأصلية) كأساس الحساب — فهو يعكس ما صُرف اليوم فعلياً حتى هذه اللحظة.
 - لا تستخدم إطلاقاً علامة ** أو أي رموز ماركداون (##, ---, إلخ). نص عادي فقط.
 - الشكل العام: جملة إنسانية قصيرة أولاً، ثم تحليل مختصر، ثم اقتراح عملي واحد، ثم خطوة تالية إن كانت مفيدة. لا تتجاوز 4-6 أسطر إجمالاً (إلا في التخطيط المالي التفصيلي حيث يمكن حتى 8 أسطر).
 أجب باللغة العربية الفصحى بأسلوب طبيعي غير آلي.`;
@@ -6959,6 +7122,38 @@ ${styleGuide}${savingAmountAddendum}
             refreshContext() {
                 this.financialContext = FinancialContextBuilder.build();
                 return this.financialContext;
+            },
+
+            /** يبني بطاقة "ميزانية اليوم" الديناميكية: الأساس + المصروف اليوم + المتبقي (الرقم الأهم) + شريط استهلاك */
+            buildDynamicDailyCardHtml(d) {
+                if (!d) {
+                    return '<div class="dash-card negative"><div class="card-icon"><i class="fas fa-calendar-day"></i></div><div class="card-label">📅 ميزانية اليوم</div><div class="card-value">—</div></div>';
+                }
+                const pct = Math.max(0, Math.min(100, d.consumptionPercent));
+                const barColor = d.exceeded ? 'var(--danger)' : (pct >= 80 ? 'var(--warning)' : 'var(--accent)');
+                const cls = d.exceeded ? 'negative' : 'accent';
+                return `<div class="dash-card ${cls} daily-dynamic-card">
+                    <div class="card-icon"><i class="fas fa-calendar-day"></i></div>
+                    <div class="card-label">📅 ميزانية اليوم</div>
+                    <div class="card-value">${Utils.formatCurrency(d.remaining)}</div>
+                    <div class="daily-dynamic-sub">${d.exceeded ? 'تجاوزت ميزانية اليوم' : 'المتبقي لليوم'} — من أصل ${Utils.formatCurrency(d.base)}</div>
+                    <div class="daily-progress-track"><div class="daily-progress-fill" style="width:${pct}%;background:${barColor};"></div></div>
+                    <div class="daily-dynamic-pct">صرفت ${Utils.formatCurrency(d.spentToday)} (${d.consumptionPercent}%)</div>
+                </div>`;
+            },
+
+            /** يبني بطاقة "هدف الادخار" مع خيار حجزه ضمن الأموال المحجوزة */
+            buildSavingsGoalCardHtml(goal) {
+                const isReserved = Storage.getSettings().savingsGoalReserved === true;
+                return `<div class="dash-card accent savings-goal-card">
+                    <div class="card-icon"><i class="fas fa-bullseye"></i></div>
+                    <div class="card-label">🎯 هدف الادخار</div>
+                    <div class="card-value">${Utils.formatCurrency(goal)}</div>
+                    <label class="savings-reserve-toggle">
+                        <input type="checkbox" id="savingsGoalReserveToggle" ${isReserved ? 'checked' : ''} />
+                        <span>احجزه ضمن الأموال المحجوزة</span>
+                    </label>
+                </div>`;
             },
 
             renderAll() {
@@ -8910,6 +9105,21 @@ ${styleGuide}${savingAmountAddendum}
                             text: `📉 بناءً على معدل صرفك الحالي، من المتوقع أن تنتهي الشهر بعجز ${Utils.formatCurrency(Math.abs(forecastCtx.projectedEndBalance))} — قلل الصرف الآن لتفادي ذلك`
                         });
                     }
+
+                    const dynDailyForAlert = FinancialEngine.getDynamicDailyBudget();
+                    if (dynDailyForAlert && dynDailyForAlert.exceeded) {
+                        alerts.push({
+                            key: `daily-exceeded-${todayStr}`,
+                            type: 'danger',
+                            text: `🔴 تجاوزت ميزانية اليوم بمقدار ${Utils.formatCurrency(Math.abs(dynDailyForAlert.remaining))}`
+                        });
+                    } else if (dynDailyForAlert && dynDailyForAlert.consumptionPercent >= 80) {
+                        alerts.push({
+                            key: `daily-near-limit-${todayStr}-${Math.floor(dynDailyForAlert.consumptionPercent / 10)}`,
+                            type: 'warning',
+                            text: `🔶 استهلكت ${dynDailyForAlert.consumptionPercent}% من ميزانية اليوم — تبقى لك ${Utils.formatCurrency(dynDailyForAlert.remaining)}`
+                        });
+                    }
                     const dismissed = Storage.getDismissedAlerts() || [];
                     const visibleAlerts = alerts.filter(a => !dismissed.includes(a.key));
                     if (visibleAlerts.length === 0) {
@@ -8943,6 +9153,7 @@ ${styleGuide}${savingAmountAddendum}
                 const weeklyLabel = FinancialEngine.getWeeklyBudgetLabel();
                 const daysUntilSalary = FinancialEngine.getRemainingDaysUntilSalary();
                 const savingsGoal = FinancialEngine.getSavingsGoal();
+                const dynamicDaily = FinancialEngine.getDynamicDailyBudget();
                 
                 let healthScore = 0;
                 if (available !== null && salary > 0) {
@@ -8997,11 +9208,11 @@ ${styleGuide}${savingAmountAddendum}
                         { icon: 'fa-lock', label: '🔒 الأموال المحجوزة', value: Utils.formatCurrency(reserved), cls: 'accent', key: 'reserved' },
                         { icon: 'fa-arrow-down', label: '💸 المصروفات الفعلية', value: Utils.formatCurrency(paid), cls: 'negative', key: 'paid' },
                         { icon: 'fa-check-circle', label: '✅ المتاح للصرف', value: available !== null ? Utils.formatCurrency(available) : '—', cls: available !== null && available >= 0 ? 'positive' : 'negative' },
-                        { icon: 'fa-calendar-day', label: '📅 ميزانية اليوم', value: daily !== null ? Utils.formatCurrency(daily) : '—', cls: daily !== null && daily > 0 ? 'accent' : 'negative' },
+                        { icon: 'fa-calendar-day', label: '📅 ميزانية اليوم', value: daily !== null ? Utils.formatCurrency(daily) : '—', cls: daily !== null && daily > 0 ? 'accent' : 'negative', html: this.buildDynamicDailyCardHtml(dynamicDaily) },
                         { icon: 'fa-calendar-week', label: `📅 ${weeklyLabel}`, value: weekly !== null ? Utils.formatCurrency(weekly) : '—', cls: weekly !== null && weekly > 0 ? 'accent' : 'negative' },
-                        { icon: 'fa-piggy-bank', label: '🎯 هدف الادخار', value: Utils.formatCurrency(savingsGoal), cls: 'accent' },
+                        { icon: 'fa-bullseye', label: '🎯 هدف الادخار', value: Utils.formatCurrency(savingsGoal), cls: 'accent', html: this.buildSavingsGoalCardHtml(savingsGoal) },
                         { icon: 'fa-heartbeat', label: 'الصحة المالية', value: healthScoreDisplay + '/100', cls: healthScoreDisplay >= 70 ? 'positive' : healthScoreDisplay >= 50 ? 'accent' : 'negative' },
-                        { icon: 'fa-user-tag', label: 'نمط الانفاق', value: profileLabel, cls: 'accent' },
+                        { icon: 'fa-user-tag', label: 'نمط الانفاق', value: profileLabel, cls: profile === 'Behind' ? 'negative' : 'accent' },
                         { icon: 'fa-hourglass-half', label: 'الأيام المتبقية', value: daysUntilSalary !== null ? daysUntilSalary + ' يوم' : '—', cls: daysUntilSalary !== null && daysUntilSalary <= 3 ? 'positive' : 'accent' }
                     ];
                 }
@@ -9009,15 +9220,18 @@ ${styleGuide}${savingAmountAddendum}
                 const recs = ctx.recommendations || [];
                 if (recs.length > 0 && status.status !== 'no_income') {
                     const topRec = recs[0];
+                    const shortAction = topRec.action.length > 22 ? topRec.action.substring(0, 22) + '...' : topRec.action;
+                    const amountTag = topRec.expectedSavings > 0 ? ` (${Utils.formatCurrency(topRec.expectedSavings)})` : '';
                     cards.push({ 
                         icon: 'fa-lightbulb', 
                         label: 'أولوية', 
-                        value: topRec.action.length > 25 ? topRec.action.substring(0, 25) + '...' : topRec.action, 
+                        value: shortAction + amountTag, 
                         cls: topRec.priority === 'Critical' ? 'negative' : 'accent' 
                     });
                 }
 
                 cardsContainer.innerHTML = cards.map(c =>
+                    c.html ? c.html :
                     '<div class="dash-card ' + c.cls + (c.key ? ' clickable-card' : '') + '" data-card="' + c.label + '"' + (c.key ? ' data-key="' + c.key + '"' : '') + '><div class="card-icon"><i class="fas ' + c.icon + '"></i></div><div class="card-label">' + c.label + '</div><div class="card-value">' + c.value + '</div></div>'
                 ).join('');
 
@@ -9028,6 +9242,16 @@ ${styleGuide}${savingAmountAddendum}
                         else if (key === 'paid') this.openMonthExpensesModal();
                     });
                 });
+
+                const savingsReserveToggle = Utils.id('savingsGoalReserveToggle');
+                if (savingsReserveToggle) {
+                    Utils.on(savingsReserveToggle, 'change', () => {
+                        const settings = Storage.getSettings();
+                        settings.savingsGoalReserved = savingsReserveToggle.checked;
+                        Storage.setSettings(settings);
+                        FinancialEngine.refreshAll();
+                    });
+                }
 
                 const topCat = ctx.behavior?.topCategories?.[0];
                 const count = ctx.raw?.count || 0;
