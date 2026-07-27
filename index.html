@@ -250,6 +250,12 @@
             align-items: center;
             gap: 8px
         }
+        .sidebar-credit {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            opacity: 0.7;
+            letter-spacing: 0.02em;
+        }
         .sidebar-footer .footer-hint {
             font-size: 0.6rem;
             color: var(--text-muted);
@@ -2605,6 +2611,7 @@
             </div>
             <div class="sidebar-footer">
                 <button id="themeToggle" class="theme-toggle"><i class="fas fa-moon"></i></button>
+                <div class="sidebar-credit">تطوير فهد الخالدي</div>
             </div>
         </aside>
 
@@ -4371,7 +4378,10 @@
                 let windowDays = 30;
                 if (earliestDate) {
                     const daysSinceFirst = Math.floor((todayDateForAvg - new Date(earliestDate)) / 86400000) + 1;
-                    windowDays = Math.max(1, Math.min(30, daysSinceFirst));
+                    // حد أدنى أسبوع لنافذة المتوسط: بدون هذا، مستخدم أدخل كل مصروفاته
+                    // اليوم (يوم واحد فقط من السجل) يجعل "متوسط الصرف اليومي" = كامل
+                    // مصروفات الشهر ÷ يوم واحد، فيضخّم توقع العجز نهاية الشهر بشكل غير واقعي.
+                    windowDays = Math.max(7, Math.min(30, daysSinceFirst));
                 }
                 const avgDaily = windowDays > 0 ? last30Total / windowDays : 0;
                 const avgWeekly = avgDaily * 7;
@@ -8242,6 +8252,12 @@ ${styleGuide}${savingAmountAddendum}
                     this.addChatMessage(text, 'user');
                     input.value = '';
                     input.style.height = 'auto';
+
+                    // سؤال عن مطوّر التطبيق — إجابة مباشرة بدون أي توجيه لتحليل أو ذكاء اصطناعي
+                    if (/(من|مين)\s*(طور|صمم|صمّم|برمج|برمّج|عمل|أنشأ|انشأ|كتب|بنى|بنا)\s*(هذا\s*)?(التطبيق|البرنامج|التطبيق\s*ده|سند)|مطور\s*(التطبيق|سند)|مبرمج\s*(التطبيق|سند)|من\s*هو\s*مطور|who\s*(developed|built|made|created)\s*this\s*app/i.test(text)) {
+                        this.addChatMessage('تطوير فهد الخالدي 👨\u200d💻', 'financial-advisor');
+                        return;
+                    }
 
                     if (/أخرى/.test(text) && /(اعرض|عرض|وضح|فصل|فصّل|تفاصيل|شو فيها|ايش فيها|إيش فيها)/.test(
                             text)) {
