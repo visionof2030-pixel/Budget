@@ -3360,6 +3360,27 @@
         });
     }
 
+    /**
+     * يحسب "درجة ثراء" تقريبية لمجموعة بيانات (محلية أو سحابية) بعدد
+     * العناصر الفعلية فيها (بنود ميزانية، مصروفات، راتب مُدخل...). تُستخدم
+     * لمنع استبدال بيانات محلية غنية ببيانات سحابية فارغة أو أقدم بالخطأ
+     * (مثال: حساب سُجّل قبل ذلك بدون بيانات ثم استُخدم لاحقاً على جهاز
+     * فيه بيانات حقيقية بالفعل).
+     */
+    function dataRichnessScore(data) {
+        if (!data || typeof data !== 'object') return 0;
+        let score = 0;
+        try {
+            const budgetItems = data.budget_items;
+            if (Array.isArray(budgetItems)) score += budgetItems.length;
+            const expenses = data.expenses;
+            if (Array.isArray(expenses)) score += expenses.length;
+            const settings = data.settings;
+            if (settings && parseFloat(settings.salary) > 0) score += 1;
+        } catch (e) { /* تجاهل وإرجاع الدرجة كما وصلت */ }
+        return score;
+    }
+
     const DataSync = {
         status: 'idle', // idle | syncing | saved | error
         _authenticated: false,
@@ -3415,7 +3436,21 @@
                 }
 
                 if (rows && rows.length > 0) {
-                    restoreLocalData(rows[0].data);
+                    const cloudData = rows[0].data;
+                    const localData = collectLocalData();
+                    const cloudScore = dataRichnessScore(cloudData);
+                    const localScore = dataRichnessScore(localData);
+
+                    if (localScore > cloudScore) {
+                        // البيانات المحلية أغنى من نسخة السحابة (مثال: حساب سُجّل
+                        // سابقاً بدون بيانات، والآن يُستخدم على جهاز فيه بيانات حقيقية).
+                        // لا نستبدل المحلي؛ بدل ذلك نرفع المحلي ليصبح هو نسخة السحابة.
+                        const pushResult = await this.pushToCloud();
+                        this._pullInFlight = false;
+                        return { success: pushResult.success, hadCloudData: true, keptLocal: true, error: pushResult.error };
+                    }
+
+                    restoreLocalData(cloudData);
                     if (typeof FinancialEngine !== 'undefined') FinancialEngine.refreshAll();
                     this._setStatus('saved');
                     this._pullInFlight = false;
@@ -6114,7 +6149,7 @@
 
                 3) المخاطر: قيّم استقرار النمط المالي، احتمال حدوث عجز إذا استمر النمط الحالي، ارتفاع الالتزامات الثابتة مقابل الدخل، والفئات التي قد تسبب ضغطاً مستقبلياً — صنّف مستوى الخطر مع سبب واضح.
 
-                4) التوقعات: بناءً على النمط الحالي فقط، توقع الرصيد/الفائض/العجز المحتمل وأي فئة قد تتجاوز ميزانيتها قبل حدوث ذلك — ووضّح صراحة أن كل توقع تقديري وليس مؤكداً.
+                4) التوقعات: اعتمد على رقم "الرصيد المتوقع نهاية الشهر" المعطى لك أعلاه كما هو (لا تحسب رقماً بديلاً)، ووضّح ماذا يعني هذا الرقم عملياً وأي فئة قد تتجاوز ميزانيتها قبل حدوث ذلك — ووضّح صراحة أن كل توقع تقديري وليس مؤكداً.
 
                 5) المقارنة: قارن الأداء الحالي بالفترات السابقة المتوفرة في البيانات، وحدد أكبر تحسّن وأكبر تراجع فعلي، دون ذكر أي تغيّر غير جوهري.
 
@@ -6130,6 +6165,7 @@
 
                 قواعد صارمة على المخرج النهائي:
                 - لا تختلق أي استنتاج أو نمط أو سبب لا تدعمه البيانات أعلاه؛ إذا كانت البيانات غير كافية لاستنتاج موثوق فصرّح بذلك بوضوح بدل التخمين.
+                - "الرصيد المتوقع نهاية الشهر" أعلاه مُحسوب مسبقاً وبدقة من النظام؛ استخدم هذا الرقم كما هو حرفياً في أي إشارة للعجز أو الفائض المتوقع، ولا تعيد حسابه أو تقدّره بنفسك من متوسط المصروفات أو عدد الأيام مهما بدا لك الحساب اليدوي منطقياً — أي رقم عجز/فائض تذكره يجب أن يطابق هذا الرقم تماماً.
                 - لا تكرر أرقاماً ظاهرة أصلاً في الرسوم البيانية أو الجداول بلا تفسير جديد.
                 - اعرض فقط الرؤى التي تضيف قيمة فعلية وتساعد على قرار أفضل، ورتّبها حسب الأثر المالي.
                 - ابرز أهم معلومة قد لا يلاحظها المستخدم بنفسه في البداية.
