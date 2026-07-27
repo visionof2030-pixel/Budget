@@ -197,6 +197,48 @@
         .nav-link.active i {
             color: #fff
         }
+        .sidebar-auth-box {
+            padding-top: 14px;
+            margin-top: 6px;
+            border-top: 1px dashed var(--bg-glass-border);
+            display: flex;
+            flex-direction: column;
+            gap: 2px
+        }
+        .sync-status-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            padding: 4px 10px 4px 4px;
+            margin: 2px 0;
+        }
+        .sync-status-badge.sync-saved {
+            color: var(--success)
+        }
+        .sync-status-badge.sync-syncing {
+            color: var(--text-muted)
+        }
+        .sync-status-badge.sync-error {
+            color: var(--danger)
+        }
+        .sync-status-badge.sync-idle {
+            color: var(--text-muted)
+        }
+        .auth-status-msg {
+            min-height: 1.2rem;
+            font-size: 0.82rem;
+            margin: 4px 2px 6px;
+        }
+        .auth-status-msg.success {
+            color: var(--success)
+        }
+        .auth-status-msg.error {
+            color: var(--danger)
+        }
+        .auth-status-msg.loading {
+            color: var(--text-muted)
+        }
         .sidebar-footer {
             padding-top: 20px;
             border-top: 1px solid var(--bg-glass-border);
@@ -910,6 +952,75 @@
         }
         .method-panel {
             padding: 12px 0
+        }
+        .auth-tab {
+            flex: 1;
+            padding: 10px 12px;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: transparent;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-family: var(--font);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all var(--transition);
+            touch-action: manipulation;
+            min-height: 44px
+        }
+        .auth-tab.active {
+            background: var(--accent-gradient);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(18, 60, 87, 0.20)
+        }
+        .auth-tab:hover:not(.active) {
+            background: var(--bg-card)
+        }
+        .auth-gate {
+            position: fixed;
+            inset: 0;
+            z-index: 5000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-primary);
+            padding: 24px;
+            overflow-y: auto
+        }
+        .auth-gate.hidden {
+            display: none
+        }
+        .auth-gate-card {
+            width: 100%;
+            max-width: 380px;
+            padding: 32px 28px;
+            border-radius: var(--radius);
+            background: var(--bg-card);
+        }
+        .auth-gate-brand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 22px;
+            font-family: var(--font-display);
+            font-size: 1.55rem;
+            font-weight: 700
+        }
+        .auth-gate-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 18px
+        }
+        .auth-gate-footer-btn {
+            width: 100%;
+            margin-top: 10px
+        }
+        .auth-gate-note {
+            text-align: center;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 18px
         }
         .parse-result {
             margin-top: 12px
@@ -2423,6 +2534,36 @@
     </style>
 <body>
 
+    <div id="authGate" class="auth-gate">
+        <div class="auth-gate-card glass">
+            <div class="auth-gate-brand">
+                <span class="brand-icon"><i class="fas fa-brain"></i></span>
+                <span class="brand-name">AI Budget</span>
+            </div>
+            <div class="auth-gate-tabs">
+                <button class="auth-tab active" data-gate-tab="login" type="button">تسجيل الدخول</button>
+                <button class="auth-tab" data-gate-tab="register" type="button">إنشاء حساب</button>
+            </div>
+
+            <form id="gateLoginForm" class="method-panel">
+                <div class="form-group"><label>البريد الإلكتروني</label><input type="email" id="gateLoginEmail" class="form-input" required autocomplete="email" /></div>
+                <div class="form-group"><label>كلمة المرور</label><input type="password" id="gateLoginPassword" class="form-input" required autocomplete="current-password" /></div>
+                <div id="gateLoginStatusMsg" class="auth-status-msg"></div>
+                <button type="submit" class="btn-primary auth-gate-footer-btn" id="gateLoginSubmitBtn">دخول</button>
+            </form>
+
+            <form id="gateRegisterForm" class="method-panel" style="display:none;">
+                <div class="form-group"><label>البريد الإلكتروني</label><input type="email" id="gateRegisterEmail" class="form-input" required autocomplete="email" /></div>
+                <div class="form-group"><label>كلمة المرور</label><input type="password" id="gateRegisterPassword" class="form-input" required autocomplete="new-password" /></div>
+                <div class="form-group"><label>تأكيد كلمة المرور</label><input type="password" id="gateRegisterConfirmPassword" class="form-input" required autocomplete="new-password" /></div>
+                <div id="gateRegisterStatusMsg" class="auth-status-msg"></div>
+                <button type="submit" class="btn-primary auth-gate-footer-btn" id="gateRegisterSubmitBtn">إنشاء حساب</button>
+            </form>
+
+            <p class="auth-gate-note">بياناتك محفوظة بأمان ومرتبطة بحسابك فقط.</p>
+        </div>
+    </div>
+
     <div id="app">
 
         <aside id="sidebar" class="sidebar closed">
@@ -2443,9 +2584,24 @@
                 <a href="#" class="nav-link" data-page="temp"><i class="fas fa-umbrella-beach"></i><span>ميزانية مؤقتة</span></a>
                 <a href="#" class="nav-link" data-page="chat"><i class="fas fa-comment-dots"></i><span>المستشار المالي</span></a>
             </nav>
+            <div class="sidebar-auth-box" id="sidebarAuthBox">
+                <button id="authLoginBtn" class="nav-link" style="width:100%;">
+                    <i class="fas fa-user"></i><span>تسجيل الدخول</span>
+                </button>
+                <div id="authUserInfo" style="display:none;">
+                    <div class="nav-link" style="cursor:default;pointer-events:none;">
+                        <i class="fas fa-user-check"></i><span id="authUserEmail" style="font-size:0.78rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+                    </div>
+                    <div id="syncStatusBadge" class="sync-status-badge sync-idle">
+                        <i class="fas fa-check-circle"></i> <span id="syncStatusText">—</span>
+                    </div>
+                    <button id="authLogoutBtn" class="nav-link" style="width:100%;">
+                        <i class="fas fa-sign-out-alt"></i><span>تسجيل الخروج</span>
+                    </button>
+                </div>
+            </div>
             <div class="sidebar-footer">
                 <button id="themeToggle" class="theme-toggle"><i class="fas fa-moon"></i></button>
-                <span class="footer-hint" id="geminiSecretTrigger">⚡ Gemini AI v2</span>
             </div>
         </aside>
 
@@ -2619,7 +2775,7 @@
                         <hr style="margin: 24px 0; border-color: var(--bg-glass-border);" />
                         <h3>إدارة البيانات</h3>
                         <button id="resetAppBtn" class="btn-danger" style="width:100%;"><i class="fas fa-trash-alt"></i> 🗑 إعادة ضبط التطبيق</button>
-                        <p style="font-size:0.8rem; color:var(--text-muted); margin-top:8px;">سيتم حذف جميع البيانات المالية مع الاحتفاظ بمفاتيح Gemini.</p>
+                        <p style="font-size:0.8rem; color:var(--text-muted); margin-top:8px;">سيتم حذف جميع البيانات المالية من هذا الجهاز.</p>
                     </div>
                 </section>
 
@@ -2681,6 +2837,37 @@
     </div>
 
     <!-- ===== MODALS ===== -->
+    <div id="authModal" class="modal">
+        <div class="modal-content glass">
+            <div class="modal-header"><h2>الحساب</h2><button class="modal-close" id="closeAuthModal">&times;</button></div>
+            <div class="modal-body">
+                <div class="method-tabs">
+                    <button class="auth-tab active" data-auth-tab="login" type="button">تسجيل الدخول</button>
+                    <button class="auth-tab" data-auth-tab="register" type="button">إنشاء حساب</button>
+                </div>
+
+                <form id="authLoginForm" class="method-panel">
+                    <div class="form-group"><label>البريد الإلكتروني</label><input type="email" id="loginEmail" class="form-input" required autocomplete="email" /></div>
+                    <div class="form-group"><label>كلمة المرور</label><input type="password" id="loginPassword" class="form-input" required autocomplete="current-password" /></div>
+                    <div id="loginStatusMsg" class="auth-status-msg"></div>
+                    <div class="modal-actions" style="border-top:none;padding-top:0;">
+                        <button type="submit" class="btn-primary" id="loginSubmitBtn">دخول</button>
+                    </div>
+                </form>
+
+                <form id="authRegisterForm" class="method-panel" style="display:none;">
+                    <div class="form-group"><label>البريد الإلكتروني</label><input type="email" id="registerEmail" class="form-input" required autocomplete="email" /></div>
+                    <div class="form-group"><label>كلمة المرور</label><input type="password" id="registerPassword" class="form-input" required autocomplete="new-password" minlength="6" /></div>
+                    <div class="form-group"><label>تأكيد كلمة المرور</label><input type="password" id="registerConfirmPassword" class="form-input" required autocomplete="new-password" minlength="6" /></div>
+                    <div id="registerStatusMsg" class="auth-status-msg"></div>
+                    <div class="modal-actions" style="border-top:none;padding-top:0;">
+                        <button type="submit" class="btn-primary" id="registerSubmitBtn">إنشاء الحساب</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div id="expenseModal" class="modal">
         <div class="modal-content glass">
             <div class="modal-header"><h2>إضافة مصروف</h2><button class="modal-close" id="closeExpenseModal">&times;</button></div>
@@ -2857,47 +3044,6 @@
         </div>
     </div>
 
-    <div id="geminiModal" class="modal">
-        <div class="modal-content glass">
-            <div class="modal-header"><h2>⚙️ إعدادات Gemini AI</h2><button class="modal-close" id="closeGeminiModal">&times;</button></div>
-            <div class="modal-body">
-                <form id="geminiSettingsForm" class="settings-form">
-                    <div class="form-group">
-                        <label for="geminiModel">نوع النموذج</label>
-                        <select id="geminiModel" class="form-input">
-                            <option value="gemini-2.5-pro" selected>Gemini 2.5 Pro</option>
-                            <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-                            <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite</option>
-                            <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
-                            <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
-                            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>مفاتيح Gemini API (حتى 12 مفتاح)</label>
-                        <div class="key-input-group">
-                            <input type="password" id="geminiKeyInput" class="form-input" placeholder="أدخل مفتاح Gemini" />
-                            <button type="button" id="addKeyBtn" class="btn-primary btn-sm">إضافة</button>
-                            <button type="button" id="toggleKeysVisibility" class="btn-secondary btn-sm">إظهار</button>
-                        </div>
-                        <div id="keysList" class="keys-container"></div>
-                        <div id="keyCounter" class="key-counter">0 / 12 مفتاح</div>
-                        <small class="form-hint">يتم توزيع الطلبات بشكل دائري على المفاتيح النشطة.</small>
-                        <div style="margin-top:8px;padding:10px 12px;background:var(--bg-glass);border-radius:var(--radius-sm);border-right:3px solid var(--warning);font-size:0.78rem;color:var(--text-secondary);">
-                            ⚠️ <strong>تنبيه أمني:</strong> تُحفظ المفاتيح داخل متصفحك فقط (localStorage) بدون تشفير. لا تستخدم هذه الميزة على جهاز مشترك أو عام، ولا تشارك رابط هذا التطبيق مع مفاتيحك المحفوظة فيه مع أي شخص آخر.
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>المفتاح النشط حالياً</label>
-                        <div id="activeKeyDisplay" style="font-family:var(--font-mono);font-size:0.8rem;color:var(--text-secondary);padding:8px 12px;background:var(--bg-glass);border-radius:var(--radius-sm);border:1px solid var(--bg-glass-border);">لا يوجد مفتاح نشط</div>
-                    </div>
-                    <button type="submit" class="btn-primary">حفظ الإعدادات</button>
-                </form>
-                <div id="geminiStatus" class="api-status" style="margin-top:12px;"></div>
-            </div>
-        </div>
-    </div>
-
     <div id="setupModal" class="modal setup-modal">
         <div class="modal-content glass">
             <div class="modal-header"><h2>مرحباً بك في AI Budget Manager</h2><p>لنبدأ بإعداد ميزانيتك</p></div>
@@ -2939,6 +3085,437 @@
         <span class="fab-advisor-icon"><i class="fas fa-comment-dots"></i></span>
         <span class="fab-advisor-label">المستشار</span>
     </button>
+
+    <!-- Supabase JS SDK (المرحلة 1: الاتصال فقط) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+/**
+ * ============================================================
+ * Supabase Client — ملف الاتصال فقط
+ * ============================================================
+ * هذا الملف مسؤول حصراً عن إنشاء وإدارة الاتصال بـ Supabase.
+ * لا يحتوي على أي Business Logic أو استعلامات بيانات — تلك تُضاف
+ * لاحقاً في مراحل منفصلة (Auth، Sync، ... إلخ).
+ *
+ * ملاحظة حول Environment Variables:
+ * هذا المشروع عبارة عن صفحة HTML واحدة بدون أداة بناء (لا يوجد
+ * package.json ولا Vite/Webpack ولا خادم Node). لذلك لا تتوفر آلية
+ * حقيقية لمتغيرات البيئة (.env / process.env) في المتصفح مباشرة.
+ * تم اعتماد الحل التالي:
+ *   1) القيم موضوعة كثوابت أدناه (Publishable Key مصمم أصلاً ليكون
+ *      علنياً وآمناً على الواجهة الأمامية، تماماً مثل مفاتيح Firebase
+ *      العامة — الحماية الفعلية تتم عبر Row Level Security في Supabase).
+ *   2) تم دعم قراءة القيم من window.__SUPABASE_ENV__ إن وُجدت، حتى
+ *      يسهل لاحقاً حقنها من أي أداة بناء أو خادم بدون تعديل هذا الملف.
+ */
+(function (global) {
+    'use strict';
+
+    const ENV = global.__SUPABASE_ENV__ || {};
+
+    const SUPABASE_URL = ENV.SUPABASE_URL || 'https://elgjznfkkxsejxqnbhrz.supabase.co';
+    const SUPABASE_PUBLISHABLE_KEY = ENV.SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_ovAztgGDLOOAotSbBNEq7Q_9UHG90T0';
+
+    // نسخة واحدة فقط من العميل (Singleton) — منع تكرار الاتصال
+    let _clientInstance = null;
+
+    const SupabaseClient = {
+        /**
+         * يرجع نسخة واحدة فقط من عميل Supabase.
+         * أي استدعاء لاحق يعيد نفس النسخة بدل إنشاء اتصال جديد.
+         */
+        getClient() {
+            if (_clientInstance) {
+                return _clientInstance;
+            }
+
+            if (typeof global.supabase === 'undefined' || typeof global.supabase.createClient !== 'function') {
+                console.error('[SupabaseClient] مكتبة Supabase JS غير محمّلة. تأكد من إضافة CDN قبل هذا الملف.');
+                return null;
+            }
+
+            if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+                console.error('[SupabaseClient] SUPABASE_URL أو SUPABASE_PUBLISHABLE_KEY غير معرّفة.');
+                return null;
+            }
+
+            _clientInstance = global.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+                auth: {
+                    persistSession: true,
+                    autoRefreshToken: true,
+                    detectSessionInUrl: false
+                }
+            });
+
+            return _clientInstance;
+        },
+
+        /** هل تم ضبط بيانات الاتصال؟ */
+        isConfigured() {
+            return !!(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY);
+        },
+
+        /**
+         * اختبار خفيف للتأكد من الوصول الفعلي لمشروع Supabase.
+         * يستخدم نقطة فحص صحة Auth (لا يلمس أي جدول بيانات ولا يحتاج تسجيل دخول).
+         * يرجع: { success: boolean, error?: string }
+         */
+        async testConnection() {
+            const client = this.getClient();
+            if (!client) {
+                return { success: false, error: 'تعذر إنشاء عميل Supabase (تحقق من تحميل المكتبة والمفاتيح).' };
+            }
+            try {
+                const response = await fetch(SUPABASE_URL + '/auth/v1/health', {
+                    method: 'GET',
+                    headers: { apikey: SUPABASE_PUBLISHABLE_KEY }
+                });
+                if (!response.ok) {
+                    return { success: false, error: 'استجابة غير متوقعة من Supabase (HTTP ' + response.status + ')' };
+                }
+                return { success: true };
+            } catch (err) {
+                return { success: false, error: (err && err.message) || 'تعذر الوصول إلى الشبكة' };
+            }
+        }
+    };
+
+    global.SupabaseClient = SupabaseClient;
+
+})(window);
+
+    </script>
+
+    <script>
+/**
+ * ============================================================
+ * Auth Service — طبقة المصادقة (Supabase Auth)
+ * ============================================================
+ * يعتمد حصراً على SupabaseClient.getClient() (نفس العميل الوحيد
+ * من المرحلة 1) — لا يُنشئ أي اتصال جديد.
+ * هذا الملف مسؤول فقط عن: تسجيل حساب / دخول / خروج / الجلسة /
+ * متابعة تغيّر حالة المستخدم. لا يحتوي على أي منطق خاص بالمصروفات
+ * أو بيانات التطبيق (ذلك يُضاف في مراحل لاحقة).
+ */
+(function (global) {
+    'use strict';
+
+    function getClient() {
+        if (typeof global.SupabaseClient === 'undefined') {
+            console.error('[AuthService] SupabaseClient غير متوفر. تأكد من تحميل supabaseClient.js أولاً.');
+            return null;
+        }
+        return global.SupabaseClient.getClient();
+    }
+
+    /** ترجمة أخطاء Supabase الشائعة إلى رسائل عربية مفهومة */
+    function translateError(err) {
+        const msg = (err && err.message) || '';
+        const map = {
+            'Invalid login credentials': 'البريد الإلكتروني أو كلمة المرور غير صحيحة',
+            'User already registered': 'هذا البريد الإلكتروني مسجّل مسبقاً',
+            'Password should be at least 6 characters': 'كلمة المرور يجب ألا تقل عن 6 أحرف',
+            'Email not confirmed': 'الرجاء تأكيد البريد الإلكتروني أولاً',
+            'Failed to fetch': 'تعذر الاتصال بالخادم، تحقق من اتصال الإنترنت'
+        };
+        return map[msg] || msg || 'حدث خطأ غير متوقع';
+    }
+
+    const AuthService = {
+        async signUp(email, password) {
+            const client = getClient();
+            if (!client) return { success: false, error: 'تعذر الاتصال بخدمة المصادقة' };
+            try {
+                const { data, error } = await client.auth.signUp({ email, password });
+                if (error) return { success: false, error: translateError(error) };
+                return { success: true, data };
+            } catch (err) {
+                return { success: false, error: translateError(err) };
+            }
+        },
+
+        async signIn(email, password) {
+            const client = getClient();
+            if (!client) return { success: false, error: 'تعذر الاتصال بخدمة المصادقة' };
+            try {
+                const { data, error } = await client.auth.signInWithPassword({ email, password });
+                if (error) return { success: false, error: translateError(error) };
+                return { success: true, data };
+            } catch (err) {
+                return { success: false, error: translateError(err) };
+            }
+        },
+
+        async signOut() {
+            const client = getClient();
+            if (!client) return { success: false, error: 'تعذر الاتصال بخدمة المصادقة' };
+            try {
+                const { error } = await client.auth.signOut();
+                if (error) return { success: false, error: translateError(error) };
+                return { success: true };
+            } catch (err) {
+                return { success: false, error: translateError(err) };
+            }
+        },
+
+        /** يرجع الجلسة الحالية إن وُجدت (لمتابعة حالة المستخدم عند فتح التطبيق) */
+        async getSession() {
+            const client = getClient();
+            if (!client) return null;
+            try {
+                const { data, error } = await client.auth.getSession();
+                if (error || !data) return null;
+                return data.session || null;
+            } catch (err) {
+                return null;
+            }
+        },
+
+        async getCurrentUser() {
+            const session = await this.getSession();
+            return session ? session.user : null;
+        },
+
+        /** الاستماع لتغيّر حالة المصادقة (دخول/خروج/تحديث الجلسة) */
+        onAuthStateChange(callback) {
+            const client = getClient();
+            if (!client) return null;
+            const { data } = client.auth.onAuthStateChange((event, session) => {
+                callback(event, session);
+            });
+            return data ? data.subscription : null;
+        }
+    };
+
+    global.AuthService = AuthService;
+
+})(window);
+
+    </script>
+
+    <script>
+/**
+ * ============================================================
+ * Data Sync — ربط بيانات التطبيق المحلية بجدول user_data
+ * ============================================================
+ * المسؤولية فقط: سحب بيانات المستخدم بعد تسجيل الدخول، ورفع أي
+ * تعديل محلي جديد إلى Supabase. لا يحتوي على أي منطق مالي —
+ * ذلك يبقى بالكامل داخل FinancialEngine كما هو.
+ *
+ * التصميم:
+ * - نفس أسلوب ميزة "النسخ الاحتياطي" الموجودة أصلاً في التطبيق:
+ *   كل المفاتيح التي تبدأ بـ ai_budget_ تُجمع في كائن JSON واحد
+ *   ويُخزَّن في عمود `data` بجدول user_data (صف واحد لكل مستخدم).
+ * - البيانات المحلية تبقى دائماً كما هي ولا تُحذف أبداً من هذه
+ *   الطبقة؛ الاستثناء الوحيد هو الاستعادة الصريحة عند تسجيل الدخول
+ *   (سحب بيانات الحساب من السحابة)، وهو سلوك مقصود لدعم تعدد الأجهزة.
+ *
+ * ⚠️ مهم جداً (يلزم تنفيذه من طرفكم داخل Supabase):
+ * لضمان وصول كل مستخدم إلى بياناته فقط، يجب تفعيل Row Level
+ * Security على جدول user_data مع سياسات تعتمد على auth.uid().
+ * راجعوا التقرير المرفق للسكربت الجاهز.
+ */
+(function (global) {
+    'use strict';
+
+    const TABLE = 'user_data';
+    let pushTimer = null;
+
+    function getClient() {
+        if (typeof global.SupabaseClient === 'undefined') return null;
+        return global.SupabaseClient.getClient();
+    }
+
+    /** يجمع كل بيانات التطبيق المحلية (نفس أسلوب ميزة النسخ الاحتياطي الحالية) */
+    function collectLocalData() {
+        const data = {};
+        Object.keys(localStorage).forEach((key) => {
+            if (key.startsWith('ai_budget_')) {
+                const raw = localStorage.getItem(key);
+                try {
+                    data[key.replace('ai_budget_', '')] = JSON.parse(raw);
+                } catch (e) {
+                    data[key.replace('ai_budget_', '')] = raw;
+                }
+            }
+        });
+        return data;
+    }
+
+    /** يكتب بيانات مستلمة من السحابة داخل localStorage (نفس أسلوب ميزة الاستيراد الحالية) */
+    function restoreLocalData(data) {
+        if (!data || typeof data !== 'object') return;
+        Object.entries(data).forEach(([key, value]) => {
+            localStorage.setItem('ai_budget_' + key, JSON.stringify(value));
+        });
+    }
+
+    const DataSync = {
+        status: 'idle', // idle | syncing | saved | error
+        _authenticated: false,
+        _pushInFlight: false,
+        _pushQueued: false,
+        _pendingPush: false,
+        _listeners: [],
+
+        isAuthenticated() {
+            return this._authenticated;
+        },
+        setAuthenticated(val) {
+            this._authenticated = !!val;
+        },
+
+        /** اشتراك اختياري لمتابعة حالة المزامنة (سيُستخدم في المرحلة 5 لعرضها بالواجهة) */
+        onStatusChange(fn) {
+            this._listeners.push(fn);
+        },
+        _setStatus(s) {
+            this.status = s;
+            this._listeners.forEach((fn) => {
+                try { fn(s); } catch (e) { /* تجاهل أخطاء المستمعين */ }
+            });
+        },
+
+        /** سحب بيانات المستخدم من Supabase بعد تسجيل الدخول */
+        async pullFromCloud() {
+            const client = getClient();
+            if (!client) return { success: false, error: 'لا يوجد اتصال بـ Supabase' };
+            if (typeof AuthService === 'undefined') return { success: false, error: 'خدمة المصادقة غير متاحة' };
+
+            const user = await AuthService.getCurrentUser();
+            if (!user) return { success: false, error: 'المستخدم غير مسجل الدخول' };
+
+            this._setStatus('syncing');
+            try {
+                const { data: rows, error } = await client
+                    .from(TABLE)
+                    .select('id, data')
+                    .eq('user_id', user.id)
+                    .limit(1);
+
+                if (error) {
+                    this._setStatus('error');
+                    return { success: false, error: error.message };
+                }
+
+                if (rows && rows.length > 0) {
+                    restoreLocalData(rows[0].data);
+                    if (typeof FinancialEngine !== 'undefined') FinancialEngine.refreshAll();
+                    this._setStatus('saved');
+                    return { success: true, hadCloudData: true };
+                }
+
+                // لا توجد بيانات سحابية بعد لهذا المستخدم — نرفع بياناته المحلية الحالية لتكون البداية
+                const pushResult = await this.pushToCloud();
+                return { success: pushResult.success, hadCloudData: false, error: pushResult.error };
+            } catch (err) {
+                this._setStatus('error');
+                return { success: false, error: (err && err.message) || 'خطأ غير متوقع' };
+            }
+        },
+
+        /** رفع/تحديث بيانات المستخدم الحالية في Supabase */
+        async pushToCloud() {
+            // منع تنفيذ أكثر من عملية رفع في نفس اللحظة (تفادي تكرار البيانات)
+            if (this._pushInFlight) {
+                this._pushQueued = true;
+                return { success: true, queued: true };
+            }
+
+            const client = getClient();
+            if (!client) return { success: false, error: 'لا يوجد اتصال بـ Supabase' };
+            if (typeof AuthService === 'undefined') return { success: false, error: 'خدمة المصادقة غير متاحة' };
+
+            const user = await AuthService.getCurrentUser();
+            if (!user) return { success: false, error: 'المستخدم غير مسجل الدخول' };
+
+            // التعامل مع انقطاع الإنترنت: لا نحاول الاتصال، ونجدول إعادة المحاولة تلقائياً عند عودته
+            if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+                this._pendingPush = true;
+                this._setStatus('error');
+                return { success: false, error: 'لا يوجد اتصال بالإنترنت — سيتم الحفظ تلقائياً عند عودة الاتصال' };
+            }
+
+            this._pushInFlight = true;
+            this._setStatus('syncing');
+            try {
+                const payload = collectLocalData();
+
+                const { data: existing, error: selErr } = await client
+                    .from(TABLE)
+                    .select('id')
+                    .eq('user_id', user.id)
+                    .limit(1);
+
+                if (selErr) {
+                    this._handlePushFailure(selErr);
+                    return { success: false, error: selErr.message };
+                }
+
+                let writeError = null;
+                if (existing && existing.length > 0) {
+                    const { error } = await client
+                        .from(TABLE)
+                        .update({ data: payload, updated_at: new Date().toISOString() })
+                        .eq('id', existing[0].id)
+                        .eq('user_id', user.id);
+                    writeError = error;
+                } else {
+                    const { error } = await client
+                        .from(TABLE)
+                        .insert({ user_id: user.id, data: payload });
+                    writeError = error;
+                }
+
+                if (writeError) {
+                    this._handlePushFailure(writeError);
+                    return { success: false, error: writeError.message };
+                }
+
+                this._setStatus('saved');
+                return { success: true };
+            } catch (err) {
+                this._handlePushFailure(err);
+                return { success: false, error: (err && err.message) || 'تعذر الحفظ في Supabase' };
+            } finally {
+                this._pushInFlight = false;
+                if (this._pushQueued) {
+                    this._pushQueued = false;
+                    this.pushToCloud();
+                }
+            }
+        },
+
+        /** معالجة موحّدة لفشل الرفع: تحديث الحالة، وجدولة إعادة محاولة تلقائية إن كان السبب انقطاع الشبكة */
+        _handlePushFailure(err) {
+            this._setStatus('error');
+            const offline = (typeof navigator !== 'undefined' && navigator.onLine === false) ||
+                (err && /fetch|network/i.test(err.message || ''));
+            if (offline) this._pendingPush = true;
+        },
+
+        /** رفع مؤجَّل (Debounce) — يُستدعى تلقائياً من Storage.set عند أي تعديل محلي */
+        schedulePush() {
+            if (pushTimer) clearTimeout(pushTimer);
+            pushTimer = setTimeout(() => { this.pushToCloud(); }, 1200);
+        }
+    };
+
+    // إعادة المحاولة تلقائياً فور عودة الاتصال بالإنترنت
+    if (typeof global.addEventListener === 'function') {
+        global.addEventListener('online', () => {
+            if (DataSync._pendingPush && DataSync.isAuthenticated()) {
+                DataSync._pendingPush = false;
+                DataSync.pushToCloud();
+            }
+        });
+    }
+
+    global.DataSync = DataSync;
+
+})(window);
+
+    </script>
 
     <script>
         // ============================================================
@@ -3090,7 +3667,10 @@
         const Storage = {
             get(key, def) { try { const val = localStorage.getItem('ai_budget_' + key); return val ? JSON.parse(val) :
                         def; } catch { return def; } },
-            set(key, val) { localStorage.setItem('ai_budget_' + key, JSON.stringify(val)); },
+            set(key, val) {
+                localStorage.setItem('ai_budget_' + key, JSON.stringify(val));
+                if (typeof DataSync !== 'undefined' && DataSync.isAuthenticated()) DataSync.schedulePush();
+            },
             remove(key) { localStorage.removeItem('ai_budget_' + key); },
             getExpenses() { return this.get('expenses', []); },
             setExpenses(exp) { this.set('expenses', exp); },
@@ -3099,12 +3679,6 @@
                 return this.get('settings', def);
             },
             setSettings(s) { this.set('settings', s); },
-            getGeminiKeys() { return this.get('gemini_keys', []); },
-            setGeminiKeys(keys) { this.set('gemini_keys', keys); },
-            getGeminiModel() { return this.get('gemini_model', 'gemini-2.5-pro'); },
-            setGeminiModel(model) { this.set('gemini_model', model); },
-            getGeminiKeyIndex() { return this.get('gemini_key_index', 0); },
-            setGeminiKeyIndex(idx) { this.set('gemini_key_index', idx); },
             getBudgetItems() { return this.get('budget_items', []); },
             setBudgetItems(items) { this.set('budget_items', items); },
             getTravelBudget() { const def = { enabled: false, tripName: '', totalBudget: 0, categoryBudgets: {} }; return this
@@ -3233,7 +3807,7 @@
                 const now = WorldTime.now();
                 const today0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
                 let candidate = new Date(now.getFullYear(), now.getMonth(), day);
-                if (candidate < today0) {
+                if (candidate <= today0) {
                     candidate = new Date(now.getFullYear(), now.getMonth() + 1, day);
                 }
                 return Math.round((candidate - today0) / 86400000);
@@ -3573,7 +4147,7 @@
             },
 
             resetApp() {
-                const keysToKeep = ['gemini_keys', 'gemini_model', 'gemini_key_index', 'migrated_v2'];
+                const keysToKeep = ['migrated_v2'];
                 const allKeys = Object.keys(localStorage);
                 allKeys.forEach(key => {
                     if (key.startsWith('ai_budget_')) {
@@ -4494,65 +5068,31 @@
         };
 
         // ============================================================
-        // 7. GEMINI (محسّن مع استغلال المفاتيح الـ12 وتحليل النص)
+        // 7. GEMINI (الاتصال يتم فقط عبر Supabase Edge Function "gemini-analysis")
         // ============================================================
         const Gemini = {
-            getKeys() { return Storage.getGeminiKeys(); },
-            getModel() { return Storage.getGeminiModel(); },
-            getCurrentKey() {
-                const keys = this.getKeys();
-                if (keys.length === 0) return null;
-                const index = Storage.getGeminiKeyIndex() % keys.length;
-                return keys[index];
-            },
-            rotateKey() {
-                const keys = this.getKeys();
-                if (keys.length === 0) return null;
-                const currentIndex = Storage.getGeminiKeyIndex();
-                const newIndex = (currentIndex + 1) % keys.length;
-                Storage.setGeminiKeyIndex(newIndex);
-                return keys[newIndex];
-            },
+            // كل الاتصال بـ Gemini أصبح يمر حصرياً عبر Supabase Edge Function باسم "gemini-analysis".
+            // لا يوجد أي مفتاح API ولا أي اتصال مباشر بـ Google داخل الواجهة الأمامية.
+            // إدارة المفاتيح ودورانها (Key Rotation) ونوع النموذج (gemini-2.5-flash-lite)
+            // أصبحت بالكامل من مسؤولية الـ Edge Function على الخادم.
             async sendRequest(prompt, history) {
-                const key = this.getCurrentKey();
-                if (!key) throw new Error('لا يوجد مفتاح Gemini نشط. أضف مفتاحاً من خلال النقر على "Gemini AI v2" في الفوتر.');
-                const model = this.getModel();
-                const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' +
-                    key;
-                const contents = [];
-                if (Array.isArray(history) && history.length > 0) {
-                    history.forEach(turn => {
-                        contents.push({ role: turn.role === 'user' ? 'user' : 'model', parts: [{ text: turn.text }] });
-                    });
+                const client = (typeof SupabaseClient !== 'undefined') ? SupabaseClient.getClient() : null;
+                if (!client) {
+                    throw new Error('تعذر الاتصال بخدمة التحليل (Supabase). تحقق من الاتصال بالإنترنت.');
                 }
-                contents.push({ role: 'user', parts: [{ text: prompt }] });
-                const payload = {
-                    contents: contents,
-                    generationConfig: { temperature: 0.5, maxOutputTokens: 2048, topP: 0.95 }
-                };
                 try {
-                    const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(payload) });
-                    if (response.status === 429 || response.status === 403 || response.status === 401) {
-                        const newKey = this.rotateKey();
-                        if (newKey) {
-                            const retryUrl = 'https://generativelanguage.googleapis.com/v1beta/models/' + model +
-                                ':generateContent?key=' + newKey;
-                            const retryResponse = await fetch(retryUrl, { method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(
-                                    payload) });
-                            if (retryResponse.ok) { const data = await retryResponse.json(); return data.candidates?.[0]
-                                    ?.content?.parts?.[0]?.text || ''; }
-                        }
-                        throw new Error('تم استنفاذ جميع المفاتيح أو بعضها غير صالح.');
+                    const { data, error } = await client.functions.invoke('gemini-analysis', {
+                        body: { prompt: prompt, history: Array.isArray(history) ? history : [] }
+                    });
+                    if (error) {
+                        throw new Error(error.message || 'خطأ في الاتصال بخدمة التحليل');
                     }
-                    if (!response.ok) { const errData = await response.json(); throw new Error(errData.error?.message ||
-                            'خطأ في الاتصال بـ Gemini'); }
-                    const data = await response.json();
-                    return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                    if (!data || typeof data.text !== 'string') {
+                        throw new Error('رد غير صالح من خدمة التحليل');
+                    }
+                    return data.text;
                 } catch (e) {
-                    this.rotateKey();
-                    throw new Error(e.message || 'فشل الاتصال بـ Gemini');
+                    throw new Error(e.message || 'فشل الاتصال بخدمة التحليل');
                 }
             },
 
@@ -5584,26 +6124,147 @@
                 }
             },
 
+            // ============================================================
+            // تصنيف نية سؤال المستشار المالي إلى 7 أنواع — منطق JS بحت
+            // بدون أي استدعاء ذكاء اصطناعي إضافي فقط للتصنيف (لا تكلفة زائدة)
+            // ============================================================
+            classifyAdvisorIntent(question) {
+                const q = (question || '').trim();
+                if (!q) return 'GENERAL';
+
+                // 6) دعم نفسي مالي — المستخدم يبدو قلقاً أو مضغوطاً
+                const emotionalKeywords = [
+                    'متوتر', 'مضغوط', 'قلق', 'قلقان', 'خايف', 'خائف',
+                    'ما أقدر أوفر', 'ما اقدر اوفر', 'راتبي يضيع', 'راتبي يروح',
+                    'مرهق مالياً', 'مرهق ماليا', 'ضايع مالياً', 'ضايع ماليا',
+                    'تعبت من مصاريفي', 'تعبان من مصاريفي'
+                ];
+
+                // 5) اتخاذ قرار مالي (شراء / قرض / التزام جديد)
+                const decisionKeywords = [
+                    'هل أشتري', 'هل اشتري', 'هل أقدر آخذ قرض', 'هل اقدر اخذ قرض',
+                    'هل أقدر أشتري', 'هل اقدر اشتري', 'هل أستطيع شراء', 'هل استطيع شراء',
+                    'هل آخذ قرض', 'هل اخذ قرض', 'هل أقسط', 'هل اقسط', 'هل أقدم على'
+                ];
+
+                // 4) التخطيط المالي
+                const planningKeywords = [
+                    'خطة', 'كيف أوزع راتبي', 'كيف اوزع راتبي', 'وزع راتبي', 'رتب مصاريفي'
+                ];
+
+                // 3) اكتشاف الهدر المالي
+                const wasteKeywords = [
+                    'أين أصرف زيادة', 'اين أصرف زيادة', 'اين اصرف زيادة',
+                    'وين أصرف أكثر', 'وين اصرف اكثر', 'أين الهدر', 'اين الهدر',
+                    'فين الهدر', 'وش اللي زايد', 'ايش اللي زايد', 'مصاريف زايدة'
+                ];
+
+                // 2) تحليل الوضع المالي العام
+                const analysisKeywords = [
+                    'كيف وضعي المالي', 'كيف وضعي', 'حلل مصاريفي', 'هل أنا ماشي صح',
+                    'هل انا ماشي صح', 'وضعي المالي', 'قيم وضعي', 'حلل وضعي',
+                    'هل وضعي جيد', 'هل وضعي المالي جيد', 'تحليل مصاريفي'
+                ];
+
+                // 7) أسئلة عامة/شخصية بدون طلب أرقام تحديداً
+                const generalKeywords = [
+                    'كيف حالك', 'كيفك', 'شلونك', 'ما نصيحتك', 'وش رأيك', 'ايش رأيك'
+                ];
+
+                if (emotionalKeywords.some(k => q.includes(k))) return 'EMOTIONAL_SUPPORT';
+                if (decisionKeywords.some(k => q.includes(k))) return 'DECISION';
+                if (planningKeywords.some(k => q.includes(k))) return 'PLANNING';
+                if (wasteKeywords.some(k => q.includes(k))) return 'WASTE_DETECTION';
+                if (analysisKeywords.some(k => q.includes(k))) return 'SITUATION_ANALYSIS';
+                if (generalKeywords.some(k => q.includes(k))) return 'GENERAL';
+
+                // افتراضياً: نعاملها كتحليل وضع عام (أشمل رد آمن ومفيد لأي سؤال غير مصنّف)
+                return 'SITUATION_ANALYSIS';
+            },
+
+            // ============================================================
+            // ذكاء الحوار: لأسئلة القرار (DECISION) التي تنقصها معلومة جوهرية
+            // (سعر / قسط) — نسأل سؤالاً ذكياً بدل التخمين، بدون استدعاء Gemini
+            // ترجع نصاً للسؤال التوضيحي، أو null إذا كانت المعلومات كافية
+            // ============================================================
+            detectMissingDecisionInfo(question) {
+                const q = (question || '').trim();
+                const hasNumber = /\d/.test(ExpenseParser.normalizeDigits(q));
+                if (hasNumber) return null;
+
+                if (/سيارة/.test(q)) {
+                    return 'أقدر أساعدك، لكن أحتاج أعرف قيمة السيارة والقسط الشهري المتوقع (إن وجد) حتى أعطيك رأياً أدق.';
+                }
+                if (/قرض/.test(q)) {
+                    return 'أقدر أساعدك، لكن أحتاج أعرف قيمة القرض والقسط الشهري المتوقع حتى أقيّم تأثيره على وضعك المالي.';
+                }
+                if (/(أشتري|اشتري)/.test(q)) {
+                    return 'أقدر أساعدك، لكن أحتاج أعرف سعر الشيء الذي تنوي شراءه تقريباً حتى أقارنه بميزانيتك المتاحة.';
+                }
+                return null;
+            },
+
             async answerQuickQuestion(question, expenses, settings) {
                 const context = FinancialContextBuilder.build();
-                const prompt = `أنت مستشار مالي. أجب على السؤال التالي بناءً على السياق المالي الحقيقي.
 
-                ${this.buildContextString(context)}
+                // ===== ذكاء الحوار: سؤال قرار ناقص معلومة جوهرية -> نسأل بدل التخمين =====
+                const intent = this.classifyAdvisorIntent(question);
+                if (intent === 'DECISION') {
+                    const clarification = this.detectMissingDecisionInfo(question);
+                    if (clarification) return clarification;
+                }
 
-                السؤال: ${question}
+                // ===== توجيه أسلوب الرد حسب نوع النية (7 أنماط إنسانية مختلفة) =====
+                const styleGuides = {
+                    SITUATION_ANALYSIS: `نوع السؤال: تحليل الوضع المالي العام.
+حلل الاستقرار المالي ومعدل الصرف والادخار والالتزامات، وحدد أهم نقطة قوة وأكبر نقطة خطر أو فرصة تحسين واحدة.
+ابدأ بجملة إنسانية قصيرة تلخّص انطباعك العام (بأسلوب مثل "لاحظت من بياناتك..." أو "يبدو أن...")، ثم حلل باختصار، ثم اذكر الفرصة الأكبر للتحسين بجملة عملية واحدة. لا تسرد كل الأرقام، اختر فقط ما يخدم الصورة العامة.`,
+                    WASTE_DETECTION: `نوع السؤال: اكتشاف هدر مالي.
+لا تكتفِ بذكر أكبر رقم إنفاق فقط. ابحث في البيانات عن: ارتفاع بند مقارنة بمتوسطه المعتاد، مصروفات متكررة أو اشتراكات، مصاريف صغيرة متراكمة، وأي تغيّر ملحوظ في العادات الشرائية.
+اربط كل ملاحظة بأثرها العملي على القدرة على الادخار (بأسلوب مثل: "لاحظت أن ... ارتفع مقارنة بـ ...، والزيادة نفسها بسيطة لكن تكرارها شهرياً يقلل من ادخارك")، وانهِ بأولوية واحدة واضحة للتحسين.`,
+                    PLANNING: `نوع السؤال: طلب خطة مالية شخصية.
+ابنِ الخطة من الدخل الفعلي والمصروفات والالتزامات الظاهرة في البيانات أعلاه، وليس من نسب عامة جاهزة (تجنب قوالب مثل 50/30/20 إلا إذا كانت البيانات فعلاً تدعمها).
+اقترح: حداً تقريبياً للضروريات، حداً للكماليات، هدف ادخار واقعياً بالريال بناءً على الفائض الفعلي المتاح، وخطوة أو خطوتين قابلتين للتنفيذ هذا الأسبوع تحديداً. اكتب الخطة بأسلوب مباشر وشخصي لا كقائمة نظرية عامة.`,
+                    DECISION: `نوع السؤال: قرار مالي (شراء / قرض / التزام جديد).
+حلل: القدرة الحالية على تحمّل المبلغ أو القسط المذكور، تأثيره على التدفق النقدي الشهري ونسبة الأمان المالي، ثم اذكر بديلاً عملياً واحداً إن وُجد (مثل التأجيل أو التقسيط أو تقليل بند آخر مؤقتاً).
+لا تكتفِ بـ"نعم" أو "لا" مجردة، بل اربطها برأي مالي واضح (بأسلوب مثل: "من وجهة نظري المالية، القرار ممكن لكن يحتاج..." أو "أفضل تأجيل القرار حالياً لأن...").`,
+                    EMOTIONAL_SUPPORT: `نوع السؤال: دعم نفسي مالي — المستخدم يبدو متوتراً أو قلقاً بخصوص وضعه المالي.
+لا تستخدم أي لغة لوم أو تحكيم إطلاقاً. ابدأ بطمأنة قصيرة وواقعية (وليست تحفيزاً مبالغاً فيه)، ثم اقترح مراجعة الوضع خطوة بخطوة بدءاً بأكبر نقطة تأثير واحدة فقط دون إغراقه بكل التفاصيل دفعة واحدة (بأسلوب مثل: "خلنا نراجع الوضع خطوة بخطوة" أو "واضح أن هناك فرصة للتحسين، ولنبدأ بأكبر تأثير").`,
+                    GENERAL: `نوع السؤال: سؤال عام أو محادثة شخصية مع المستشار، وليس بالضرورة طلب أرقام.
+رد كمستشار شخصي مطّلع على وضع المستخدم، بجملة أو جملتين فقط، بدون سرد كل الأرقام، ثم أشر لأفضل فرصة تحسين واحدة إن كانت مناسبة للسياق.`
+                };
 
-                قواعد الرد (مهمة جداً):
-                - اكتب كمستشار مالي محترف حقيقي وليس كنموذج ذكاء اصطناعي؛ بدون مقدمات أو عبارات إنشائية أو تحفيز مبالغ فيه.
-                - كل جملة تعتمد على بيانات المستخدم الفعلية أعلاه فقط، ولا تذكر استنتاجاً لا تدعمه البيانات.
-                - لا تستخدم إطلاقاً علامة ** أو أي رموز ماركداون (##, ---, إلخ). اكتب نصاً عادياً فقط.
-                - كن مختصراً جداً ودقيقاً؛ لا تكرر شرح الأرقام أو الوضع المالي، اذهب مباشرة للإجابة.
-                - إن كان السؤال عن كيفية توفير مبلغ معين، أجب بهذا الترتيب بالضبط وبدون أي إطالة:
-                  1) سطر واحد يذكر المبلغ المطلوب وما يعادله يومياً حتى نهاية الشهر.
-                  2) 2-4 بنود إنفاق فعلية (وليست افتراضية) من بياناته أعلاه يمكن تخفيضها — استثنِ الإيجار والأقساط دائماً — كل بند بصيغة: "التصنيف: تخفيض X ريال (Y%)".
-                  3) سطر أخير واحد يلخص خطة تنفيذ بسيطة (مثال: قلل كذا هذا الأسبوع وحوّل الفرق لحساب التوفير).
-                  لا تكتب أكثر من 6 أسطر إجمالاً لهذا النوع من الأسئلة.
-                - لغيرها من الأسئلة: أجب بشكل مباشر وعملي في 2-4 أسطر كحد أقصى، واستخدم الأرقام من السياق لتخصيص الإجابة، وكل رقم مصحوب بمعناه وتأثيره.
-                أجب باللغة العربية الفصحى.`;
+                const styleGuide = styleGuides[intent] || styleGuides.SITUATION_ANALYSIS;
+
+                // حالة خاصة: سؤال تخطيط لتوفير مبلغ محدد بالريال -> صيغة مختصرة صارمة
+                const normalizedQuestion = ExpenseParser.normalizeDigits(question);
+                const isSavingAmountQuestion = intent === 'PLANNING' &&
+                    /\d/.test(normalizedQuestion) && /(وفر|توفير)/.test(question);
+                const savingAmountAddendum = isSavingAmountQuestion ? `
+تنبيه إضافي: بما أن السؤال يذكر مبلغ توفير محدداً بالريال، التزم بهذا الترتيب المختصر بدلاً مما سبق:
+1) سطر واحد يذكر المبلغ المطلوب وما يعادله يومياً حتى نهاية الشهر.
+2) 2-4 بنود إنفاق فعلية (وليست افتراضية) من بياناته أعلاه يمكن تخفيضها — استثنِ الإيجار والأقساط دائماً — كل بند بصيغة: "التصنيف: تخفيض X ريال (Y%)".
+3) سطر أخير واحد يلخص خطوة تنفيذ بسيطة.
+لا تتجاوز 6 أسطر إجمالاً لهذا النوع من الأسئلة.` : '';
+
+                const prompt = `أنت مستشار مالي شخصي حقيقي، تفهم المستخدم كإنسان قبل أن تحلل أرقامه. هدفك مساعدته على اتخاذ قرار أو خطوة أفضل الآن، وليس فقط عرض بيانات أو توليد تقرير.
+
+قبل أن تجيب، اسأل نفسك: لماذا سأل المستخدم هذا السؤال تحديداً؟ ما القرار أو المشكلة خلفه؟ ما أفضل خطوة عملية له الآن؟ اجعل إجابتك تعكس ذلك الفهم.
+
+${this.buildContextString(context)}
+
+السؤال: ${question}
+
+${styleGuide}${savingAmountAddendum}
+
+قواعد الأنسنة (إلزامية):
+- لا تفتح بنفس المقدمة أو نفس الجملة في كل مرة، ولا تعرض رداً بشكل "بطاقة تحليل" ثابتة القالب.
+- استخدم تعبيرات طبيعية متنوعة مثل: "لاحظت..."، "بناءً على مصاريفك..."، "أقترح عليك..."، "لو كنت مكانك سأركز على..." دون تكرار نفس العبارة حرفياً في كل رد.
+- اكتب كإنسان يتحدث عن وضع شخص واحد يعرفه جيداً، لا كنموذج يولّد تقريراً عاماً لأي مستخدم.
+- كل جملة تعتمد على بيانات المستخدم الفعلية أعلاه فقط، بدون استنتاج لا تدعمه البيانات ولا تحفيز مبالغ فيه ولا لغة لوم.
+- لا تستخدم إطلاقاً علامة ** أو أي رموز ماركداون (##, ---, إلخ). نص عادي فقط.
+- الشكل العام: جملة إنسانية قصيرة أولاً، ثم تحليل مختصر، ثم اقتراح عملي واحد، ثم خطوة تالية إن كانت مفيدة. لا تتجاوز 4-6 أسطر إجمالاً (إلا في التخطيط المالي التفصيلي حيث يمكن حتى 8 أسطر).
+أجب باللغة العربية الفصحى بأسلوب طبيعي غير آلي.`;
 
                 try {
                     const response = await this.sendRequest(prompt);
@@ -6169,6 +6830,7 @@
                 FinancialEngine.syncBudgetItemsSpent();
 
                 this.chatMessages = Utils.id('chatMessages');
+                this.setupAuth();
                 this.setupTheme();
                 this.setupNavigation();
                 this.setupSidebar();
@@ -6177,7 +6839,6 @@
                 this.setupSettings();
                 this.setupAnalytics();
                 this.setupSetupWizard();
-                this.setupGeminiModal();
                 this.setupChat();
                 this.setupQuickExpenseModal();
                 this.setupTravel();
@@ -6306,6 +6967,262 @@
                 Utils.on(modal, 'click', (e) => {
                     if (e.target === modal) closeModal();
                 });
+            },
+
+            setupAuth() {
+                const modalId = 'authModal';
+                this.setupModalClose(modalId, 'closeAuthModal', null);
+
+                const loginBtn = Utils.id('authLoginBtn');
+                const logoutBtn = Utils.id('authLogoutBtn');
+                const userInfoBox = Utils.id('authUserInfo');
+                const userEmailEl = Utils.id('authUserEmail');
+                const loginForm = Utils.id('authLoginForm');
+                const registerForm = Utils.id('authRegisterForm');
+                const authTabs = Utils.qsa('.auth-tab');
+
+                if (!loginBtn || !loginForm || !registerForm) return;
+
+                Utils.on(loginBtn, 'click', () => this.openModal(modalId));
+
+                authTabs.forEach(tab => {
+                    Utils.on(tab, 'click', () => {
+                        authTabs.forEach(t => t.classList.remove('active'));
+                        tab.classList.add('active');
+                        const target = tab.dataset.authTab;
+                        loginForm.style.display = target === 'login' ? 'block' : 'none';
+                        registerForm.style.display = target === 'register' ? 'block' : 'none';
+                        Utils.id('loginStatusMsg').textContent = '';
+                        Utils.id('registerStatusMsg').textContent = '';
+                    });
+                });
+
+                const setStatus = (el, text, type) => {
+                    if (!el) return;
+                    el.textContent = text;
+                    el.className = 'auth-status-msg' + (type ? ' ' + type : '');
+                };
+
+                // شارة حالة المزامنة (المرحلة 5): Saved / Syncing / Error
+                const syncBadge = Utils.id('syncStatusBadge');
+                const syncText = Utils.id('syncStatusText');
+                const renderSyncStatus = (status) => {
+                    if (!syncBadge || !syncText) return;
+                    const map = {
+                        idle: { text: 'بانتظار المزامنة', icon: 'fa-circle-notch', cls: 'sync-idle' },
+                        syncing: { text: 'جارٍ الحفظ...', icon: 'fa-spinner fa-spin', cls: 'sync-syncing' },
+                        saved: { text: 'تم الحفظ', icon: 'fa-check-circle', cls: 'sync-saved' },
+                        error: { text: 'تعذر الحفظ', icon: 'fa-exclamation-triangle', cls: 'sync-error' }
+                    };
+                    const s = map[status] || map.idle;
+                    syncBadge.className = 'sync-status-badge ' + s.cls;
+                    syncBadge.querySelector('i').className = 'fas ' + s.icon;
+                    syncText.textContent = s.text;
+                };
+                if (typeof DataSync !== 'undefined') {
+                    DataSync.onStatusChange(renderSyncStatus);
+                    renderSyncStatus(DataSync.status);
+                }
+
+                // ===== بوابة الدخول الإجبارية (Auth Gate) =====
+                const authGate = Utils.id('authGate');
+                const showGate = (show) => {
+                    if (!authGate) return;
+                    authGate.classList.toggle('hidden', !show);
+                    document.body.style.overflow = show ? 'hidden' : '';
+                };
+
+                const setUIForUser = (user) => {
+                    if (!loginBtn || !userInfoBox) return;
+                    if (user) {
+                        loginBtn.style.display = 'none';
+                        userInfoBox.style.display = 'block';
+                        if (userEmailEl) userEmailEl.textContent = user.email || '';
+                    } else {
+                        loginBtn.style.display = 'flex';
+                        userInfoBox.style.display = 'none';
+                        if (userEmailEl) userEmailEl.textContent = '';
+                    }
+                    // تُظهر البوابة إذا لم يكن هناك مستخدم مسجّل، وتُخفيها بعد الدخول
+                    showGate(!user);
+                };
+
+                // متابعة حالة المستخدم عند فتح التطبيق ثم عند أي تغيّر لاحق
+                if (typeof AuthService !== 'undefined') {
+                    AuthService.getCurrentUser().then(user => {
+                        setUIForUser(user);
+                        if (typeof DataSync !== 'undefined') {
+                            DataSync.setAuthenticated(!!user);
+                            if (user) DataSync.pullFromCloud();
+                        }
+                    }).catch(() => setUIForUser(null));
+
+                    AuthService.onAuthStateChange((event, session) => {
+                        const user = session ? session.user : null;
+                        setUIForUser(user);
+                        if (typeof DataSync !== 'undefined') {
+                            DataSync.setAuthenticated(!!user);
+                            if (event === 'SIGNED_IN') DataSync.pullFromCloud();
+                        }
+                    });
+                } else {
+                    // لا توجد خدمة مصادقة متاحة (مثلاً تعذّر تحميل Supabase) — لا نقفل التطبيق بلا مخرج
+                    showGate(false);
+                }
+
+                // تبويبات البوابة (دخول / إنشاء حساب)
+                const gateTabs = Utils.qsa('[data-gate-tab]');
+                const gateLoginForm = Utils.id('gateLoginForm');
+                const gateRegisterForm = Utils.id('gateRegisterForm');
+                gateTabs.forEach(tab => {
+                    Utils.on(tab, 'click', () => {
+                        gateTabs.forEach(t => t.classList.remove('active'));
+                        tab.classList.add('active');
+                        const target = tab.dataset.gateTab;
+                        gateLoginForm.style.display = target === 'login' ? 'block' : 'none';
+                        gateRegisterForm.style.display = target === 'register' ? 'block' : 'none';
+                        Utils.id('gateLoginStatusMsg').textContent = '';
+                        Utils.id('gateRegisterStatusMsg').textContent = '';
+                    });
+                });
+
+                // نموذج تسجيل الدخول في البوابة
+                Utils.on(gateLoginForm, 'submit', async (e) => {
+                    e.preventDefault();
+                    const email = Utils.id('gateLoginEmail').value.trim();
+                    const password = Utils.id('gateLoginPassword').value;
+                    const statusEl = Utils.id('gateLoginStatusMsg');
+                    const submitBtn = Utils.id('gateLoginSubmitBtn');
+                    if (!email || !password) { setStatus(statusEl, 'الرجاء تعبئة جميع الحقول', 'error'); return; }
+                    if (typeof AuthService === 'undefined') { setStatus(statusEl, 'خدمة المصادقة غير متاحة', 'error'); return; }
+
+                    submitBtn.disabled = true;
+                    const originalText = submitBtn.textContent;
+                    submitBtn.textContent = 'جارٍ الدخول...';
+                    setStatus(statusEl, 'جارٍ التحقق من البيانات...', 'loading');
+
+                    const result = await AuthService.signIn(email, password);
+
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+
+                    if (result.success) {
+                        setStatus(statusEl, 'تم تسجيل الدخول بنجاح', 'success');
+                        gateLoginForm.reset();
+                        // إخفاء البوابة يتم تلقائياً عبر onAuthStateChange أعلاه
+                    } else {
+                        setStatus(statusEl, result.error, 'error');
+                    }
+                });
+
+                // نموذج إنشاء حساب في البوابة
+                Utils.on(gateRegisterForm, 'submit', async (e) => {
+                    e.preventDefault();
+                    const email = Utils.id('gateRegisterEmail').value.trim();
+                    const password = Utils.id('gateRegisterPassword').value;
+                    const confirmPassword = Utils.id('gateRegisterConfirmPassword').value;
+                    const statusEl = Utils.id('gateRegisterStatusMsg');
+                    const submitBtn = Utils.id('gateRegisterSubmitBtn');
+
+                    if (!email || !password || !confirmPassword) { setStatus(statusEl, 'الرجاء تعبئة جميع الحقول', 'error'); return; }
+                    if (password !== confirmPassword) { setStatus(statusEl, 'كلمتا المرور غير متطابقتين', 'error'); return; }
+                    if (password.length < 6) { setStatus(statusEl, 'كلمة المرور يجب ألا تقل عن 6 أحرف', 'error'); return; }
+                    if (typeof AuthService === 'undefined') { setStatus(statusEl, 'خدمة المصادقة غير متاحة', 'error'); return; }
+
+                    submitBtn.disabled = true;
+                    const originalText = submitBtn.textContent;
+                    submitBtn.textContent = 'جارٍ إنشاء الحساب...';
+                    setStatus(statusEl, 'جارٍ إنشاء الحساب...', 'loading');
+
+                    const result = await AuthService.signUp(email, password);
+
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+
+                    if (result.success) {
+                        setStatus(statusEl, 'تم إنشاء الحساب بنجاح! إذا كان تأكيد البريد مفعّلاً في مشروعكم، تحقق من بريدك الإلكتروني لتسجيل الدخول.', 'success');
+                        gateRegisterForm.reset();
+                    } else {
+                        setStatus(statusEl, result.error, 'error');
+                    }
+                });
+
+                // تسجيل الدخول
+                Utils.on(loginForm, 'submit', async (e) => {
+                    e.preventDefault();
+                    const email = Utils.id('loginEmail').value.trim();
+                    const password = Utils.id('loginPassword').value;
+                    const statusEl = Utils.id('loginStatusMsg');
+                    const submitBtn = Utils.id('loginSubmitBtn');
+                    if (!email || !password) { setStatus(statusEl, 'الرجاء تعبئة جميع الحقول', 'error'); return; }
+                    if (typeof AuthService === 'undefined') { setStatus(statusEl, 'خدمة المصادقة غير متاحة', 'error'); return; }
+
+                    submitBtn.disabled = true;
+                    const originalText = submitBtn.textContent;
+                    submitBtn.textContent = 'جارٍ الدخول...';
+                    setStatus(statusEl, 'جارٍ التحقق من البيانات...', 'loading');
+
+                    const result = await AuthService.signIn(email, password);
+
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+
+                    if (result.success) {
+                        setStatus(statusEl, 'تم تسجيل الدخول بنجاح', 'success');
+                        setTimeout(() => {
+                            this.closeModal(modalId);
+                            loginForm.reset();
+                            statusEl.textContent = '';
+                        }, 900);
+                    } else {
+                        setStatus(statusEl, result.error, 'error');
+                    }
+                });
+
+                // إنشاء حساب
+                Utils.on(registerForm, 'submit', async (e) => {
+                    e.preventDefault();
+                    const email = Utils.id('registerEmail').value.trim();
+                    const password = Utils.id('registerPassword').value;
+                    const confirmPassword = Utils.id('registerConfirmPassword').value;
+                    const statusEl = Utils.id('registerStatusMsg');
+                    const submitBtn = Utils.id('registerSubmitBtn');
+
+                    if (!email || !password || !confirmPassword) { setStatus(statusEl, 'الرجاء تعبئة جميع الحقول', 'error'); return; }
+                    if (password !== confirmPassword) { setStatus(statusEl, 'كلمتا المرور غير متطابقتين', 'error'); return; }
+                    if (password.length < 6) { setStatus(statusEl, 'كلمة المرور يجب ألا تقل عن 6 أحرف', 'error'); return; }
+                    if (typeof AuthService === 'undefined') { setStatus(statusEl, 'خدمة المصادقة غير متاحة', 'error'); return; }
+
+                    submitBtn.disabled = true;
+                    const originalText = submitBtn.textContent;
+                    submitBtn.textContent = 'جارٍ إنشاء الحساب...';
+                    setStatus(statusEl, 'جارٍ إنشاء الحساب...', 'loading');
+
+                    const result = await AuthService.signUp(email, password);
+
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+
+                    if (result.success) {
+                        setStatus(statusEl, 'تم إنشاء الحساب بنجاح! إذا كان تأكيد البريد مفعّلاً في مشروعكم، تحقق من بريدك الإلكتروني.', 'success');
+                        registerForm.reset();
+                    } else {
+                        setStatus(statusEl, result.error, 'error');
+                    }
+                });
+
+                // تسجيل الخروج
+                if (logoutBtn) {
+                    Utils.on(logoutBtn, 'click', async () => {
+                        if (typeof AuthService === 'undefined') return;
+                        logoutBtn.disabled = true;
+                        const result = await AuthService.signOut();
+                        logoutBtn.disabled = false;
+                        if (!result.success) {
+                            alert('تعذر تسجيل الخروج: ' + result.error);
+                        }
+                    });
+                }
             },
 
             setupTheme() {
@@ -7044,10 +7961,10 @@
                 const resetBtn = Utils.id('resetAppBtn');
                 Utils.on(resetBtn, 'click', () => {
                     if (confirm(
-                            'سيتم حذف جميع البيانات الموجودة داخل التطبيق بشكل نهائي.\nلن يتم حذف:\n- مفاتيح Gemini\n- نموذج Gemini المختار\n- إعدادات Gemini\n\nهل تريد المتابعة؟'
+                            'سيتم حذف جميع البيانات الموجودة داخل التطبيق بشكل نهائي.\n\nهل تريد المتابعة؟'
                             )) {
                         FinancialEngine.resetApp();
-                        alert('تم إعادة ضبط التطبيق بنجاح. تم الاحتفاظ بمفاتيح Gemini.');
+                        alert('تم إعادة ضبط التطبيق بنجاح.');
                         this.renderAll();
                     }
                 });
@@ -7146,109 +8063,6 @@
                 });
             },
 
-            setupGeminiModal() {
-                const modalId = 'geminiModal';
-                this.setupModalClose(modalId, 'closeGeminiModal');
-                const trigger = Utils.id('geminiSecretTrigger');
-                const form = Utils.id('geminiSettingsForm');
-                const keyInput = Utils.id('geminiKeyInput');
-                const addBtn = Utils.id('addKeyBtn');
-                const toggleVisBtn = Utils.id('toggleKeysVisibility');
-                const keysList = Utils.id('keysList');
-                const keyCounter = Utils.id('keyCounter');
-                const activeDisplay = Utils.id('activeKeyDisplay');
-                const status = Utils.id('geminiStatus');
-                const modelSelect = Utils.id('geminiModel');
-                let showKeys = false;
-
-                const renderKeys = () => {
-                    const keys = Storage.getGeminiKeys();
-                    const currentIndex = Storage.getGeminiKeyIndex();
-                    const activeKey = keys.length > 0 ? keys[currentIndex % keys.length] : null;
-                    keysList.innerHTML = keys.map((k, i) => {
-                        const isActive = i === (currentIndex % keys.length);
-                        const displayKey = showKeys ? k : k.substring(0, 8) + '••••••••' + k.substring(k
-                            .length - 4);
-                        return '<div class="key-item"><span class="key-index">#' + (i + 1) +
-                            '</span><span class="key-text">' + displayKey +
-                            '</span><span class="key-status ' + (isActive ? 'active' : 'inactive') +
-                            '">' + (isActive ? 'نشط' : '') +
-                            '</span><button class="btn-remove" data-index="' + i +
-                            '"><i class="fas fa-times"></i></button></div>';
-                    }).join('');
-                    keyCounter.textContent = keys.length + ' / 12 مفتاح';
-                    activeDisplay.textContent = activeKey ? (showKeys ? activeKey : activeKey.substring(0,
-                        8) + '••••••••' + activeKey.substring(activeKey.length - 4)) :
-                        'لا يوجد مفتاح نشط';
-                    Utils.qsa('.btn-remove').forEach(btn => {
-                        Utils.on(btn, 'click', () => {
-                            const idx = parseInt(btn.dataset.index);
-                            const keysArr = Storage.getGeminiKeys();
-                            keysArr.splice(idx, 1);
-                            Storage.setGeminiKeys(keysArr);
-                            if (Storage.getGeminiKeyIndex() >= keysArr.length && keysArr.length >
-                                0) { Storage.setGeminiKeyIndex(0); } else if (keysArr.length ===
-                                0) { Storage.setGeminiKeyIndex(0); }
-                            renderKeys();
-                            updateStatus();
-                        });
-                    });
-                };
-
-                const updateStatus = () => {
-                    const keys = Storage.getGeminiKeys();
-                    if (keys.length === 0) { status.className = 'api-status error';
-                        status.textContent = '⚠️ لا توجد مفاتيح Gemini. أضف مفتاحاً واحداً على الأقل.'; } else { status
-                            .className = 'api-status success';
-                        status.textContent = '✅ ' + keys.length + ' مفتاح محفوظ، يتم التوزيع بشكل دائري.'; }
-                };
-
-                Utils.on(trigger, 'click', () => {
-                    this.openModal(modalId);
-                    const savedModel = Storage.getGeminiModel();
-                    modelSelect.value = savedModel || 'gemini-2.5-pro';
-                    renderKeys();
-                    updateStatus();
-                });
-
-                Utils.on(addBtn, 'click', () => {
-                    const key = keyInput.value.trim();
-                    if (!key) { status.className = 'api-status error';
-                        status.textContent = '⚠️ الرجاء إدخال مفتاح صالح.'; return; }
-                    const keys = Storage.getGeminiKeys();
-                    if (keys.length >= 12) { status.className = 'api-status error';
-                        status.textContent = '⚠️ تم الوصول للحد الأقصى 12 مفتاح.'; return; }
-                    keys.push(key);
-                    Storage.setGeminiKeys(keys);
-                    keyInput.value = '';
-                    renderKeys();
-                    updateStatus();
-                    status.className = 'api-status success';
-                    status.textContent = '✅ تمت إضافة المفتاح بنجاح. (' + keys.length + '/12)';
-                });
-
-                Utils.on(toggleVisBtn, 'click', () => { showKeys = !showKeys;
-                    toggleVisBtn.textContent = showKeys ? 'إخفاء' : 'إظهار';
-                    renderKeys(); });
-
-                Utils.on(form, 'submit', (e) => {
-                    e.preventDefault();
-                    const model = modelSelect.value;
-                    Storage.setGeminiModel(model);
-                    const keys = Storage.getGeminiKeys();
-                    if (keys.length === 0) { status.className = 'api-status error';
-                        status.textContent = '⚠️ يجب إضافة مفتاح واحد على الأقل.'; return; }
-                    if (Storage.getGeminiKeyIndex() >= keys.length) { Storage.setGeminiKeyIndex(0); }
-                    status.className = 'api-status success';
-                    status.textContent = '✅ تم حفظ الإعدادات بنجاح. (' + keys.length + ' مفاتيح، النموذج: ' +
-                        model + ')';
-                    renderKeys();
-                    setTimeout(() => this.closeModal(modalId), 1200);
-                });
-                Utils.on(keyInput, 'keydown', (e) => { if (e.key === 'Enter') { e.preventDefault();
-                        addBtn.click(); } });
-            },
-
             addChatQuickReplies(promptText, options, onSelect) {
                 if (!this.chatMessages) return;
                 const div = document.createElement('div');
@@ -7267,6 +8081,141 @@
                         onSelect(options[idx]);
                     });
                 });
+            },
+
+            // ============================================================
+            // دالة تصنيف مستقلة: تحدد نوع نية المستخدم بثلاث فئات:
+            // COMMAND (أمر تنفيذي) / DATA_QUERY (طلب بيانات مباشر) / FINANCIAL_ADVICE (تحليل/نصيحة)
+            // منطق JavaScript بحت بدون أي استدعاء ذكاء اصطناعي — قابل للتوسع بإضافة كلمات فقط
+            // ============================================================
+            classifyUserIntent(text) {
+                const normalized = (text || '').trim();
+                if (!normalized) return 'COMMAND';
+
+                // كلمات تدل على نية تنفيذ إجراء (إضافة / تعديل / حذف بيانات)
+                const commandKeywords = [
+                    'أضف', 'اضف', 'سجل', 'سدد', 'غيّر', 'غير', 'احذف', 'امسح',
+                    'أدخل', 'ادخل', 'حدث', 'عدّل', 'عدل', 'مصروف جديد', 'اشتراك جديد',
+                    'أضف راتب', 'اضف راتب'
+                ];
+
+                // كلمات/عبارات تدل على طلب بيانات مباشر (لا تحتاج تحليل ذكاء)
+                const dataQueryKeywords = [
+                    'كم فاتورة', 'كم صرفت', 'كم المتبقي', 'كم الباقي', 'كم باقي',
+                    'كم مصاريف', 'كم مصروف', 'ما أكبر بند', 'ما اكبر بند',
+                    'أكبر بند', 'اكبر بند', 'أين صرفت', 'اين صرفت',
+                    'ما آخر عملية', 'ما اخر عملية', 'آخر عملية', 'اخر عملية',
+                    'آخر مصروف', 'اخر مصروف', 'آخر معاملة', 'اخر معاملة'
+                ];
+
+                // كلمات/عبارات تدل على سؤال مالي أو طلب تحليل/نصيحة
+                // (تشمل: تحليل وضع، تخطيط، قرار مالي، اكتشاف هدر، دعم نفسي مالي)
+                const advisorKeywords = [
+                    'حلل', 'تحليل', 'كيف أوفر', 'كيف اوفر', 'كيف', 'هل', 'لماذا',
+                    'تقييم', 'نصيحة', 'وضع مالي', 'وضعي المالي', 'وفر', 'أوفر',
+                    'أين أصرف', 'اين أصرف', 'اين اصرف', 'أصرف أكثر', 'اصرف اكثر',
+                    'أين يوجد الهدر', 'اين يوجد الهدر', 'الهدر',
+                    'أستطيع شراء', 'استطيع شراء', 'ميزانيتي', 'تقييم ميزانيتي',
+                    'أحسن ميزانيتي', 'احسن ميزانيتي',
+                    // تخطيط مالي
+                    'خطة', 'كيف أوزع راتبي', 'كيف اوزع راتبي', 'وزع راتبي',
+                    // قرار مالي (أسئلة القرار غالباً تبدأ بـ"هل" المشمولة أعلاه، فلا حاجة لتكرارها بصيغة الفعل)
+                    // دعم نفسي مالي
+                    'متوتر', 'مضغوط', 'قلق', 'قلقان', 'خايف', 'خائف',
+                    'ما أقدر أوفر', 'ما اقدر اوفر', 'راتبي يضيع', 'راتبي يروح',
+                    'مرهق مالياً', 'مرهق ماليا', 'ضايع مالياً', 'ضايع ماليا'
+                ];
+
+                const isCommand = commandKeywords.some(k => normalized.includes(k));
+                const isDataQuery = dataQueryKeywords.some(k => normalized.includes(k));
+                const isAdvisorQuestion = advisorKeywords.some(k => normalized.includes(k));
+
+                // الأولوية الأولى: سؤال تحليل/نصيحة واضح
+                if (isAdvisorQuestion) return 'FINANCIAL_ADVICE';
+
+                // الأولوية الثانية: طلب بيانات مباشر واضح
+                if (isDataQuery && !isCommand) return 'DATA_QUERY';
+
+                // الأولوية الثالثة: أمر تنفيذي واضح
+                if (isCommand && !isDataQuery) return 'COMMAND';
+
+                // حالة تداخل نادرة بين أمر وطلب بيانات: نرجّح حسب بنية الجملة
+                if (isCommand && isDataQuery) {
+                    const looksLikeQuestion = /؟|\?/.test(normalized) ||
+                        /^(كم|ما|أين|اين)/.test(normalized);
+                    return looksLikeQuestion ? 'DATA_QUERY' : 'COMMAND';
+                }
+
+                // افتراضياً: نتّبع نفس السلوك الحالي (نظام الأوامر / Gemini.thinkAndDecide)
+                return 'COMMAND';
+            },
+
+            // ============================================================
+            // إجابة مباشرة على أسئلة DATA_QUERY من بيانات التطبيق الحالية فقط
+            // (Budget / FinancialEngine) — بدون أي استدعاء ذكاء اصطناعي
+            // ترجع نصاً جاهزاً عند النجاح، أو null إذا تعذّر تحديد المطلوب بدقة
+            // ============================================================
+            answerDataQuery(text) {
+                const normalized = ExpenseParser.normalizeDigits((text || '').trim());
+                const monthExpenses = Budget.getMonthExpenses();
+                const allExpenses = Budget.getExpenses();
+
+                // 1) كم المتبقي / الباقي للصرف
+                if (/كم المتبقي|كم الباقي|كم باقي|المتبقي/.test(normalized) &&
+                    !/فاتورة|بند/.test(normalized)) {
+                    const available = Budget.getRemaining();
+                    return `المتبقي المتاح للصرف حالياً هو ${Utils.formatCurrency(available)}.`;
+                }
+
+                // 2) آخر عملية / آخر مصروف مسجل (بغض النظر عن الفئة)
+                if (/آخر عملية|اخر عملية|آخر مصروف|اخر مصروف|آخر معاملة|اخر معاملة/.test(normalized)) {
+                    const sorted = allExpenses.slice().sort((a, b) =>
+                        (b.date || '').localeCompare(a.date || '') ||
+                        (b.createdAt || '').localeCompare(a.createdAt || ''));
+                    const last = sorted[0];
+                    if (!last) return 'لا توجد أي عمليات مسجلة لديك حتى الآن.';
+                    return `آخر عملية مسجلة: ${last.description || last.category} بمبلغ ${Utils.formatCurrency(last.amount)} بتاريخ ${Utils.formatDate(last.date)}.`;
+                }
+
+                // 3) أكبر بند صرف / أين صرفت أكثر (هذا الشهر)
+                if (/أكبر بند|اكبر بند|أين صرفت|اين صرفت/.test(normalized)) {
+                    const byCategory = Budget.getByCategory(monthExpenses);
+                    const entries = Object.entries(byCategory);
+                    if (entries.length === 0) return 'لا توجد مصاريف مسجلة هذا الشهر بعد.';
+                    entries.sort((a, b) => b[1] - a[1]);
+                    const [topCategory, topAmount] = entries[0];
+                    return `أكبر بند صرف هذا الشهر هو "${topCategory}" بمبلغ ${Utils.formatCurrency(topAmount)}.`;
+                }
+
+                // 4) إجمالي مصاريف الشهر (بدون تحديد فئة معينة)
+                const matchedCategory = Utils.defaultCategories().find(cat => {
+                    const root = cat.replace(/^ال/, '');
+                    return root && normalized.includes(root);
+                });
+
+                if (!matchedCategory && /كم مصاريف|كم مصروف|إجمالي مصاريف|اجمالي مصاريف/.test(
+                        normalized)) {
+                    const total = Budget.getTotal(monthExpenses);
+                    return `إجمالي مصاريفك هذا الشهر هو ${Utils.formatCurrency(total)}.`;
+                }
+
+                // 5) سؤال عن فئة محددة (فاتورة الكهرباء / صرفت على المطاعم ...)
+                if (matchedCategory) {
+                    if (/فاتورة/.test(normalized)) {
+                        const catExpenses = allExpenses
+                            .filter(e => e.category === matchedCategory)
+                            .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+                        const last = catExpenses[0];
+                        if (!last) return `لا توجد فاتورة مسجلة لبند "${matchedCategory}" حتى الآن.`;
+                        return `فاتورة ${matchedCategory} المسجلة لديك هي ${Utils.formatCurrency(last.amount)} بتاريخ ${Utils.formatDate(last.date)}.`;
+                    }
+                    const total = Budget.getTotal(
+                        monthExpenses.filter(e => e.category === matchedCategory));
+                    return `صرفت على ${matchedCategory} هذا الشهر ${Utils.formatCurrency(total)}.`;
+                }
+
+                // تعذّر تحديد نوع البيانات المطلوبة بدقة
+                return null;
             },
 
             setupChat() {
@@ -7343,6 +8292,33 @@
                     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
                     try {
+                        // ===== [جديد] طبقة الـ Router =====
+                        const intent = this.classifyUserIntent(text);
+
+                        // DATA_QUERY: إجابة مباشرة من بيانات التطبيق بدون أي ذكاء اصطناعي
+                        if (intent === 'DATA_QUERY') {
+                            const directAnswer = this.answerDataQuery(text);
+                            if (directAnswer) {
+                                typingDiv.remove();
+                                this.addChatMessage(directAnswer, 'financial-advisor');
+                                return;
+                            }
+                            // تعذّر تحديد البيانات بدقة -> تُعامل كسؤال مالي عام (احتياطياً فقط)
+                        }
+
+                        // FINANCIAL_ADVICE (أو DATA_QUERY الذي تعذّر الرد عليه مباشرة)
+                        if (intent === 'FINANCIAL_ADVICE' || intent === 'DATA_QUERY') {
+                            const expenses = Budget.getMonthExpenses();
+                            const settings = Storage.getSettings();
+                            const advisorResponse = await Gemini.answerQuickQuestion(text, expenses,
+                                settings);
+
+                            typingDiv.remove();
+                            this.addChatMessage(advisorResponse, 'financial-advisor');
+                            return;
+                        }
+                        // ===== نهاية طبقة الـ Router: COMMAND يكمل للمسار الحالي =====
+
                         const context = this.getContext();
                         const recentHistory = (this.chatHistory || []).slice(0, -1);
                         const rawResponse = await Gemini.thinkAndDecide(text, context, recentHistory);
@@ -9071,6 +10047,18 @@
         // ============================================================
         document.addEventListener('DOMContentLoaded', () => {
             UI.init();
+
+            // اختبار اتصال Supabase (المرحلة 2) — تسجيل في Console فقط، لا يؤثر على الواجهة
+            if (typeof SupabaseClient !== 'undefined') {
+                SupabaseClient.testConnection().then((result) => {
+                    if (result.success) {
+                        console.log('%c[Supabase] الاتصال بالمشروع ناجح ✅', 'color:#1F7A5C;font-weight:bold;');
+                    } else {
+                        console.error('[Supabase] فشل الاتصال بالمشروع:', result.error);
+                    }
+                });
+            }
+
             let resizeTimeout;
             window.addEventListener('resize', () => {
                 clearTimeout(resizeTimeout);
